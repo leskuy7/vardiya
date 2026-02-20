@@ -15,7 +15,7 @@ vardiya/
 - **Backend**: NestJS 10, Prisma 6, PostgreSQL
 - **Frontend**: Next.js 14 (App Router), Tailwind CSS v4, TanStack Query v5
 - **Auth**: JWT (access 15dk + refresh 7gün, httpOnly cookie)
-- **Deploy**: Render (backend) + Vercel (frontend) + Neon.tech (DB)
+- **Deploy**: Railway (backend) + Vercel (frontend) + Neon.tech (DB)
 
 ---
 
@@ -65,19 +65,15 @@ npm run dev
 3. **Connection string** kopyalayın (sslmode=require ile birlikte)
 4. İleride bu URL'i Render'a ekleyeceksiniz
 
-### 2. Render (Backend)
+### 2. Railway (Backend)
 
-1. [render.com](https://render.com) → New → Web Service
-2. GitHub repo'yu bağlayın: `leskuy7/vardiya`
-3. Ayarlar:
-   - **Root Directory**: `shift-planner-api`
-   - **Build Command**: `npm install && npm run build && npx prisma generate && npx prisma migrate deploy`
-   - **Start Command**: `node dist/main`
-   - **Plan**: Free
-4. Environment Variables ekleyin:
+1. [railway.app](https://railway.app) → New Project → Deploy from GitHub Repo
+2. Repo: `leskuy7/vardiya`
+3. Serviste **Root Directory** olarak `shift-planner-api` seçin
+4. Railway, `shift-planner-api/nixpacks.toml` dosyasını otomatik kullanır
+5. Environment Variables ekleyin:
    ```
    NODE_ENV=production
-   PORT=3001
    TZ=UTC
    DATABASE_URL=<Neon connection string>
    JWT_SECRET=<güçlü rastgele string>
@@ -86,6 +82,9 @@ npm run dev
    JWT_REFRESH_EXPIRATION=7d
    FRONTEND_URL=<Vercel URL - deploy sonrası eklenecek>
    ```
+6. Deploy sonrası sağlık kontrolü:
+   - `https://<railway-domain>/api/health`
+   - `https://<railway-domain>/`
 
 ### 3. Vercel (Frontend)
 
@@ -95,9 +94,9 @@ npm run dev
 4. Framework: Next.js (otomatik algılar)
 5. Environment Variables:
    ```
-   NEXT_PUBLIC_API_URL=https://<render-servis-adı>.onrender.com/api
+   NEXT_PUBLIC_API_URL=https://<railway-domain>/api
    ```
-6. Deploy edin → aldığınız URL'i Render'daki `FRONTEND_URL` değişkenine ekleyin
+6. Deploy edin → aldığınız URL'i Railway'deki `FRONTEND_URL` değişkenine ekleyin
 
 ---
 
