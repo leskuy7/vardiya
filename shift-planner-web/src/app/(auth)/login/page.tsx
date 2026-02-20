@@ -4,9 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
 import {
   CalendarDays,
@@ -18,8 +15,6 @@ import {
   Sun,
   Globe2,
   Shield,
-  Clock,
-  BarChart3,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -179,141 +174,124 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* ── Left: Branding Panel ── */}
-      <section className="hidden w-[480px] shrink-0 bg-sidebar text-sidebar-foreground lg:flex lg:flex-col lg:justify-between p-10">
-        <div>
-          <div className="flex items-center gap-3 mb-12">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-blue-400 text-white shadow-lg shadow-primary/20">
-              <CalendarDays className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-lg font-bold tracking-tight">Vardiya Planlayıcı</h1>
-              <p className="text-xs text-sidebar-foreground/50">Ekip Yönetim Platformu</p>
-            </div>
-          </div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 p-4">
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-blue-600/5 blur-3xl" />
+      </div>
 
-          <div className="space-y-6">
-            {[
-              { icon: CalendarDays, title: t.feature1, desc: t.feature1Desc },
-              { icon: Clock, title: t.feature2, desc: t.feature2Desc },
-              { icon: BarChart3, title: t.feature3, desc: t.feature3Desc },
-            ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
-                  <Icon className="h-5 w-5 text-sidebar-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{title}</p>
-                  <p className="text-xs text-sidebar-foreground/50 mt-0.5">{desc}</p>
-                </div>
-              </div>
-            ))}
+      {/* Main Card */}
+      <div className="relative z-10 w-full max-w-[480px] animate-[slide-up_0.4s_ease-out]">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
+            <CalendarDays className="h-7 w-7" />
           </div>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Vardiya Planlayıcı</h1>
+          <p className="mt-1 text-sm text-blue-200/60">Ekip Yönetim Platformu</p>
         </div>
 
-        <div className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-5">
-          <p className="text-xs font-semibold text-sidebar-foreground/70 mb-3 uppercase tracking-wider">{t.demoTitle}</p>
-          <div className="space-y-1.5 text-xs text-sidebar-foreground/50 font-mono">
-            <p>admin@shiftplanner.com / Admin1234!</p>
-            <p>manager@shiftplanner.com / Manager1234!</p>
-            <p>ali@shiftplanner.com / Employee1234!</p>
-          </div>
-        </div>
-      </section>
+        {/* Form Card */}
+        <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-8 shadow-2xl shadow-black/20 backdrop-blur-xl">
+          {/* Top Controls */}
+          <div className="flex items-center justify-between mb-6">
+            {/* Tab Switcher */}
+            <div className="flex rounded-xl bg-white/[0.06] p-1">
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className={`rounded-lg px-5 py-2 text-sm font-medium transition-all ${
+                  mode === "login"
+                    ? "bg-white/15 text-white shadow-sm"
+                    : "text-white/50 hover:text-white/80"
+                }`}
+              >
+                {t.titleLogin}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("register")}
+                className={`rounded-lg px-5 py-2 text-sm font-medium transition-all ${
+                  mode === "register"
+                    ? "bg-white/15 text-white shadow-sm"
+                    : "text-white/50 hover:text-white/80"
+                }`}
+              >
+                {t.titleRegister}
+              </button>
+            </div>
 
-      {/* ── Right: Auth Form ── */}
-      <section className="flex flex-1 items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-[420px]">
-          <div className="flex items-center justify-end gap-2 mb-8">
-            <button
-              type="button"
-              onClick={toggleLang}
-              className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground hover:border-foreground/20"
-            >
-              <Globe2 className="h-3.5 w-3.5" />
-              {lang === "tr" ? "TR" : "EN"}
-            </button>
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="flex items-center justify-center rounded-lg border p-1.5 text-muted-foreground transition hover:text-foreground hover:border-foreground/20"
-            >
-              {theme === "light" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
-            </button>
+            {/* Lang + Theme */}
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={toggleLang}
+                className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs text-white/40 transition hover:bg-white/[0.06] hover:text-white/70"
+              >
+                <Globe2 className="h-3.5 w-3.5" />
+                {lang === "tr" ? "TR" : "EN"}
+              </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="rounded-lg p-1.5 text-white/40 transition hover:bg-white/[0.06] hover:text-white/70"
+              >
+                {theme === "light" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+              </button>
+            </div>
           </div>
 
+          {/* Title */}
           <div className="mb-6">
-            <h2 className="text-2xl font-bold tracking-tight">
+            <h2 className="text-xl font-semibold text-white">
               {mode === "login" ? t.titleLogin : t.titleRegister}
             </h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">
+            <p className="mt-1 text-sm text-white/40">
               {mode === "login" ? t.subtitleLogin : t.subtitleRegister}
             </p>
           </div>
 
-          <div className="flex rounded-xl bg-muted p-1 mb-6">
-            <button
-              type="button"
-              onClick={() => setMode("login")}
-              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                mode === "login"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.titleLogin}
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode("register")}
-              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                mode === "register"
-                  ? "bg-card text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.titleRegister}
-            </button>
-          </div>
-
+          {/* Login Form */}
           {mode === "login" ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email">{t.email}</Label>
-                <Input
+                <label htmlFor="email" className="text-sm font-medium text-white/70">{t.email}</label>
+                <input
                   id="email"
                   type="email"
                   autoComplete="email"
                   placeholder="ornek@sirket.com"
-                  error={errors.email?.message}
+                  className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 text-sm text-white placeholder:text-white/25 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                   {...register("email")}
                 />
+                {errors.email?.message && <p className="text-xs text-red-400">{errors.email.message}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password">{t.password}</Label>
+                <label htmlFor="password" className="text-sm font-medium text-white/70">{t.password}</label>
                 <div className="relative">
-                  <Input
+                  <input
                     id="password"
                     type={showLoginPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    error={errors.password?.message}
+                    className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 pr-10 text-sm text-white placeholder:text-white/25 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     {...register("password")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowLoginPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
-                    aria-label="Şifreyi göster/gizle"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                   >
                     {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {errors.password?.message && <p className="text-xs text-red-400">{errors.password.message}</p>}
               </div>
 
-              <div className="flex items-center justify-end">
+              <div className="flex justify-end">
                 <button
                   type="button"
                   onClick={() => {
@@ -322,109 +300,153 @@ export default function LoginPage() {
                       window.open("mailto:destek@vardiya.app?subject=Sifre%20Sifirlama", "_blank");
                     }
                   }}
-                  className="text-xs text-primary hover:text-primary/80 font-medium"
+                  className="text-xs text-blue-400/80 hover:text-blue-300 transition-colors font-medium"
                 >
                   {t.forgot}
                 </button>
               </div>
 
-              <Button type="submit" className="w-full h-11" loading={isSubmitting}>
-                <KeyRound className="h-4 w-4" />
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:from-blue-500 hover:to-indigo-500 hover:shadow-blue-500/30 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {isSubmitting ? (
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <KeyRound className="h-4 w-4" />
+                )}
                 {t.login}
-              </Button>
+              </button>
             </form>
           ) : (
+            /* Register Form */
             <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="firstName">{t.firstName}</Label>
-                  <Input
+                  <label htmlFor="firstName" className="text-sm font-medium text-white/70">{t.firstName}</label>
+                  <input
                     id="firstName"
                     placeholder="Ali"
-                    error={registerErrors.firstName?.message}
+                    className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 text-sm text-white placeholder:text-white/25 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     {...registerField("firstName")}
                   />
+                  {registerErrors.firstName?.message && <p className="text-xs text-red-400">{registerErrors.firstName.message}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="lastName">{t.lastName}</Label>
-                  <Input
+                  <label htmlFor="lastName" className="text-sm font-medium text-white/70">{t.lastName}</label>
+                  <input
                     id="lastName"
                     placeholder="Yılmaz"
-                    error={registerErrors.lastName?.message}
+                    className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 text-sm text-white placeholder:text-white/25 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     {...registerField("lastName")}
                   />
+                  {registerErrors.lastName?.message && <p className="text-xs text-red-400">{registerErrors.lastName.message}</p>}
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="registerEmail">{t.email}</Label>
-                <Input
+                <label htmlFor="registerEmail" className="text-sm font-medium text-white/70">{t.email}</label>
+                <input
                   id="registerEmail"
                   type="email"
                   autoComplete="email"
                   placeholder="ornek@sirket.com"
-                  error={registerErrors.email?.message}
+                  className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 text-sm text-white placeholder:text-white/25 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                   {...registerField("email")}
                 />
+                {registerErrors.email?.message && <p className="text-xs text-red-400">{registerErrors.email.message}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="registerPassword">{t.password}</Label>
+                <label htmlFor="registerPassword" className="text-sm font-medium text-white/70">{t.password}</label>
                 <div className="relative">
-                  <Input
+                  <input
                     id="registerPassword"
                     type={showRegisterPassword ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="En az 8 karakter"
-                    error={registerErrors.password?.message}
+                    className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 pr-10 text-sm text-white placeholder:text-white/25 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     {...registerField("password")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowRegisterPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
-                    aria-label="Şifreyi göster/gizle"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                   >
                     {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {registerErrors.password?.message && <p className="text-xs text-red-400">{registerErrors.password.message}</p>}
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="confirmPassword">{t.passwordAgain}</Label>
+                <label htmlFor="confirmPassword" className="text-sm font-medium text-white/70">{t.passwordAgain}</label>
                 <div className="relative">
-                  <Input
+                  <input
                     id="confirmPassword"
                     type={showRegisterPassword2 ? "text" : "password"}
                     autoComplete="new-password"
                     placeholder="Şifrenizi tekrar girin"
-                    error={registerErrors.confirmPassword?.message}
+                    className="flex h-11 w-full rounded-xl border border-white/10 bg-white/[0.06] px-4 pr-10 text-sm text-white placeholder:text-white/25 focus:border-blue-500/50 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
                     {...registerField("confirmPassword")}
                   />
                   <button
                     type="button"
                     onClick={() => setShowRegisterPassword2((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
-                    aria-label="Şifreyi göster/gizle"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                   >
                     {showRegisterPassword2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {registerErrors.confirmPassword?.message && <p className="text-xs text-red-400">{registerErrors.confirmPassword.message}</p>}
               </div>
 
-              <Button type="submit" className="w-full h-11" loading={isRegisterSubmitting}>
-                <UserPlus className="h-4 w-4" />
+              <button
+                type="submit"
+                disabled={isRegisterSubmitting}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-semibold text-white shadow-lg shadow-blue-600/25 transition-all hover:from-blue-500 hover:to-indigo-500 hover:shadow-blue-500/30 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {isRegisterSubmitting ? (
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  <UserPlus className="h-4 w-4" />
+                )}
                 {t.register}
-              </Button>
+              </button>
             </form>
           )}
+        </div>
 
-          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <Shield className="h-3.5 w-3.5" />
-            <span>{t.noGoogle}</span>
+        {/* Demo Accounts */}
+        <div className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.03] p-5 backdrop-blur-sm">
+          <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest mb-3">{t.demoTitle}</p>
+          <div className="grid grid-cols-1 gap-2">
+            {[
+              { role: "Admin", email: "admin@shiftplanner.com", pass: "Admin1234!" },
+              { role: "Yönetici", email: "manager@shiftplanner.com", pass: "Manager1234!" },
+              { role: "Çalışan", email: "ali@shiftplanner.com", pass: "Employee1234!" },
+            ].map((d) => (
+              <div key={d.role} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2">
+                <span className="text-xs font-medium text-blue-300/70">{d.role}</span>
+                <span className="text-xs text-white/30 font-mono">{d.email} / {d.pass}</span>
+              </div>
+            ))}
           </div>
         </div>
-      </section>
+
+        {/* Footer */}
+        <div className="mt-4 flex items-center justify-center gap-2 text-xs text-white/25">
+          <Shield className="h-3.5 w-3.5" />
+          <span>{t.noGoogle}</span>
+        </div>
+      </div>
     </div>
   );
 }
