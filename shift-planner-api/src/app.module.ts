@@ -12,8 +12,10 @@ import { ScheduleModule } from './schedule/schedule.module';
 import { ReportsModule } from './reports/reports.module';
 import { AuditModule } from './audit/audit.module';
 import { HealthModule } from './health/health.module';
+import { RootController } from './root.controller';
 
 @Module({
+  controllers: [RootController],
   imports: [
     // Config
     ConfigModule.forRoot({ isGlobal: true }),
