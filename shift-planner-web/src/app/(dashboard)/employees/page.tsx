@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Pencil, Trash2, UserCheck, UserX } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, UserCheck, UserX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -134,10 +134,18 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{employees?.length ?? 0} çalışan</p>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Users className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold">Çalışan Listesi</h2>
+            <p className="text-xs text-muted-foreground">{employees?.length ?? 0} kayıtlı çalışan</p>
+          </div>
+        </div>
         <Button size="sm" onClick={openCreate}>
           <Plus className="h-4 w-4" />
           Yeni Çalışan
@@ -145,26 +153,33 @@ export default function EmployeesPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border overflow-hidden">
+      <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50">
-            <tr>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Ad</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">E-posta</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Pozisyon</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Departman</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Rol</th>
-              <th className="px-4 py-3 text-left font-medium text-muted-foreground">Durum</th>
-              <th className="px-4 py-3 text-right font-medium text-muted-foreground">İşlem</th>
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ad</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">E-posta</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Pozisyon</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Departman</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Rol</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Durum</th>
+              <th className="px-4 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">İşlem</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-border">
             {employees?.map((emp) => (
-              <tr key={emp.id} className="hover:bg-muted/20 transition-colors">
-                <td className="px-4 py-3 font-medium">{emp.user.name}</td>
-                <td className="px-4 py-3 text-muted-foreground">{emp.user.email}</td>
-                <td className="px-4 py-3 text-muted-foreground">{emp.position ?? "—"}</td>
-                <td className="px-4 py-3 text-muted-foreground">{emp.department ?? "—"}</td>
+              <tr key={emp.id} className="hover:bg-muted/30 transition-colors">
+                <td className="px-4 py-3.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
+                      {emp.user.name?.charAt(0)?.toUpperCase() ?? "?"}
+                    </div>
+                    <span className="font-medium text-[13px]">{emp.user.name}</span>
+                  </div>
+                </td>
+                <td className="px-4 py-3.5 text-muted-foreground text-[13px]">{emp.user.email}</td>
+                <td className="px-4 py-3.5 text-muted-foreground text-[13px]">{emp.position ?? "—"}</td>
+                <td className="px-4 py-3.5 text-muted-foreground text-[13px]">{emp.department ?? "—"}</td>
                 <td className="px-4 py-3">
                   <Badge
                     variant={
@@ -182,26 +197,29 @@ export default function EmployeesPage() {
                       : "Çalışan"}
                   </Badge>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5">
                   {emp.isActive ? (
-                    <span className="flex items-center gap-1 text-green-600 text-xs">
-                      <UserCheck className="h-3.5 w-3.5" /> Aktif
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                      Aktif
                     </span>
                   ) : (
-                    <span className="flex items-center gap-1 text-muted-foreground text-xs">
-                      <UserX className="h-3.5 w-3.5" /> Pasif
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                      <span className="h-1.5 w-1.5 rounded-full bg-muted-foreground/40"></span>
+                      Pasif
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5">
                   <div className="flex items-center justify-end gap-1">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => openEdit(emp)}
                       title="Düzenle"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
                     >
-                      <Pencil className="h-4 w-4" />
+                      <Pencil className="h-3.5 w-3.5" />
                     </Button>
                     {emp.isActive && (
                       <Button
@@ -209,9 +227,9 @@ export default function EmployeesPage() {
                         size="icon"
                         onClick={() => setDeleteDialog({ open: true, employee: emp })}
                         title="Pasife Al"
-                        className="hover:text-destructive"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     )}
                   </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { Printer } from "lucide-react";
+import { Printer, Moon, Sun, Globe2, Bell } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 const pageTitles: Record<string, string> = {
@@ -20,10 +21,36 @@ export function Navbar() {
 
   const showPrint = pathname.startsWith("/schedule");
 
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const saved = (localStorage.getItem("theme") as "light" | "dark" | null) ?? "light";
+    setTheme(saved);
+    document.documentElement.classList.toggle("dark", saved === "dark");
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    localStorage.setItem("theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
+  };
+
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-6">
-      <h1 className="text-base font-semibold">{title}</h1>
-      <div className="flex items-center gap-2">
+    <header className="flex h-16 shrink-0 items-center justify-between border-b bg-card/80 backdrop-blur-sm px-6">
+      <div>
+        <h1 className="text-base font-semibold tracking-tight">{title}</h1>
+        <p className="text-xs text-muted-foreground">
+          {new Date().toLocaleDateString("tr-TR", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+      </div>
+      <div className="flex items-center gap-1.5">
         {showPrint && (
           <Button
             variant="outline"
@@ -35,6 +62,15 @@ export function Navbar() {
             Yazdır
           </Button>
         )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggleTheme}
+          aria-label="Tema değiştir"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          {theme === "light" ? <Moon className="h-[18px] w-[18px]" /> : <Sun className="h-[18px] w-[18px]" />}
+        </Button>
       </div>
     </header>
   );

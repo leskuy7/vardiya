@@ -54,27 +54,27 @@ export function ShiftCard({
       style={style}
       {...(isDraggable && canManage ? { ...attributes, ...listeners } : {})}
       className={cn(
-        "group relative rounded-lg border bg-card p-2.5 text-xs shadow-sm transition-all",
-        isDragging && "opacity-50 shadow-lg ring-2 ring-primary",
+        "group relative rounded-lg border bg-card p-2.5 text-xs shadow-sm transition-all duration-150 hover:shadow-md",
+        isDragging && "opacity-50 shadow-lg ring-2 ring-primary scale-105",
         isDraggable && canManage && "cursor-grab active:cursor-grabbing",
-        shift.status === "CANCELLED" && "opacity-60"
+        shift.status === "CANCELLED" && "opacity-50 line-through"
       )}
     >
       {/* Time row */}
       <div className="flex items-center justify-between gap-1">
-        <span className="font-semibold text-foreground">
+        <span className="font-semibold text-foreground tracking-tight">
           {formatTime(shift.startTime)} – {formatTime(shift.endTime)}
           {isOvernight && " 🌙"}
         </span>
-        <Badge variant={status.variant} className="text-[10px] px-1.5 py-0">
+        <Badge variant={status.variant} className="text-[10px] px-1.5 py-0 font-medium">
           {status.label}
         </Badge>
       </div>
 
       {/* Hours */}
-      <p className="mt-0.5 text-muted-foreground">
+      <p className="mt-1 text-muted-foreground leading-relaxed">
         {duration.toFixed(1)} saat
-        {shift.note && ` · ${shift.note}`}
+        {shift.note && <span className="ml-1 text-foreground/60">· {shift.note}</span>}
       </p>
 
       {/* Actions - visible on hover */}

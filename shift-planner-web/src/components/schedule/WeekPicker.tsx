@@ -42,16 +42,18 @@ export function WeekPicker({ currentMonday, onChange }: WeekPickerProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="icon" onClick={prevWeek} aria-label="Önceki hafta">
+      <Button variant="outline" size="icon" onClick={prevWeek} aria-label="Önceki hafta" className="h-9 w-9">
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <span className="min-w-[220px] text-center text-sm font-medium">
-        {startLabel} – {endLabel}
-      </span>
-      <Button variant="outline" size="icon" onClick={nextWeek} aria-label="Sonraki hafta">
+      <div className="min-w-[220px] text-center">
+        <span className="text-sm font-semibold tracking-tight">
+          {startLabel} – {endLabel}
+        </span>
+      </div>
+      <Button variant="outline" size="icon" onClick={nextWeek} aria-label="Sonraki hafta" className="h-9 w-9">
         <ChevronRight className="h-4 w-4" />
       </Button>
-      <Button variant="outline" size="sm" onClick={goToToday}>
+      <Button variant="secondary" size="sm" onClick={goToToday} className="ml-1">
         Bugün
       </Button>
     </div>

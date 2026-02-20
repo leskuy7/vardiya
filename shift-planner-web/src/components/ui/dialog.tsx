@@ -47,16 +47,16 @@ export function Dialog({ open, onClose, title, description, children, className,
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-[2px] animate-[fade-in_0.15s_ease-out]"
         onClick={onClose}
       />
       {/* Content */}
       <div
         className={cn(
-          "relative z-10 w-full rounded-lg border bg-background p-6 shadow-lg",
+          "relative z-10 w-full rounded-xl border bg-card p-6 shadow-xl animate-[slide-up_0.2s_ease-out]",
           sizeMap[size],
           className
         )}
@@ -66,21 +66,21 @@ export function Dialog({ open, onClose, title, description, children, className,
       >
         {/* Header */}
         {(title || description) && (
-          <div className="mb-4">
+          <div className="mb-5">
             {title && (
-              <h2 id="dialog-title" className="text-lg font-semibold">
+              <h2 id="dialog-title" className="text-lg font-semibold tracking-tight">
                 {title}
               </h2>
             )}
             {description && (
-              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+              <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{description}</p>
             )}
           </div>
         )}
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring"
+          className="absolute right-4 top-4 rounded-lg p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           aria-label="Kapat"
         >
           <X className="h-4 w-4" />

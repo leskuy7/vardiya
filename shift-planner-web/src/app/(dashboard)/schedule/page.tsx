@@ -111,7 +111,7 @@ export default function SchedulePage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-5 h-full">
       {/* Toolbar */}
       <div className="flex items-center justify-between flex-wrap gap-3 no-print">
         <WeekPicker currentMonday={currentMonday} onChange={setCurrentMonday} />

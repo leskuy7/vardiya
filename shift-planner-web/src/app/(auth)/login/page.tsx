@@ -17,9 +17,13 @@ import {
   Moon,
   Sun,
   Globe2,
+  Shield,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+/* ─── Schemas ─── */
 const loginSchema = z.object({
   email: z.string().email("Geçerli bir e-posta girin"),
   password: z.string().min(6, "Şifre en az 6 karakter olmalıdır"),
@@ -43,9 +47,9 @@ const registerSchema = z
 
 type LoginForm = z.infer<typeof loginSchema>;
 type RegisterForm = z.infer<typeof registerSchema>;
-
 type Lang = "tr" | "en";
 
+/* ─── i18n ─── */
 const copy: Record<Lang, Record<string, string>> = {
   tr: {
     titleLogin: "Giriş Yap",
@@ -60,10 +64,15 @@ const copy: Record<Lang, Record<string, string>> = {
     login: "Giriş Yap",
     register: "Hesap Oluştur",
     forgot: "Şifremi Unuttum",
-    noGoogle: "Google ile giriş yok. E-posta ve şifre ile güvenli giriş kullanılır.",
+    noGoogle: "Güvenli e-posta ve şifre ile giriş yapılır.",
     supportToast: "Şifre sıfırlama için yöneticinize veya destek mailine yazın.",
-    themeLabelDark: "Karanlık",
-    themeLabelLight: "Aydınlık",
+    feature1: "Haftalık Planlama",
+    feature1Desc: "Sürükle-bırak ile kolay vardiya oluşturma",
+    feature2: "Gerçek Zamanlı Takip",
+    feature2Desc: "Çalışan mesai ve uygunluk kontrolü",
+    feature3: "Detaylı Raporlar",
+    feature3Desc: "Maliyet ve fazla mesai analizi",
+    demoTitle: "Demo Hesaplar",
   },
   en: {
     titleLogin: "Sign In",
@@ -78,28 +87,26 @@ const copy: Record<Lang, Record<string, string>> = {
     login: "Sign In",
     register: "Create Account",
     forgot: "Forgot password",
-    noGoogle: "No Google login. Use email & password only.",
+    noGoogle: "Secure email & password authentication.",
     supportToast: "Contact your admin or support to reset password.",
-    themeLabelDark: "Dark",
-    themeLabelLight: "Light",
+    feature1: "Weekly Planning",
+    feature1Desc: "Easy shift creation with drag & drop",
+    feature2: "Real-time Tracking",
+    feature2Desc: "Employee overtime & availability control",
+    feature3: "Detailed Reports",
+    feature3Desc: "Cost and overtime analysis",
+    demoTitle: "Demo Accounts",
   },
 };
 
 function getErrorMessage(err: unknown, fallback: string) {
   const responseData = (err as { response?: { data?: unknown } })?.response?.data;
-
   if (typeof responseData === "string") return responseData;
-
   if (responseData && typeof responseData === "object") {
     const message = (responseData as { message?: unknown }).message;
-    if (Array.isArray(message) && message.length > 0) {
-      return String(message[0]);
-    }
-    if (typeof message === "string") {
-      return message;
-    }
+    if (Array.isArray(message) && message.length > 0) return String(message[0]);
+    if (typeof message === "string") return message;
   }
-
   return fallback;
 }
 
@@ -120,13 +127,11 @@ export default function LoginPage() {
     const savedTheme = (localStorage.getItem("theme") as "light" | "dark" | null) ?? "light";
     setTheme(savedTheme);
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
-
     const savedLang = (localStorage.getItem("lang") as Lang | null) ?? "tr";
     setLang(savedLang);
   }, []);
 
   const toggleTheme = () => {
-    if (typeof window === "undefined") return;
     const next = theme === "light" ? "dark" : "light";
     setTheme(next);
     localStorage.setItem("theme", next);
@@ -134,7 +139,6 @@ export default function LoginPage() {
   };
 
   const toggleLang = () => {
-    if (typeof window === "undefined") return;
     const next = lang === "tr" ? "en" : "tr";
     setLang(next);
     localStorage.setItem("lang", next);
@@ -175,82 +179,102 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 px-4 py-8">
-      <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-2">
-        <section className="hidden rounded-2xl border bg-card p-8 lg:flex lg:flex-col lg:justify-between">
-          <div>
-            <div className="mb-8 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-                <CalendarDays className="h-6 w-6" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Vardiya Planlayıcı</h1>
-                <p className="text-sm text-muted-foreground">Ekip planlamayı tek ekrandan yönet</p>
-              </div>
+    <div className="flex min-h-screen bg-background">
+      {/* ── Left: Branding Panel ── */}
+      <section className="hidden w-[480px] shrink-0 bg-sidebar text-sidebar-foreground lg:flex lg:flex-col lg:justify-between p-10">
+        <div>
+          <div className="flex items-center gap-3 mb-12">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sidebar-primary to-blue-400 text-white shadow-lg shadow-primary/20">
+              <CalendarDays className="h-5 w-5" />
             </div>
-            <div className="space-y-3 text-sm text-muted-foreground">
-              <p>• Haftalık vardiya planlarını hızlıca oluştur.</p>
-              <p>• Çalışan uygunluklarını tek panelde takip et.</p>
-              <p>• Fazla mesai ve saat raporlarını otomatik hesapla.</p>
-            </div>
-          </div>
-
-          <div className="rounded-lg border bg-muted/40 p-4 text-xs text-muted-foreground">
-            <p className="mb-2 font-semibold">Demo hesaplar:</p>
-            <p>Admin: admin@shiftplanner.com / Admin1234!</p>
-            <p>Yönetici: manager@shiftplanner.com / Manager1234!</p>
-            <p>Çalışan: ali@shiftplanner.com / Employee1234!</p>
-          </div>
-        </section>
-
-        <section className="rounded-2xl border bg-card p-6 shadow-sm sm:p-8">
-          <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">{mode === "login" ? t.titleLogin : t.titleRegister}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {mode === "login" ? t.subtitleLogin : t.subtitleRegister}
-              </p>
+              <h1 className="text-lg font-bold tracking-tight">Vardiya Planlayıcı</h1>
+              <p className="text-xs text-sidebar-foreground/50">Ekip Yönetim Platformu</p>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={toggleLang}
-                className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground"
-                aria-label="Dil değiştir"
-              >
-                <Globe2 className="h-4 w-4" />
-                {lang === "tr" ? "Türkçe" : "English"}
-              </button>
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-sm text-muted-foreground transition hover:text-foreground"
-                aria-label="Tema değiştir"
-              >
-                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                {theme === "light" ? t.themeLabelDark : t.themeLabelLight}
-              </button>
-              <div className="rounded-lg border bg-muted p-1">
-                <button
-                  type="button"
-                  onClick={() => setMode("login")}
-                  className={`rounded-md px-3 py-1.5 text-sm transition ${
-                    mode === "login" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                  }`}
-                >
-                  {t.titleLogin}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("register")}
-                  className={`rounded-md px-3 py-1.5 text-sm transition ${
-                    mode === "register" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                  }`}
-                >
-                  {t.titleRegister}
-                </button>
+          </div>
+
+          <div className="space-y-6">
+            {[
+              { icon: CalendarDays, title: t.feature1, desc: t.feature1Desc },
+              { icon: Clock, title: t.feature2, desc: t.feature2Desc },
+              { icon: BarChart3, title: t.feature3, desc: t.feature3Desc },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/[0.06]">
+                  <Icon className="h-5 w-5 text-sidebar-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">{title}</p>
+                  <p className="text-xs text-sidebar-foreground/50 mt-0.5">{desc}</p>
+                </div>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-white/[0.04] border border-white/[0.06] p-5">
+          <p className="text-xs font-semibold text-sidebar-foreground/70 mb-3 uppercase tracking-wider">{t.demoTitle}</p>
+          <div className="space-y-1.5 text-xs text-sidebar-foreground/50 font-mono">
+            <p>admin@shiftplanner.com / Admin1234!</p>
+            <p>manager@shiftplanner.com / Manager1234!</p>
+            <p>ali@shiftplanner.com / Employee1234!</p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Right: Auth Form ── */}
+      <section className="flex flex-1 items-center justify-center p-6 sm:p-10">
+        <div className="w-full max-w-[420px]">
+          <div className="flex items-center justify-end gap-2 mb-8">
+            <button
+              type="button"
+              onClick={toggleLang}
+              className="flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs text-muted-foreground transition hover:text-foreground hover:border-foreground/20"
+            >
+              <Globe2 className="h-3.5 w-3.5" />
+              {lang === "tr" ? "TR" : "EN"}
+            </button>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="flex items-center justify-center rounded-lg border p-1.5 text-muted-foreground transition hover:text-foreground hover:border-foreground/20"
+            >
+              {theme === "light" ? <Moon className="h-3.5 w-3.5" /> : <Sun className="h-3.5 w-3.5" />}
+            </button>
+          </div>
+
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold tracking-tight">
+              {mode === "login" ? t.titleLogin : t.titleRegister}
+            </h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">
+              {mode === "login" ? t.subtitleLogin : t.subtitleRegister}
+            </p>
+          </div>
+
+          <div className="flex rounded-xl bg-muted p-1 mb-6">
+            <button
+              type="button"
+              onClick={() => setMode("login")}
+              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                mode === "login"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.titleLogin}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("register")}
+              className={`flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                mode === "register"
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {t.titleRegister}
+            </button>
           </div>
 
           {mode === "login" ? (
@@ -281,7 +305,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowLoginPassword((v) => !v)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
                     aria-label="Şifreyi göster/gizle"
                   >
                     {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -289,8 +313,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span />
+              <div className="flex items-center justify-end">
                 <button
                   type="button"
                   onClick={() => {
@@ -299,13 +322,13 @@ export default function LoginPage() {
                       window.open("mailto:destek@vardiya.app?subject=Sifre%20Sifirlama", "_blank");
                     }
                   }}
-                  className="text-foreground underline-offset-4 hover:underline"
+                  className="text-xs text-primary hover:text-primary/80 font-medium"
                 >
                   {t.forgot}
                 </button>
               </div>
 
-              <Button type="submit" className="w-full" loading={isSubmitting}>
+              <Button type="submit" className="w-full h-11" loading={isSubmitting}>
                 <KeyRound className="h-4 w-4" />
                 {t.login}
               </Button>
@@ -359,7 +382,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowRegisterPassword((v) => !v)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
                     aria-label="Şifreyi göster/gizle"
                   >
                     {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -381,7 +404,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowRegisterPassword2((v) => !v)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
                     aria-label="Şifreyi göster/gizle"
                   >
                     {showRegisterPassword2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -389,18 +412,19 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" loading={isRegisterSubmitting}>
+              <Button type="submit" className="w-full h-11" loading={isRegisterSubmitting}>
                 <UserPlus className="h-4 w-4" />
                 {t.register}
               </Button>
             </form>
           )}
 
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            {t.noGoogle}
-          </p>
-        </section>
-      </div>
+          <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <Shield className="h-3.5 w-3.5" />
+            <span>{t.noGoogle}</span>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

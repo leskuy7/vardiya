@@ -24,22 +24,22 @@ export default function ReportsPage() {
       {/* Summary cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
-          icon={<Clock className="h-5 w-5 text-blue-500" />}
+          icon={<Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
           label="Normal Çalışma"
           value={`${totalRegular.toFixed(1)} saat`}
-          bg="bg-blue-50"
+          bg="bg-blue-50 dark:bg-blue-500/10"
         />
         <StatCard
-          icon={<TrendingUp className="h-5 w-5 text-orange-500" />}
+          icon={<TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
           label="Fazla Mesai"
           value={`${totalOvertime.toFixed(1)} saat`}
-          bg="bg-orange-50"
+          bg="bg-amber-50 dark:bg-amber-500/10"
         />
         <StatCard
-          icon={<DollarSign className="h-5 w-5 text-green-600" />}
+          icon={<DollarSign className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />}
           label="Toplam Maliyet"
           value={`₺${totalCost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`}
-          bg="bg-green-50"
+          bg="bg-emerald-50 dark:bg-emerald-500/10"
         />
       </div>
 
@@ -49,45 +49,55 @@ export default function ReportsPage() {
           <Spinner size="lg" />
         </div>
       ) : !report?.employees.length ? (
-        <div className="flex h-48 items-center justify-center rounded-lg border border-dashed text-muted-foreground">
-          <p>Bu hafta için rapor verisi bulunamadı.</p>
+        <div className="flex h-48 items-center justify-center rounded-xl border border-dashed text-muted-foreground">
+          <div className="text-center">
+            <BarChart3 className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
+            <p>Bu hafta için rapor verisi bulunamadı.</p>
+          </div>
         </div>
       ) : (
-        <div className="rounded-lg border overflow-hidden">
+        <div className="rounded-xl border bg-card overflow-hidden shadow-sm">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Çalışan</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Vardiya</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Normal</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Fazla Mesai</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Saatlik Ücret</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">Toplam</th>
-                <th className="px-4 py-3 text-center font-medium text-muted-foreground">Durum</th>
+            <thead>
+              <tr className="border-b bg-muted/50">
+                <th className="px-4 py-3.5 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Çalışan</th>
+                <th className="px-4 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vardiya</th>
+                <th className="px-4 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Normal</th>
+                <th className="px-4 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Fazla Mesai</th>
+                <th className="px-4 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Saatlik Ücret</th>
+                <th className="px-4 py-3.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Toplam</th>
+                <th className="px-4 py-3.5 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">Durum</th>
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className="divide-y divide-border">
               {report.employees.map((emp) => (
-                <tr key={emp.employeeId} className="hover:bg-muted/20 transition-colors">
-                  <td className="px-4 py-3 font-medium">{emp.name}</td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">{emp.shiftCount}</td>
-                  <td className="px-4 py-3 text-right">{emp.regularHours.toFixed(1)}s</td>
-                  <td className="px-4 py-3 text-right">
+                <tr key={emp.employeeId} className="hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
+                        {emp.name?.charAt(0)?.toUpperCase() ?? "?"}
+                      </div>
+                      <span className="font-medium text-[13px]">{emp.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-right text-muted-foreground">{emp.shiftCount}</td>
+                  <td className="px-4 py-3.5 text-right font-medium">{emp.regularHours.toFixed(1)}s</td>
+                  <td className="px-4 py-3.5 text-right">
                     {emp.overtimeHours > 0 ? (
-                      <span className="text-orange-600 font-medium">{emp.overtimeHours.toFixed(1)}s</span>
+                      <span className="text-amber-600 dark:text-amber-400 font-semibold">{emp.overtimeHours.toFixed(1)}s</span>
                     ) : (
                       <span className="text-muted-foreground">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-right text-muted-foreground">
+                  <td className="px-4 py-3.5 text-right text-muted-foreground">
                     {emp.hourlyRate ? `₺${emp.hourlyRate}/sa` : "—"}
                   </td>
-                  <td className="px-4 py-3 text-right font-semibold">
+                  <td className="px-4 py-3.5 text-right font-semibold">
                     {emp.totalCost > 0
                       ? `₺${emp.totalCost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`
                       : "—"}
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3.5 text-center">
                     {emp.totalHours >= 45 ? (
                       <Badge variant="warning">Yüksek</Badge>
                     ) : emp.totalHours >= 40 ? (
@@ -99,18 +109,18 @@ export default function ReportsPage() {
                 </tr>
               ))}
             </tbody>
-            <tfoot className="bg-muted/30">
-              <tr>
-                <td className="px-4 py-3 font-semibold" colSpan={2}>Toplam</td>
-                <td className="px-4 py-3 text-right font-semibold">{totalRegular.toFixed(1)}s</td>
-                <td className="px-4 py-3 text-right font-semibold text-orange-600">
+            <tfoot>
+              <tr className="border-t-2 border-border bg-muted/30">
+                <td className="px-4 py-3.5 font-semibold text-[13px]" colSpan={2}>Toplam</td>
+                <td className="px-4 py-3.5 text-right font-semibold">{totalRegular.toFixed(1)}s</td>
+                <td className="px-4 py-3.5 text-right font-semibold text-amber-600 dark:text-amber-400">
                   {totalOvertime > 0 ? `${totalOvertime.toFixed(1)}s` : "—"}
                 </td>
-                <td className="px-4 py-3" />
-                <td className="px-4 py-3 text-right font-bold text-green-700">
+                <td className="px-4 py-3.5" />
+                <td className="px-4 py-3.5 text-right font-bold text-emerald-700 dark:text-emerald-400">
                   ₺{totalCost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}
                 </td>
-                <td className="px-4 py-3" />
+                <td className="px-4 py-3.5" />
               </tr>
             </tfoot>
           </table>
@@ -132,11 +142,11 @@ function StatCard({
   bg: string;
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-lg border bg-card p-4 shadow-sm">
-      <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${bg}`}>{icon}</div>
+    <div className="flex items-center gap-4 rounded-xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${bg}`}>{icon}</div>
       <div>
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="text-xl font-bold">{value}</p>
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</p>
+        <p className="text-2xl font-bold tracking-tight mt-0.5">{value}</p>
       </div>
     </div>
   );
