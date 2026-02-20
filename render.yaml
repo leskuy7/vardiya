@@ -3,15 +3,13 @@ services:
     name: shift-planner-api
     runtime: node
     rootDir: shift-planner-api
-    buildCommand: npm ci --include=dev && npm run build && npx prisma generate && npx prisma migrate deploy
-    startCommand: node dist/main
+    buildCommand: npm ci --include=dev && npm run build && npx prisma generate
+    startCommand: npx prisma migrate deploy && node dist/main
     envVars:
       - key: NODE_ENV
         value: production
       - key: TZ
         value: UTC
-      - key: PORT
-        value: "3001"
       - key: DATABASE_URL
         sync: false        # Set in Render dashboard (Neon URL)
       - key: JWT_SECRET
