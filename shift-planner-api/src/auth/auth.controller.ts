@@ -15,9 +15,6 @@ import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
 import { JwtAuthGuard, JwtRefreshGuard } from './guards';
 import { CurrentUser } from '../common/decorators';
-import { Roles } from '../common/decorators';
-import { RolesGuard } from '../common/guards';
-import { Role } from '@prisma/client';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -25,10 +22,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.ADMIN)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Yeni kullanıcı kaydet (sadece admin)' })
+  @Throttle({ short: { ttl: 60000, limit: 5 } })
+  @ApiOperation({ summary: 'Yeni kullanıcı kaydı' })
   @ApiResponse({ status: 201, description: 'Kullanıcı başarıyla oluşturuldu' })
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);

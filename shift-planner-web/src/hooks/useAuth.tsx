@@ -17,6 +17,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (data: { firstName: string; lastName: string; email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   isAdmin: boolean;
   isManager: boolean;
@@ -70,6 +71,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [router]
   );
 
+  const register = useCallback(
+    async (data: { firstName: string; lastName: string; email: string; password: string }) => {
+      await api.post("/auth/register", data);
+      await login(data.email, data.password);
+    },
+    [login]
+  );
+
   const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout");
@@ -87,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     isAuthenticated: !!user,
     login,
+    register,
     logout,
     isAdmin: user?.role === "ADMIN",
     isManager: user?.role === "MANAGER",

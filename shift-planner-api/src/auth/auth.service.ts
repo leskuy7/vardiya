@@ -42,7 +42,7 @@ export class AuthService {
         email: dto.email,
         passwordHash,
         name: `${dto.firstName} ${dto.lastName}`,
-        role: dto.role || 'EMPLOYEE',
+        role: 'EMPLOYEE',
         employee: {
           create: {},
         },
