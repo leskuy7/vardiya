@@ -1,0 +1,92 @@
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateAvailabilityDto } from './dto';
+
+@Injectable()
+export class AvailabilityService {
+  private readonly logger = new Logger(AvailabilityService.name);
+
+  constructor(private prisma: PrismaService) {}
+
+  async findAll(filters: { employeeId?: string; dayOfWeek?: number }) {
+    const where: any = {};
+
+    if (filters.employeeId) where.employeeId = filters.employeeId;
+    if (filters.dayOfWeek !== undefined) where.dayOfWeek = filters.dayOfWeek;
+
+    return this.prisma.availabilityBlock.findMany({
+      where,
+      include: {
+        employee: {
+          select: { id: true, user: { select: { name: true } } },
+        },
+      },
+      orderBy: [{ dayOfWeek: 'asc' }, { startTime: 'asc' }],
+    });
+  }
+
+  async create(dto: CreateAvailabilityDto, employeeId: string) {
+    if (dto.startTime && dto.endTime && dto.startTime >= dto.endTime) {
+      throw new BadRequestException({
+        code: 'INVALID_TIME_RANGE',
+        message: 'Bitiş saati başlangıç saatinden sonra olmalıdır',
+      });
+    }
+
+    const block = await this.prisma.availabilityBlock.create({
+      data: {
+        employeeId,
+        type: dto.type,
+        dayOfWeek: dto.dayOfWeek,
+        startTime: dto.startTime ?? null,
+        endTime: dto.endTime ?? null,
+        startDate: dto.startDate ?? null,
+        endDate: dto.endDate ?? null,
+        note: dto.note ?? null,
+      },
+      include: {
+        employee: {
+          select: { id: true, user: { select: { name: true } } },
+        },
+      },
+    });
+
+    this.logger.log(
+      `Availability block created: ${block.id} for employee ${employeeId}`,
+    );
+
+    return block;
+  }
+
+  async remove(id: string, employeeId: string, userRole: string) {
+    const block = await this.prisma.availabilityBlock.findUnique({
+      where: { id },
+    });
+
+    if (!block) {
+      throw new NotFoundException({
+        code: 'AVAILABILITY_NOT_FOUND',
+        message: 'Müsaitlik bloğu bulunamadı',
+      });
+    }
+
+    // Only owner or admin can delete
+    if (block.employeeId !== employeeId && userRole !== 'ADMIN') {
+      throw new ForbiddenException({
+        code: 'FORBIDDEN',
+        message: 'Bu müsaitlik bloğunu silme yetkiniz yok',
+      });
+    }
+
+    await this.prisma.availabilityBlock.delete({ where: { id } });
+
+    this.logger.log(`Availability block deleted: ${id}`);
+    return { message: 'Müsaitlik bloğu silindi' };
+  }
+}

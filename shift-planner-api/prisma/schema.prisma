@@ -1,0 +1,121 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum ShiftStatus {
+  DRAFT
+  PUBLISHED
+  ACKNOWLEDGED
+  CANCELLED
+}
+
+enum AvailabilityType {
+  UNAVAILABLE
+  PREFER_NOT
+  AVAILABLE_ONLY
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  role         Role     @default(EMPLOYEE)
+  refreshToken String?  @map("refresh_token")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  employee Employee?
+  auditLogs AuditLog[]
+
+  @@map("users")
+}
+
+model Employee {
+  id             String    @id @default(uuid())
+  userId         String    @unique @map("user_id")
+  position       String?
+  department     String?
+  phone          String?
+  hourlyRate     Decimal?  @map("hourly_rate") @db.Decimal(10, 2)
+  maxWeeklyHours Int       @default(45) @map("max_weekly_hours")
+  isActive       Boolean   @default(true) @map("is_active")
+  deletedAt      DateTime? @map("deleted_at")
+  branchId       String?   @map("branch_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shifts             Shift[]
+  availabilityBlocks AvailabilityBlock[]
+  branch             Branch?            @relation(fields: [branchId], references: [id])
+
+  @@map("employees")
+}
+
+model Shift {
+  id         String      @id @default(uuid())
+  employeeId String      @map("employee_id")
+  startTime  DateTime    @map("start_time") @db.Timestamptz()
+  endTime    DateTime    @map("end_time") @db.Timestamptz()
+  note       String?
+  status     ShiftStatus @default(DRAFT)
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("shifts")
+}
+
+model AvailabilityBlock {
+  id         String           @id @default(uuid())
+  employeeId String           @map("employee_id")
+  type       AvailabilityType @default(UNAVAILABLE)
+  dayOfWeek  Int              @map("day_of_week") // 0=Sun, 1=Mon, ..., 6=Sat
+  startTime  String?          @map("start_time")  // HH:mm
+  endTime    String?          @map("end_time")    // HH:mm
+  startDate  String?          @map("start_date")  // YYYY-MM-DD (optional date range)
+  endDate    String?          @map("end_date")    // YYYY-MM-DD
+  note       String?
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("availability_blocks")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id")
+  details    Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  employees Employee[]
+
+  @@map("branches")
+}

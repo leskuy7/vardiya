@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: shift-planner-api
+    runtime: node
+    rootDir: shift-planner-api
+    buildCommand: npm install && npm run build && npx prisma generate && npx prisma migrate deploy
+    startCommand: node dist/main
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TZ
+        value: UTC
+      - key: PORT
+        value: "3001"
+      - key: DATABASE_URL
+        sync: false        # Set in Render dashboard (Neon URL)
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRATION
+        value: 15m
+      - key: JWT_REFRESH_EXPIRATION
+        value: 7d
+      - key: FRONTEND_URL
+        sync: false        # Set to Vercel deployment URL
+    healthCheckPath: /api/health
+    autoDeploy: true
