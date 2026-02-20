@@ -8,8 +8,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/toast";
-import { CalendarDays, KeyRound, UserPlus } from "lucide-react";
-import { useState } from "react";
+import {
+  CalendarDays,
+  KeyRound,
+  UserPlus,
+  Eye,
+  EyeOff,
+  Moon,
+  Sun,
+  Globe2,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 const loginSchema = z.object({
   email: z.string().email("Geçerli bir e-posta girin"),
@@ -35,6 +44,47 @@ const registerSchema = z
 type LoginForm = z.infer<typeof loginSchema>;
 type RegisterForm = z.infer<typeof registerSchema>;
 
+type Lang = "tr" | "en";
+
+const copy: Record<Lang, Record<string, string>> = {
+  tr: {
+    titleLogin: "Giriş Yap",
+    titleRegister: "Kayıt Ol",
+    subtitleLogin: "Hesabınıza giriş yaparak devam edin",
+    subtitleRegister: "Dakikalar içinde yeni hesap oluşturun",
+    email: "E-posta",
+    password: "Şifre",
+    passwordAgain: "Şifre (Tekrar)",
+    firstName: "Ad",
+    lastName: "Soyad",
+    login: "Giriş Yap",
+    register: "Hesap Oluştur",
+    forgot: "Şifremi Unuttum",
+    noGoogle: "Google ile giriş yok. E-posta ve şifre ile güvenli giriş kullanılır.",
+    supportToast: "Şifre sıfırlama için yöneticinize veya destek mailine yazın.",
+    themeLabelDark: "Karanlık",
+    themeLabelLight: "Aydınlık",
+  },
+  en: {
+    titleLogin: "Sign In",
+    titleRegister: "Create Account",
+    subtitleLogin: "Continue with your account",
+    subtitleRegister: "Create a new account in minutes",
+    email: "Email",
+    password: "Password",
+    passwordAgain: "Password (Repeat)",
+    firstName: "First name",
+    lastName: "Last name",
+    login: "Sign In",
+    register: "Create Account",
+    forgot: "Forgot password",
+    noGoogle: "No Google login. Use email & password only.",
+    supportToast: "Contact your admin or support to reset password.",
+    themeLabelDark: "Dark",
+    themeLabelLight: "Light",
+  },
+};
+
 function getErrorMessage(err: unknown, fallback: string) {
   const responseData = (err as { response?: { data?: unknown } })?.response?.data;
 
@@ -57,6 +107,38 @@ export default function LoginPage() {
   const { login, register: registerUser } = useAuth();
   const { toast } = useToast();
   const [mode, setMode] = useState<"login" | "register">("login");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [lang, setLang] = useState<Lang>("tr");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showRegisterPassword2, setShowRegisterPassword2] = useState(false);
+
+  const t = useMemo(() => copy[lang], [lang]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const savedTheme = (localStorage.getItem("theme") as "light" | "dark" | null) ?? "light";
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle("dark", savedTheme === "dark");
+
+    const savedLang = (localStorage.getItem("lang") as Lang | null) ?? "tr";
+    setLang(savedLang);
+  }, []);
+
+  const toggleTheme = () => {
+    if (typeof window === "undefined") return;
+    const next = theme === "light" ? "dark" : "light";
+    setTheme(next);
+    localStorage.setItem("theme", next);
+    document.documentElement.classList.toggle("dark", next === "dark");
+  };
+
+  const toggleLang = () => {
+    if (typeof window === "undefined") return;
+    const next = lang === "tr" ? "en" : "tr";
+    setLang(next);
+    localStorage.setItem("lang", next);
+  };
 
   const {
     register,
@@ -124,39 +206,57 @@ export default function LoginPage() {
         <section className="rounded-2xl border bg-card p-6 shadow-sm sm:p-8">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">{mode === "login" ? "Giriş Yap" : "Kayıt Ol"}</h2>
+              <h2 className="text-2xl font-bold">{mode === "login" ? t.titleLogin : t.titleRegister}</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                {mode === "login"
-                  ? "Hesabınıza giriş yaparak devam edin"
-                  : "Dakikalar içinde yeni hesap oluşturun"}
+                {mode === "login" ? t.subtitleLogin : t.subtitleRegister}
               </p>
             </div>
-            <div className="rounded-lg border bg-muted p-1">
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => setMode("login")}
-                className={`rounded-md px-3 py-1.5 text-sm transition ${
-                  mode === "login" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                }`}
+                onClick={toggleLang}
+                className="flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+                aria-label="Dil değiştir"
               >
-                Giriş
+                <Globe2 className="h-4 w-4" />
+                {lang === "tr" ? "Türkçe" : "English"}
               </button>
               <button
                 type="button"
-                onClick={() => setMode("register")}
-                className={`rounded-md px-3 py-1.5 text-sm transition ${
-                  mode === "register" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
-                }`}
+                onClick={toggleTheme}
+                className="flex items-center gap-1 rounded-md border px-2.5 py-1.5 text-sm text-muted-foreground transition hover:text-foreground"
+                aria-label="Tema değiştir"
               >
-                Kayıt
+                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                {theme === "light" ? t.themeLabelDark : t.themeLabelLight}
               </button>
+              <div className="rounded-lg border bg-muted p-1">
+                <button
+                  type="button"
+                  onClick={() => setMode("login")}
+                  className={`rounded-md px-3 py-1.5 text-sm transition ${
+                    mode === "login" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+                  }`}
+                >
+                  {t.titleLogin}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode("register")}
+                  className={`rounded-md px-3 py-1.5 text-sm transition ${
+                    mode === "register" ? "bg-background text-foreground shadow-sm" : "text-muted-foreground"
+                  }`}
+                >
+                  {t.titleRegister}
+                </button>
+              </div>
             </div>
           </div>
 
           {mode === "login" ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1.5">
-                <Label htmlFor="email">E-posta</Label>
+                <Label htmlFor="email">{t.email}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -168,27 +268,53 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="password">Şifre</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  error={errors.password?.message}
-                  {...register("password")}
-                />
+                <Label htmlFor="password">{t.password}</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showLoginPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    error={errors.password?.message}
+                    {...register("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                    aria-label="Şifreyi göster/gizle"
+                  >
+                    {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span />
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast("info", t.supportToast);
+                    if (typeof window !== "undefined") {
+                      window.open("mailto:destek@vardiya.app?subject=Sifre%20Sifirlama", "_blank");
+                    }
+                  }}
+                  className="text-foreground underline-offset-4 hover:underline"
+                >
+                  {t.forgot}
+                </button>
               </div>
 
               <Button type="submit" className="w-full" loading={isSubmitting}>
                 <KeyRound className="h-4 w-4" />
-                Giriş Yap
+                {t.login}
               </Button>
             </form>
           ) : (
             <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label htmlFor="firstName">Ad</Label>
+                  <Label htmlFor="firstName">{t.firstName}</Label>
                   <Input
                     id="firstName"
                     placeholder="Ali"
@@ -197,7 +323,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="lastName">Soyad</Label>
+                  <Label htmlFor="lastName">{t.lastName}</Label>
                   <Input
                     id="lastName"
                     placeholder="Yılmaz"
@@ -208,7 +334,7 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="registerEmail">E-posta</Label>
+                <Label htmlFor="registerEmail">{t.email}</Label>
                 <Input
                   id="registerEmail"
                   type="email"
@@ -220,38 +346,58 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="registerPassword">Şifre</Label>
-                <Input
-                  id="registerPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="En az 8 karakter"
-                  error={registerErrors.password?.message}
-                  {...registerField("password")}
-                />
+                <Label htmlFor="registerPassword">{t.password}</Label>
+                <div className="relative">
+                  <Input
+                    id="registerPassword"
+                    type={showRegisterPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    placeholder="En az 8 karakter"
+                    error={registerErrors.password?.message}
+                    {...registerField("password")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterPassword((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                    aria-label="Şifreyi göster/gizle"
+                  >
+                    {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="confirmPassword">Şifre (Tekrar)</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="Şifrenizi tekrar girin"
-                  error={registerErrors.confirmPassword?.message}
-                  {...registerField("confirmPassword")}
-                />
+                <Label htmlFor="confirmPassword">{t.passwordAgain}</Label>
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showRegisterPassword2 ? "text" : "password"}
+                    autoComplete="new-password"
+                    placeholder="Şifrenizi tekrar girin"
+                    error={registerErrors.confirmPassword?.message}
+                    {...registerField("confirmPassword")}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegisterPassword2((v) => !v)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted-foreground hover:text-foreground"
+                    aria-label="Şifreyi göster/gizle"
+                  >
+                    {showRegisterPassword2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
 
               <Button type="submit" className="w-full" loading={isRegisterSubmitting}>
                 <UserPlus className="h-4 w-4" />
-                Hesap Oluştur
+                {t.register}
               </Button>
             </form>
           )}
 
           <p className="mt-4 text-center text-xs text-muted-foreground">
-            Google ile giriş yok. E-posta ve şifre ile güvenli giriş kullanılır.
+            {t.noGoogle}
           </p>
         </section>
       </div>
