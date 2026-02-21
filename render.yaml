@@ -3,7 +3,7 @@ services:
     name: shift-planner-api
     runtime: node
     rootDir: shift-planner-api
-    buildCommand: npm ci --include=dev && npm run build && npx prisma generate
+    buildCommand: npm ci --include=dev && npx prisma generate && npm run build
     startCommand: npx prisma migrate deploy && node dist/main
     envVars:
       - key: NODE_ENV
