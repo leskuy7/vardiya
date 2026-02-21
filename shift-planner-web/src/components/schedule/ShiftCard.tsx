@@ -54,15 +54,15 @@ export function ShiftCard({
       style={style}
       {...(isDraggable && canManage ? { ...attributes, ...listeners } : {})}
       className={cn(
-        "group relative rounded-lg border bg-card p-2.5 text-xs shadow-sm transition-all duration-150 hover:shadow-md",
-        isDragging && "opacity-50 shadow-lg ring-2 ring-primary scale-105",
+        "group relative rounded-xl border border-border/50 bg-card/60 backdrop-blur-md p-3 text-xs shadow-sm shadow-black/5 transition-all duration-300 hover:shadow-[0_4px_20px_-3px_var(--color-primary)] hover:-translate-y-0.5 hover:border-primary/50",
+        isDragging && "opacity-60 shadow-2xl shadow-primary/20 ring-2 ring-primary scale-[1.02] z-50",
         isDraggable && canManage && "cursor-grab active:cursor-grabbing",
         shift.status === "CANCELLED" && "opacity-50 line-through"
       )}
     >
       {/* Time row */}
-      <div className="flex items-center justify-between gap-1">
-        <span className="font-semibold text-foreground tracking-tight">
+      <div className="flex items-center justify-between gap-1 mb-1.5">
+        <span className="font-semibold text-foreground tracking-tight flex items-center gap-1">
           {formatTime(shift.startTime)} – {formatTime(shift.endTime)}
           {isOvernight && " 🌙"}
         </span>
@@ -78,23 +78,23 @@ export function ShiftCard({
       </p>
 
       {/* Actions - visible on hover */}
-      <div className="absolute right-1 top-1 hidden gap-1 group-hover:flex">
+      <div className="absolute right-1 top-1 hidden gap-1 group-hover:flex backdrop-blur-md bg-card/80 p-1 rounded-lg border border-border/50 shadow-sm animate-fade-in translate-y-[-50%] translate-x-[20%]">
         {canManage && onEdit && (
           <button
-            className="rounded p-0.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-primary/20 hover:text-primary transition-colors"
             onClick={(e) => { e.stopPropagation(); onEdit(shift); }}
             title="Düzenle"
           >
-            <Edit2 className="h-3 w-3" />
+            <Edit2 className="h-3.5 w-3.5" />
           </button>
         )}
         {canManage && onDelete && (
           <button
-            className="rounded p-0.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive transition-colors"
             onClick={(e) => { e.stopPropagation(); onDelete(shift); }}
             title="Sil"
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-3.5 w-3.5" />
           </button>
         )}
         {isEmployee && shift.status === "PUBLISHED" && onAcknowledge && (

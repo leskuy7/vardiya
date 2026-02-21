@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr">
-      <body>
+    <html lang="tr" className="dark scroll-smooth">
+      <body className="antialiased selection:bg-primary/30">
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -65,7 +65,7 @@ export function WeeklyGrid({
     for (const employeeRow of schedule.employees) {
       for (const daySchedule of employeeRow.days) {
         if (daySchedule.shifts.some((shift) => shift.id === shiftId)) {
-          return `cell-${employeeRow.employee.id}-${daySchedule.date}`;
+          return `cell-${employeeRow.employee?.id}-${daySchedule.date}`;
         }
       }
     }
@@ -106,11 +106,11 @@ export function WeeklyGrid({
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="overflow-x-auto print:overflow-visible">
         <div
-          className="grid min-w-[900px] rounded-xl border bg-card overflow-hidden shadow-sm"
+          className="grid min-w-[900px] rounded-xl border border-border/40 bg-card/40 backdrop-blur-xl overflow-hidden shadow-2xl shadow-primary/5"
           style={{ gridTemplateColumns: "200px repeat(7, 1fr)" }}
         >
           {/* Header row */}
-          <div className="border-b border-r bg-muted/60 px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+          <div className="border-b border-border/40 border-r bg-muted/30 px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider backdrop-blur-md">
             Çalışan
           </div>
           {weekDays.map((day, i) => {
@@ -120,8 +120,8 @@ export function WeeklyGrid({
               <div
                 key={day}
                 className={cn(
-                  "border-b border-r last:border-r-0 px-2 py-3 text-center text-xs font-medium",
-                  isToday ? "bg-primary/8 text-primary" : "bg-muted/60 text-muted-foreground"
+                  "border-b border-r border-border/40 last:border-r-0 px-2 py-3 text-center text-xs font-medium transition-colors",
+                  isToday ? "bg-primary/10 text-primary shadow-[inset_0_-2px_0_var(--color-primary)]" : "bg-muted/30 text-muted-foreground hover:bg-muted/40"
                 )}
               >
                 <div className="text-[11px] uppercase tracking-wider">{DAY_NAMES[i]}</div>
@@ -133,9 +133,9 @@ export function WeeklyGrid({
           })}
 
           {/* Employee rows */}
-          {schedule.employees.map((empRow) => (
+          {schedule.employees.map((empRow, idx) => (
             <EmployeeRow
-              key={empRow.employee.id}
+              key={empRow.employee?.id || idx}
               empRow={empRow}
               weekDays={weekDays}
               canManage={canManage}
@@ -183,15 +183,15 @@ function EmployeeRow({
   return (
     <>
       {/* Employee label cell */}
-      <div className="border-b border-r bg-card px-4 py-3">
+      <div className="border-b border-border/40 border-r bg-card/40 px-4 py-3 backdrop-blur-sm transition-colors hover:bg-muted/20">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
-            {empRow.employee.user.name?.charAt(0)?.toUpperCase() ?? "?"}
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 text-primary shadow-[0_0_10px_-2px_var(--color-primary)] text-xs font-bold">
+            {empRow.employee?.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
           </div>
           <div className="min-w-0">
-            <p className="text-[13px] font-medium truncate">{empRow.employee.user.name}</p>
+            <p className="text-[13px] font-medium truncate">{empRow.employee?.user?.name || "Bilinmiyor"}</p>
             <p className="text-xs text-muted-foreground truncate">
-              {empRow.employee.position ?? empRow.employee.department ?? ""}
+              {empRow.employee?.position ?? empRow.employee?.department ?? ""}
             </p>
           </div>
         </div>
@@ -199,27 +199,28 @@ function EmployeeRow({
       </div>
 
       {/* Day cells */}
-      {empRow.days.map((daySchedule) => {
-        const cellId = `cell-${empRow.employee.id}-${daySchedule.date}`;
-        const shifts = daySchedule.shifts;
+      {empRow.days?.map((daySchedule) => {
+        const cellId = `cell-${empRow.employee?.id}-${daySchedule.date}`;
+        // Filter out any null/undefined shifts that might come from the API
+        const shifts = Array.isArray(daySchedule.shifts) ? daySchedule.shifts.filter(Boolean) : [];
 
         return (
           <SortableContext
             key={daySchedule.date}
             id={cellId}
-            items={shifts.map((s) => s.id)}
+            items={shifts.map((s) => s?.id || Math.random().toString())}
             strategy={rectSortingStrategy}
           >
             <div
               id={cellId}
               className={cn(
-                "group/cell border-b border-r last:border-r-0 min-h-[90px] p-2 space-y-1.5",
-                daySchedule.hasConflict && "bg-destructive/5"
+                "group/cell border-b border-r border-border/40 last:border-r-0 min-h-[100px] p-2 space-y-2 transition-colors",
+                daySchedule.hasConflict ? "bg-destructive/10" : "hover:bg-muted/20"
               )}
             >
-              {shifts.map((shift) => (
+              {shifts.map((shift, i) => (
                 <ShiftCard
-                  key={shift.id}
+                  key={shift?.id || i}
                   shift={shift}
                   onEdit={canManage ? onEditShift : undefined}
                   onDelete={canManage ? onDeleteShift : undefined}
@@ -233,10 +234,10 @@ function EmployeeRow({
               {/* Add button */}
               {canManage && (
                 <button
-                  className="hidden group-hover/cell:flex w-full items-center justify-center rounded-lg border border-dashed border-primary/25 py-1.5 text-[11px] text-primary/50 hover:border-primary hover:text-primary hover:bg-primary/5 transition-all"
-                  onClick={() => onAddShift(empRow.employee.id, daySchedule.date)}
+                  className="hidden group-hover/cell:flex w-full items-center justify-center rounded-lg border border-dashed border-primary/40 py-2 text-[11px] text-primary/70 hover:border-primary hover:text-primary hover:bg-primary/10 transition-all hover:shadow-[0_0_10px_-2px_var(--color-primary)]"
+                  onClick={() => onAddShift(empRow.employee?.id || "", daySchedule.date)}
                 >
-                  <Plus className="h-3 w-3 mr-0.5" />
+                  <Plus className="h-4 w-4 mr-0.5" />
                   Ekle
                 </button>
               )}

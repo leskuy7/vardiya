@@ -50,7 +50,7 @@ const navItems = [
   },
 ];
 
-export function Sidebar() {
+export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -62,8 +62,9 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "relative flex h-screen flex-col bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
-        collapsed ? "w-[68px]" : "w-64"
+        "relative flex h-screen flex-col bg-sidebar/95 backdrop-blur-3xl text-sidebar-foreground transition-all duration-300 ease-in-out z-20",
+        collapsed ? "w-[68px]" : "w-64",
+        className
       )}
     >
       {/* Logo */}

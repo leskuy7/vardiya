@@ -113,20 +113,28 @@ export default function SchedulePage() {
   return (
     <div className="flex flex-col gap-5 h-full">
       {/* Toolbar */}
-      <div className="flex items-center justify-between flex-wrap gap-3 no-print">
-        <WeekPicker currentMonday={currentMonday} onChange={setCurrentMonday} />
+      <div className="flex items-center justify-between flex-wrap gap-3 no-print bg-card/40 backdrop-blur-xl border border-border/40 p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-60 pointer-events-none" />
+        <div className="relative z-10 flex items-center gap-3">
+          <WeekPicker currentMonday={currentMonday} onChange={setCurrentMonday} />
+        </div>
         {canManage && (
-          <div className="flex items-center gap-2">
+          <div className="relative z-10 flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
+              className="bg-background/50 backdrop-blur-md hover:bg-background/80 transition-all shadow-sm"
               onClick={() => setCopyModal(true)}
             >
-              <Copy className="h-4 w-4" />
+              <Copy className="h-4 w-4 mr-1.5" />
               Haftayı Kopyala
             </Button>
-            <Button size="sm" onClick={() => setShiftModal({ open: true })}>
-              <Plus className="h-4 w-4" />
+            <Button
+              size="sm"
+              className="shadow-[0_0_15px_-3px_var(--color-primary)] hover:shadow-[0_0_20px_0_var(--color-primary)] transition-all"
+              onClick={() => setShiftModal({ open: true })}
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
               Vardiya Ekle
             </Button>
           </div>
