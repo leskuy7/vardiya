@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -9,11 +8,11 @@ import {
   useSensors,
   closestCenter,
 } from "@dnd-kit/core";
-import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
+import { format, parseISO } from "date-fns";
 import { Plus } from "lucide-react";
-import { cn, formatTime } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { ShiftCard } from "./ShiftCard";
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import type { WeeklySchedule, EmployeeSchedule, Shift } from "@/types";
 
@@ -62,16 +61,45 @@ export function WeeklyGrid({
     );
   }
 
+  const findCellIdByShiftId = (shiftId: string): string | null => {
+    for (const employeeRow of schedule.employees) {
+      for (const daySchedule of employeeRow.days) {
+        if (daySchedule.shifts.some((shift) => shift.id === shiftId)) {
+          return `cell-${employeeRow.employee.id}-${daySchedule.date}`;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  const parseCellId = (cellId: string): { employeeId: string; date: string } | null => {
+    if (!cellId.startsWith("cell-") || cellId.length <= 16) {
+      return null;
+    }
+
+    const date = cellId.slice(-10);
+    const employeeId = cellId.slice(5, -11);
+
+    if (!employeeId || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return null;
+    }
+
+    return { employeeId, date };
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    // over.id format: "cell-{employeeId}-{dateStr}"
     const overId = String(over.id);
-    if (overId.startsWith("cell-")) {
-      const [, empId, dateStr] = overId.split("-");
-      onMoveShift(String(active.id), empId, dateStr);
-    }
+    const targetCellId = overId.startsWith("cell-") ? overId : findCellIdByShiftId(overId);
+    if (!targetCellId) return;
+
+    const parsed = parseCellId(targetCellId);
+    if (!parsed) return;
+
+    onMoveShift(String(active.id), parsed.employeeId, parsed.date);
   };
 
   return (
@@ -86,8 +114,8 @@ export function WeeklyGrid({
             Çalışan
           </div>
           {weekDays.map((day, i) => {
-            const d = new Date(day + "T00:00:00+03:00");
-            const isToday = day === new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" });
+            const d = parseISO(day);
+            const isToday = day === format(new Date(), "yyyy-MM-dd");
             return (
               <div
                 key={day}
@@ -180,7 +208,7 @@ function EmployeeRow({
             key={daySchedule.date}
             id={cellId}
             items={shifts.map((s) => s.id)}
-            strategy={verticalListSortingStrategy}
+            strategy={rectSortingStrategy}
           >
             <div
               id={cellId}

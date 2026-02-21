@@ -32,7 +32,10 @@ const registerSchema = z
     password: z
       .string()
       .min(8, "Şifre en az 8 karakter olmalıdır")
-      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Şifre büyük/küçük harf ve rakam içermelidir"),
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+        "Şifre büyük/küçük harf ve rakam içermelidir",
+      ),
     confirmPassword: z.string().min(1, "Şifre tekrarı zorunludur"),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -60,7 +63,8 @@ const copy: Record<Lang, Record<string, string>> = {
     register: "Hesap Oluştur",
     forgot: "Şifremi Unuttum",
     noGoogle: "Güvenli e-posta ve şifre ile giriş yapılır.",
-    supportToast: "Şifre sıfırlama için yöneticinize veya destek mailine yazın.",
+    supportToast:
+      "Şifre sıfırlama için yöneticinize veya destek mailine yazın.",
     feature1: "Haftalık Planlama",
     feature1Desc: "Sürükle-bırak ile kolay vardiya oluşturma",
     feature2: "Gerçek Zamanlı Takip",
@@ -95,7 +99,8 @@ const copy: Record<Lang, Record<string, string>> = {
 };
 
 function getErrorMessage(err: unknown, fallback: string) {
-  const responseData = (err as { response?: { data?: unknown } })?.response?.data;
+  const responseData = (err as { response?: { data?: unknown } })?.response
+    ?.data;
   if (typeof responseData === "string") return responseData;
   if (responseData && typeof responseData === "object") {
     const message = (responseData as { message?: unknown }).message;
@@ -119,7 +124,8 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const savedTheme = (localStorage.getItem("theme") as "light" | "dark" | null) ?? "light";
+    const savedTheme =
+      (localStorage.getItem("theme") as "light" | "dark" | null) ?? "light";
     setTheme(savedTheme);
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
     const savedLang = (localStorage.getItem("lang") as Lang | null) ?? "tr";
@@ -155,7 +161,10 @@ export default function LoginPage() {
     try {
       await login(data.email, data.password);
     } catch (err: unknown) {
-      toast("error", getErrorMessage(err, "Giriş başarısız. E-posta veya şifre hatalı."));
+      toast(
+        "error",
+        getErrorMessage(err, "Giriş başarısız. E-posta veya şifre hatalı."),
+      );
     }
   };
 
@@ -169,7 +178,10 @@ export default function LoginPage() {
       });
       toast("success", "Hesabınız oluşturuldu. Giriş yapılıyor...");
     } catch (err: unknown) {
-      toast("error", getErrorMessage(err, "Kayıt başarısız. Bilgilerinizi kontrol edin."));
+      toast(
+        "error",
+        getErrorMessage(err, "Kayıt başarısız. Bilgilerinizi kontrol edin."),
+      );
     }
   };
 
@@ -182,7 +194,9 @@ export default function LoginPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md">
             <CalendarDays className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">Vardiya Planlayıcı</span>
+          <span className="text-xl font-bold text-white tracking-tight">
+            Vardiya Planlayıcı
+          </span>
         </div>
 
         <div className="relative z-10 max-w-md">
@@ -191,7 +205,8 @@ export default function LoginPage() {
             <span className="text-blue-400">Akıllıca Yönetin.</span>
           </h2>
           <p className="text-lg text-zinc-400">
-            Vardiya Planlayıcı ile çalışanlarınızın mesai saatlerini, izinlerini ve uygunluk durumlarını tek bir merkezden kolayca organize edin.
+            Vardiya Planlayıcı ile çalışanlarınızın mesai saatlerini, izinlerini
+            ve uygunluk durumlarını tek bir merkezden kolayca organize edin.
           </p>
         </div>
 
@@ -202,23 +217,24 @@ export default function LoginPage() {
       </div>
 
       {/* Right side - Forms */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24">
+      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24 bg-white dark:bg-[#0A0A0B]">
         <div className="mx-auto w-full max-w-sm lg:w-[400px]">
-
           {/* Header */}
           <div className="mb-8">
             <div className="flex lg:hidden items-center gap-2 mb-6">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
                 <CalendarDays className="h-4 w-4" />
               </div>
-              <span className="text-lg font-bold tracking-tight">Vardiya Planlayıcı</span>
+              <span className="text-lg font-bold tracking-tight">
+                Vardiya Planlayıcı
+              </span>
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight">
+                <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
                   {mode === "login" ? t.titleLogin : t.titleRegister}
                 </h1>
-                <p className="mt-2 text-sm text-muted-foreground">
+                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
                   {mode === "login" ? t.subtitleLogin : t.subtitleRegister}
                 </p>
               </div>
@@ -226,27 +242,34 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={toggleLang}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 >
                   {lang.toUpperCase()}
                 </button>
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
                 >
-                  {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+                  {theme === "light" ? (
+                    <Moon className="h-4 w-4" />
+                  ) : (
+                    <Sun className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
           </div>
 
           {/* Form container */}
-          <div className="mt-8 rounded-xl bg-background border shadow-sm p-6 sm:p-8">
+          <div className="mt-8 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 shadow-sm p-6 sm:p-8">
             {mode === "login" ? (
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
                     {t.email}
                   </label>
                   <input
@@ -257,12 +280,19 @@ export default function LoginPage() {
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
                     {...register("email")}
                   />
-                  {errors.email?.message && <p className="text-[13px] text-destructive">{errors.email.message}</p>}
+                  {errors.email?.message && (
+                    <p className="text-[13px] text-destructive">
+                      {errors.email.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <label
+                      htmlFor="password"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
                       {t.password}
                     </label>
                     <button
@@ -270,7 +300,10 @@ export default function LoginPage() {
                       onClick={() => {
                         toast("info", t.supportToast);
                         if (typeof window !== "undefined") {
-                          window.open("mailto:destek@vardiya.app?subject=Sifre%20Sifirlama", "_blank");
+                          window.open(
+                            "mailto:destek@vardiya.app?subject=Sifre%20Sifirlama",
+                            "_blank",
+                          );
                         }
                       }}
                       className="text-[13px] font-medium text-primary hover:underline"
@@ -292,10 +325,18 @@ export default function LoginPage() {
                       onClick={() => setShowLoginPassword((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showLoginPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {errors.password?.message && <p className="text-[13px] text-destructive">{errors.password.message}</p>}
+                  {errors.password?.message && (
+                    <p className="text-[13px] text-destructive">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="pt-2">
@@ -305,9 +346,24 @@ export default function LoginPage() {
                     className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                   >
                     {isSubmitting ? (
-                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      <svg
+                        className="h-4 w-4 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
                       </svg>
                     ) : (
                       t.login
@@ -316,10 +372,16 @@ export default function LoginPage() {
                 </div>
               </form>
             ) : (
-              <form onSubmit={handleRegisterSubmit(onRegister)} className="space-y-4">
+              <form
+                onSubmit={handleRegisterSubmit(onRegister)}
+                className="space-y-4"
+              >
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label htmlFor="firstName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <label
+                      htmlFor="firstName"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
                       {t.firstName}
                     </label>
                     <input
@@ -328,10 +390,17 @@ export default function LoginPage() {
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
                       {...registerField("firstName")}
                     />
-                    {registerErrors.firstName?.message && <p className="text-[13px] text-destructive">{registerErrors.firstName.message}</p>}
+                    {registerErrors.firstName?.message && (
+                      <p className="text-[13px] text-destructive">
+                        {registerErrors.firstName.message}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="lastName" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <label
+                      htmlFor="lastName"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
                       {t.lastName}
                     </label>
                     <input
@@ -340,12 +409,19 @@ export default function LoginPage() {
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
                       {...registerField("lastName")}
                     />
-                    {registerErrors.lastName?.message && <p className="text-[13px] text-destructive">{registerErrors.lastName.message}</p>}
+                    {registerErrors.lastName?.message && (
+                      <p className="text-[13px] text-destructive">
+                        {registerErrors.lastName.message}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="registerEmail" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label
+                    htmlFor="registerEmail"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
                     {t.email}
                   </label>
                   <input
@@ -356,11 +432,18 @@ export default function LoginPage() {
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
                     {...registerField("email")}
                   />
-                  {registerErrors.email?.message && <p className="text-[13px] text-destructive">{registerErrors.email.message}</p>}
+                  {registerErrors.email?.message && (
+                    <p className="text-[13px] text-destructive">
+                      {registerErrors.email.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="registerPassword" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label
+                    htmlFor="registerPassword"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
                     {t.password}
                   </label>
                   <div className="relative">
@@ -377,14 +460,25 @@ export default function LoginPage() {
                       onClick={() => setShowRegisterPassword((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showRegisterPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {registerErrors.password?.message && <p className="text-[13px] text-destructive">{registerErrors.password.message}</p>}
+                  {registerErrors.password?.message && (
+                    <p className="text-[13px] text-destructive">
+                      {registerErrors.password.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="confirmPassword" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
                     {t.passwordAgain}
                   </label>
                   <div className="relative">
@@ -401,10 +495,18 @@ export default function LoginPage() {
                       onClick={() => setShowRegisterPassword2((v) => !v)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showRegisterPassword2 ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showRegisterPassword2 ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
                     </button>
                   </div>
-                  {registerErrors.confirmPassword?.message && <p className="text-[13px] text-destructive">{registerErrors.confirmPassword.message}</p>}
+                  {registerErrors.confirmPassword?.message && (
+                    <p className="text-[13px] text-destructive">
+                      {registerErrors.confirmPassword.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="pt-2">
@@ -414,9 +516,24 @@ export default function LoginPage() {
                     className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                   >
                     {isRegisterSubmitting ? (
-                      <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      <svg
+                        className="h-4 w-4 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        />
                       </svg>
                     ) : (
                       t.register
@@ -443,7 +560,9 @@ export default function LoginPage() {
                 onClick={() => setMode(mode === "login" ? "register" : "login")}
                 className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium"
               >
-                {mode === "login" ? "Hesabınız yok mu? Kayıt olun" : "Zaten hesabınız var mı? Giriş yapın"}
+                {mode === "login"
+                  ? "Hesabınız yok mu? Kayıt olun"
+                  : "Zaten hesabınız var mı? Giriş yapın"}
               </button>
             </div>
           </div>
@@ -459,25 +578,40 @@ export default function LoginPage() {
             <div className="p-4">
               <div className="space-y-3">
                 {[
-                  { role: "Admin", email: "admin@shiftplanner.com", pass: "Admin1234!" },
-                  { role: "Müdür", email: "manager@shiftplanner.com", pass: "Manager1234!" },
-                  { role: "Çalışan", email: "ali@shiftplanner.com", pass: "Employee1234!" },
+                  {
+                    role: "Admin",
+                    email: "admin@shiftplanner.com",
+                    pass: "Admin1234!",
+                  },
+                  {
+                    role: "Müdür",
+                    email: "manager@shiftplanner.com",
+                    pass: "Manager1234!",
+                  },
+                  {
+                    role: "Çalışan",
+                    email: "ali@shiftplanner.com",
+                    pass: "Employee1234!",
+                  },
                 ].map((d) => (
-                  <div key={d.role} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-border/50 pb-3 last:border-0 last:pb-0">
-                    <span className="text-[13px] font-medium text-foreground">{d.role}</span>
+                  <div
+                    key={d.role}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-border/50 pb-3 last:border-0 last:pb-0"
+                  >
+                    <span className="text-[13px] font-medium text-foreground">
+                      {d.role}
+                    </span>
                     <span className="text-[12px] text-muted-foreground font-mono select-all">
-                      {d.email} <span className="mx-1 text-border">/</span> {d.pass}
+                      {d.email} <span className="mx-1 text-border">/</span>{" "}
+                      {d.pass}
                     </span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
-  );
-}
   );
 }

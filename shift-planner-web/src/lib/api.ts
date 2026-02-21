@@ -1,4 +1,9 @@
 import axios from "axios";
+import {
+  clearStoredAuth,
+  getStoredAccessToken,
+  setStoredAccessToken,
+} from "@/lib/auth-storage";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
@@ -13,11 +18,9 @@ export const api = axios.create({
 // Request interceptor — attach access token
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== "undefined") {
-      const token = sessionStorage.getItem("accessToken");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    const token = getStoredAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -41,13 +44,12 @@ api.interceptors.response.use(
         );
 
         const { accessToken } = refreshResponse.data;
-        sessionStorage.setItem("accessToken", accessToken);
+        setStoredAccessToken(accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
         return api(originalRequest);
       } catch (refreshError) {
-        sessionStorage.removeItem("accessToken");
-        sessionStorage.removeItem("user");
+        clearStoredAuth();
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }

@@ -10,6 +10,12 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import {
+  clearStoredAuth,
+  getStoredAccessToken,
+  getStoredUser,
+  setStoredAuth,
+} from "@/lib/auth-storage";
 import type { User, LoginResponse } from "@/types";
 
 interface AuthContextType {
@@ -33,16 +39,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Try to restore session on mount
   useEffect(() => {
-    const token = sessionStorage.getItem("accessToken");
-    const storedUser = sessionStorage.getItem("user");
+    const token = getStoredAccessToken();
+    const storedUser = getStoredUser<User>();
 
     if (token && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch {
-        sessionStorage.clear();
-      }
+      setUser(storedUser);
+    } else {
+      clearStoredAuth();
     }
+
     setIsLoading(false);
   }, []);
 
@@ -54,8 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       const { accessToken, user: userData } = response.data;
-      sessionStorage.setItem("accessToken", accessToken);
-      sessionStorage.setItem("user", JSON.stringify(userData));
+  setStoredAuth(accessToken, userData);
       setUser(userData);
 
       // Redirect based on role
@@ -85,8 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore error
     }
-    sessionStorage.removeItem("accessToken");
-    sessionStorage.removeItem("user");
+    clearStoredAuth();
     setUser(null);
     router.push("/login");
   }, [router]);
