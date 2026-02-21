@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@mantine/core/styles.css";
 import { Providers } from "@/components/providers";
+import { ColorSchemeScript } from "@mantine/core";
 
 export const metadata: Metadata = {
   title: "Vardiya Planlayıcı",
@@ -14,6 +16,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr" className="dark scroll-smooth">
+      <head>
+        <ColorSchemeScript defaultColorScheme="dark" />
+      </head>
       <body className="antialiased selection:bg-primary/30">
         <Providers>{children}</Providers>
       </body>

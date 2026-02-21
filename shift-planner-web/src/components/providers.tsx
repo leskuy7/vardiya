@@ -4,6 +4,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ToastProvider } from "@/components/ui/toast";
+import { MantineProvider, createTheme } from "@mantine/core";
+
+const mantineTheme = createTheme({
+  primaryColor: "blue",
+  fontFamily: "inherit",
+  defaultRadius: "md",
+});
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -46,10 +53,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ToastProvider>{children}</ToastProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <MantineProvider theme={mantineTheme} defaultColorScheme="dark">
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </MantineProvider>
   );
 }
