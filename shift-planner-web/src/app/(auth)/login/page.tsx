@@ -9,13 +9,12 @@ import {
   CalendarDays,
   Eye,
   EyeOff,
-  Moon,
-  Sun,
+  ArrowRight,
+  Zap,
   Shield,
-  Clock,
-  BarChart3,
+  TrendingUp,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 
 /* ─── Schemas ─── */
 const loginSchema = z.object({
@@ -33,137 +32,79 @@ const registerSchema = z
       .min(8, "Şifre en az 8 karakter olmalıdır")
       .regex(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Şifre büyük/küçük harf ve rakam içermelidir",
+        "Büyük/küçük harf ve rakam içermelidir",
       ),
     confirmPassword: z.string().min(1, "Şifre tekrarı zorunludur"),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((d) => d.password === d.confirmPassword, {
     message: "Şifreler eşleşmiyor",
     path: ["confirmPassword"],
   });
 
 type LoginForm = z.infer<typeof loginSchema>;
 type RegisterForm = z.infer<typeof registerSchema>;
-type Lang = "tr" | "en";
-
-/* ─── i18n ─── */
-const copy: Record<Lang, Record<string, string>> = {
-  tr: {
-    titleLogin: "Giriş Yap",
-    titleRegister: "Kayıt Ol",
-    subtitleLogin: "Hesabınıza giriş yaparak devam edin",
-    subtitleRegister: "Dakikalar içinde yeni hesap oluşturun",
-    email: "E-posta",
-    password: "Şifre",
-    passwordAgain: "Şifre (Tekrar)",
-    firstName: "Ad",
-    lastName: "Soyad",
-    login: "Giriş Yap",
-    register: "Hesap Oluştur",
-    forgot: "Şifremi Unuttum",
-    noGoogle: "Güvenli e-posta ve şifre ile giriş yapılır.",
-    supportToast:
-      "Şifre sıfırlama için yöneticinize veya destek mailine yazın.",
-    feature1: "Haftalık Planlama",
-    feature1Desc: "Sürükle-bırak ile kolay vardiya oluşturma",
-    feature2: "Gerçek Zamanlı Takip",
-    feature2Desc: "Çalışan mesai ve uygunluk kontrolü",
-    feature3: "Detaylı Raporlar",
-    feature3Desc: "Maliyet ve fazla mesai analizi",
-    demoTitle: "Demo Hesaplar",
-  },
-  en: {
-    titleLogin: "Sign In",
-    titleRegister: "Create Account",
-    subtitleLogin: "Continue with your account",
-    subtitleRegister: "Create a new account in minutes",
-    email: "Email",
-    password: "Password",
-    passwordAgain: "Password (Repeat)",
-    firstName: "First name",
-    lastName: "Last name",
-    login: "Sign In",
-    register: "Create Account",
-    forgot: "Forgot password",
-    noGoogle: "Secure email & password authentication.",
-    supportToast: "Contact your admin or support to reset password.",
-    feature1: "Weekly Planning",
-    feature1Desc: "Easy shift creation with drag & drop",
-    feature2: "Real-time Tracking",
-    feature2Desc: "Employee overtime & availability control",
-    feature3: "Detailed Reports",
-    feature3Desc: "Cost and overtime analysis",
-    demoTitle: "Demo Accounts",
-  },
-};
 
 function getErrorMessage(err: unknown, fallback: string) {
-  const responseData = (err as { response?: { data?: unknown } })?.response
-    ?.data;
-  if (typeof responseData === "string") return responseData;
-  if (responseData && typeof responseData === "object") {
-    const message = (responseData as { message?: unknown }).message;
-    if (Array.isArray(message) && message.length > 0) return String(message[0]);
-    if (typeof message === "string") return message;
+  const data = (err as { response?: { data?: unknown } })?.response?.data;
+  if (typeof data === "string") return data;
+  if (data && typeof data === "object") {
+    const m = (data as { message?: unknown }).message;
+    if (Array.isArray(m) && m.length > 0) return String(m[0]);
+    if (typeof m === "string") return m;
   }
   return fallback;
 }
+
+const DEMO_ACCOUNTS = [
+  {
+    role: "Admin",
+    email: "admin@shiftplanner.com",
+    pass: "Admin1234!",
+    color: "from-purple-500 to-violet-600",
+    desc: "Tam yönetici erişimi",
+  },
+  {
+    role: "Müdür",
+    email: "manager@shiftplanner.com",
+    pass: "Manager1234!",
+    color: "from-blue-500 to-cyan-600",
+    desc: "Ekip yönetimi",
+  },
+  {
+    role: "Çalışan",
+    email: "ali@shiftplanner.com",
+    pass: "Employee1234!",
+    color: "from-emerald-500 to-teal-600",
+    desc: "Çalışan görünümü",
+  },
+];
 
 export default function LoginPage() {
   const { login, register: registerUser } = useAuth();
   const { toast } = useToast();
   const [mode, setMode] = useState<"login" | "register">("login");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [lang, setLang] = useState<Lang>("tr");
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
-  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  const [showRegisterPassword2, setShowRegisterPassword2] = useState(false);
-
-  const t = useMemo(() => copy[lang], [lang]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const savedTheme =
-      (localStorage.getItem("theme") as "light" | "dark" | null) ?? "light";
-    setTheme(savedTheme);
-    document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    const savedLang = (localStorage.getItem("lang") as Lang | null) ?? "tr";
-    setLang(savedLang);
-  }, []);
-
-  const toggleTheme = () => {
-    const next = theme === "light" ? "dark" : "light";
-    setTheme(next);
-    localStorage.setItem("theme", next);
-    document.documentElement.classList.toggle("dark", next === "dark");
-  };
-
-  const toggleLang = () => {
-    const next = lang === "tr" ? "en" : "tr";
-    setLang(next);
-    localStorage.setItem("lang", next);
-  };
+  const [showPw, setShowPw] = useState(false);
+  const [showPw2, setShowPw2] = useState(false);
+  const [showPw3, setShowPw3] = useState(false);
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
   const {
-    register: registerField,
-    handleSubmit: handleRegisterSubmit,
-    formState: { errors: registerErrors, isSubmitting: isRegisterSubmitting },
+    register: reg,
+    handleSubmit: handleReg,
+    formState: { errors: rErr, isSubmitting: rSub },
   } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) });
 
-  const onSubmit = async (data: LoginForm) => {
+  const onLogin = async (data: LoginForm) => {
     try {
       await login(data.email, data.password);
     } catch (err: unknown) {
-      toast(
-        "error",
-        getErrorMessage(err, "Giriş başarısız. E-posta veya şifre hatalı."),
-      );
+      toast("error", getErrorMessage(err, "E-posta veya şifre hatalı."));
     }
   };
 
@@ -175,226 +116,237 @@ export default function LoginPage() {
         email: data.email,
         password: data.password,
       });
-      toast("success", "Hesabınız oluşturuldu. Giriş yapılıyor...");
+      toast("success", "Hesabınız oluşturuldu!");
     } catch (err: unknown) {
-      toast(
-        "error",
-        getErrorMessage(err, "Kayıt başarısız. Bilgilerinizi kontrol edin."),
-      );
+      toast("error", getErrorMessage(err, "Kayıt başarısız."));
     }
   };
 
+  const fillDemo = (email: string, pass: string) => {
+    setValue("email", email);
+    setValue("password", pass);
+    if (mode !== "login") setMode("login");
+  };
+
   return (
-    <div className="flex min-h-screen font-sans">
-      {/* Left side - Branding/Hero (Visible on lg+) */}
-      <div className="hidden lg:flex lg:w-1/2 xl:w-[45%] relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
-        {/* Background pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM0MjY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2djI4SDI0VjE2aDEyem0yNC0yNHYyOEg0OFYwaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40 dark:opacity-10"></div>
-        
-        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+    <div className="relative min-h-screen overflow-hidden bg-[#050818]">
+      {/* Ambient blobs */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-blue-600/20 blur-[120px]" />
+        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-violet-600/20 blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[100px]" />
+      </div>
+
+      {/* Grid */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
+        }}
+      />
+
+      <div className="relative z-10 flex min-h-screen">
+        {/* ── Left panel ── */}
+        <div className="hidden lg:flex lg:w-[52%] flex-col justify-between p-14">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
-              <CalendarDays className="h-6 w-6" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
+              <CalendarDays className="h-5 w-5 text-white" />
             </div>
             <div>
-              <span className="block text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+              <p className="text-lg font-bold text-white tracking-tight leading-none">
                 Vardiya Planlayıcı
-              </span>
-              <span className="block text-xs text-slate-600 dark:text-slate-400 font-medium">
+              </p>
+              <p className="text-xs text-white/40 mt-0.5">
                 Ekip Yönetim Platformu
-              </span>
+              </p>
             </div>
           </div>
 
-          {/* Hero content */}
-          <div className="max-w-md space-y-8">
-            <div>
-              <h1 className="text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">
-                Ekibinizin Mesaisini{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                  Akıllıca Yönetin
+          {/* Hero copy */}
+          <div className="max-w-lg space-y-10">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/60 backdrop-blur-sm">
+                <Zap className="h-3.5 w-3.5 text-yellow-400" />
+                Gerçek zamanlı vardiya yönetimi
+              </div>
+              <h1 className="text-6xl font-extrabold leading-tight tracking-tight text-white">
+                Ekibinizi{" "}
+                <span className="relative">
+                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400">
+                    Akıllıca
+                  </span>
+                  <span className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 opacity-60" />
                 </span>
+                <br />
+                Yönetin
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-300">
-                Vardiya planlamayı basitleştirin, ekibinizin üretkenliğini artırın
+              <p className="text-lg leading-relaxed text-white/50">
+                Sürükle-bırak ile vardiya planla, mesaileri takip et,
+                <br />
+                raporları anında görüntüle.
               </p>
             </div>
 
-            {/* Features */}
-            <div className="space-y-4">
+            {/* Feature pills */}
+            <div className="flex flex-wrap gap-3">
               {[
-                {
-                  icon: CalendarDays,
-                  title: t.feature1,
-                  desc: t.feature1Desc,
-                },
-                {
-                  icon: Clock,
-                  title: t.feature2,
-                  desc: t.feature2Desc,
-                },
-                {
-                  icon: BarChart3,
-                  title: t.feature3,
-                  desc: t.feature3Desc,
-                },
-              ].map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
-                    <feature.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {feature.desc}
-                    </p>
-                  </div>
+                { icon: CalendarDays, label: "Haftalık Planlama" },
+                { icon: TrendingUp, label: "Fazla Mesai Takibi" },
+                { icon: Shield, label: "Rol Tabanlı Erişim" },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 backdrop-blur-sm"
+                >
+                  <Icon className="h-4 w-4 text-indigo-400" />
+                  <span className="text-sm font-medium text-white/70">
+                    {label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { value: "500+", label: "Çalışan" },
+                { value: "99.9%", label: "Uptime" },
+                { value: "24/7", label: "Destek" },
+              ].map((s) => (
+                <div
+                  key={s.label}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
+                >
+                  <p className="text-2xl font-bold text-white">{s.value}</p>
+                  <p className="text-xs text-white/40 mt-1">{s.label}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <Shield className="h-4 w-4" />
-            <span>{t.noGoogle}</span>
-          </div>
+          <p className="text-xs text-white/20">
+            © 2026 Vardiya Planlayıcı • Tüm hakları saklıdır
+          </p>
         </div>
-      </div>
 
-      {/* Right side - Forms */}
-      <div className="flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24 bg-white dark:bg-slate-950">
-        <div className="mx-auto w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="flex lg:hidden items-center gap-3 mb-8">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg">
-              <CalendarDays className="h-5 w-5" />
+        {/* ── Right panel ── */}
+        <div className="flex flex-1 items-center justify-center p-6 lg:p-12">
+          <div className="w-full max-w-md space-y-4">
+            {/* Mobile logo */}
+            <div className="flex lg:hidden items-center gap-3 mb-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600">
+                <CalendarDays className="h-5 w-5 text-white" />
+              </div>
+              <p className="text-base font-bold text-white">
+                Vardiya Planlayıcı
+              </p>
             </div>
-            <span className="text-xl font-bold tracking-tight">
-              Vardiya Planlayıcı
-            </span>
-          </div>
 
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-                  {mode === "login" ? t.titleLogin : t.titleRegister}
-                </h1>
-                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                  {mode === "login" ? t.subtitleLogin : t.subtitleRegister}
+            {/* Main card */}
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl shadow-black/50">
+              {/* Header */}
+              <div className="mb-7 space-y-1">
+                <h2 className="text-2xl font-bold text-white">
+                  {mode === "login" ? "Hoş Geldiniz 👋" : "Hesap Oluştur"}
+                </h2>
+                <p className="text-sm text-white/40">
+                  {mode === "login"
+                    ? "Devam etmek için giriş yapın"
+                    : "Birkaç dakikada başlayın"}
                 </p>
               </div>
-              <div className="flex gap-1.5">
-                <button
-                  type="button"
-                  onClick={toggleLang}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                >
-                  {lang.toUpperCase()}
-                </button>
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                >
-                  {theme === "light" ? (
-                    <Moon className="h-4 w-4" />
-                  ) : (
-                    <Sun className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
 
-          {/* Form container */}
-          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-8">
-            {mode === "login" ? (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="email"
-                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
+              {/* Tab switcher */}
+              <div className="mb-7 flex h-11 rounded-xl bg-white/5 p-1 border border-white/10">
+                {(["login", "register"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    className={`flex-1 rounded-lg text-sm font-semibold transition-all duration-200 ${
+                      mode === m
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
+                        : "text-white/40 hover:text-white/70"
+                    }`}
                   >
-                    {t.email}
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="ornek@sirket.com"
-                    className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                    {...register("email")}
-                  />
-                  {errors.email?.message && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
+                    {m === "login" ? "Giriş Yap" : "Kayıt Ol"}
+                  </button>
+                ))}
+              </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label
-                      htmlFor="password"
-                      className="text-sm font-semibold text-slate-700 dark:text-slate-200"
-                    >
-                      {t.password}
+              {/* Login form */}
+              {mode === "login" ? (
+                <form onSubmit={handleSubmit(onLogin)} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                      E-posta
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        toast("info", t.supportToast);
-                        if (typeof window !== "undefined") {
-                          window.open(
-                            "mailto:destek@vardiya.app?subject=Sifre%20Sifirlama",
-                            "_blank",
-                          );
-                        }
-                      }}
-                      className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
-                    >
-                      {t.forgot}
-                    </button>
-                  </div>
-                  <div className="relative">
                     <input
-                      id="password"
-                      type={showLoginPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 pr-11"
-                      {...register("password")}
+                      type="email"
+                      autoComplete="email"
+                      placeholder="ornek@sirket.com"
+                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
+                      {...register("email")}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowLoginPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                    >
-                      {showLoginPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
+                    {errors.email && (
+                      <p className="text-xs text-red-400">
+                        {errors.email.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.password?.message && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
 
-                <div className="pt-2">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                        Şifre
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          toast(
+                            "info",
+                            "Şifre sıfırlama için yöneticinize başvurun.",
+                          )
+                        }
+                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        Şifremi unuttum
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPw ? "text" : "password"}
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 pr-12 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
+                        {...register("password")}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPw((v) => !v)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+                      >
+                        {showPw ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-xs text-red-400">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                    className="group mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.01] disabled:pointer-events-none disabled:opacity-50"
                   >
                     {isSubmitting ? (
                       <svg
@@ -417,156 +369,110 @@ export default function LoginPage() {
                         />
                       </svg>
                     ) : (
-                      t.login
+                      <>
+                        Giriş Yap
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                      </>
                     )}
                   </button>
-                </div>
-              </form>
-            ) : (
-              <form
-                onSubmit={handleRegisterSubmit(onRegister)}
-                className="space-y-4"
-              >
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="firstName"
-                      className="text-sm font-semibold text-slate-700 dark:text-slate-200"
-                    >
-                      {t.firstName}
+                </form>
+              ) : (
+                /* Register form */
+                <form onSubmit={handleReg(onRegister)} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    {(["firstName", "lastName"] as const).map((field) => (
+                      <div key={field} className="space-y-1.5">
+                        <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                          {field === "firstName" ? "Ad" : "Soyad"}
+                        </label>
+                        <input
+                          placeholder={
+                            field === "firstName" ? "Ali" : "Yılmaz"
+                          }
+                          className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
+                          {...reg(field)}
+                        />
+                        {rErr[field] && (
+                          <p className="text-xs text-red-400">
+                            {rErr[field]?.message}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                      E-posta
                     </label>
                     <input
-                      id="firstName"
-                      placeholder="Ali"
-                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                      {...registerField("firstName")}
+                      type="email"
+                      placeholder="ornek@sirket.com"
+                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
+                      {...reg("email")}
                     />
-                    {registerErrors.firstName?.message && (
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        {registerErrors.firstName.message}
+                    {rErr.email && (
+                      <p className="text-xs text-red-400">
+                        {rErr.email.message}
                       </p>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <label
-                      htmlFor="lastName"
-                      className="text-sm font-semibold text-slate-700 dark:text-slate-200"
-                    >
-                      {t.lastName}
-                    </label>
-                    <input
-                      id="lastName"
-                      placeholder="Yılmaz"
-                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                      {...registerField("lastName")}
-                    />
-                    {registerErrors.lastName?.message && (
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        {registerErrors.lastName.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label
-                    htmlFor="registerEmail"
-                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
-                  >
-                    {t.email}
-                  </label>
-                  <input
-                    id="registerEmail"
-                    type="email"
-                    autoComplete="email"
-                    placeholder="ornek@sirket.com"
-                    className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
-                    {...registerField("email")}
-                  />
-                  {registerErrors.email?.message && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {registerErrors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="registerPassword"
-                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
-                  >
-                    {t.password}
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="registerPassword"
-                      type={showRegisterPassword ? "text" : "password"}
-                      autoComplete="new-password"
-                      placeholder="En az 8 karakter"
-                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 pr-11"
-                      {...registerField("password")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowRegisterPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                    >
-                      {showRegisterPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
+                  {(
+                    [
+                      {
+                        field: "password" as const,
+                        show: showPw2,
+                        toggle: () => setShowPw2((v) => !v),
+                        label: "Şifre",
+                        placeholder: "En az 8 karakter",
+                      },
+                      {
+                        field: "confirmPassword" as const,
+                        show: showPw3,
+                        toggle: () => setShowPw3((v) => !v),
+                        label: "Şifre Tekrar",
+                        placeholder: "Tekrar girin",
+                      },
+                    ]
+                  ).map(({ field, show, toggle, label, placeholder }) => (
+                    <div key={field} className="space-y-1.5">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
+                        {label}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type={show ? "text" : "password"}
+                          placeholder={placeholder}
+                          className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 pr-12 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
+                          {...reg(field)}
+                        />
+                        <button
+                          type="button"
+                          onClick={toggle}
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
+                        >
+                          {show ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                      {rErr[field] && (
+                        <p className="text-xs text-red-400">
+                          {rErr[field]?.message}
+                        </p>
                       )}
-                    </button>
-                  </div>
-                  {registerErrors.password?.message && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {registerErrors.password.message}
-                    </p>
-                  )}
-                </div>
+                    </div>
+                  ))}
 
-                <div className="space-y-2">
-                  <label
-                    htmlFor="confirmPassword"
-                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
-                  >
-                    {t.passwordAgain}
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="confirmPassword"
-                      type={showRegisterPassword2 ? "text" : "password"}
-                      autoComplete="new-password"
-                      placeholder="Şifrenizi tekrar girin"
-                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 pr-11"
-                      {...registerField("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowRegisterPassword2((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                    >
-                      {showRegisterPassword2 ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                  {registerErrors.confirmPassword?.message && (
-                    <p className="text-sm text-red-600 dark:text-red-400">
-                      {registerErrors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={isRegisterSubmitting}
-                    className="flex h-11 w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                    disabled={rSub}
+                    className="group mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.01] disabled:pointer-events-none disabled:opacity-50"
                   >
-                    {isRegisterSubmitting ? (
+                    {rSub ? (
                       <svg
                         className="h-5 w-5 animate-spin"
                         viewBox="0 0 24 24"
@@ -587,91 +493,48 @@ export default function LoginPage() {
                         />
                       </svg>
                     ) : (
-                      t.register
+                      <>
+                        Hesap Oluştur
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                      </>
                     )}
                   </button>
-                </div>
-              </form>
-            )}
-
-            <div className="relative mt-8">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-slate-200 dark:border-slate-800" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-slate-900 px-3 text-slate-500 dark:text-slate-400 font-medium">
-                  veya
-                </span>
-              </div>
+                </form>
+              )}
             </div>
 
-            <div className="mt-6 flex justify-center">
-              <button
-                type="button"
-                onClick={() => setMode(mode === "login" ? "register" : "login")}
-                className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors font-medium"
-              >
-                {mode === "login"
-                  ? "Hesabınız yok mu? Kayıt olun"
-                  : "Zaten hesabınız var mı? Giriş yapın"}
-              </button>
-            </div>
-          </div>
-
-          {/* Demo Accounts Panel */}
-          <div className="mt-6 overflow-hidden rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
-            <div className="border-b border-blue-200 dark:border-blue-900 bg-blue-100/50 dark:bg-blue-950/50 px-4 py-3">
-              <h3 className="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
-                {t.demoTitle}
-              </h3>
-            </div>
-            <div className="p-4">
-              <div className="space-y-3">
-                {[
-                  {
-                    role: "Admin",
-                    email: "admin@shiftplanner.com",
-                    pass: "Admin1234!",
-                    color: "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300",
-                  },
-                  {
-                    role: "Müdür",
-                    email: "manager@shiftplanner.com",
-                    pass: "Manager1234!",
-                    color: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300",
-                  },
-                  {
-                    role: "Çalışan",
-                    email: "ali@shiftplanner.com",
-                    pass: "Employee1234!",
-                    color: "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300",
-                  },
-                ].map((d) => (
-                  <div
+            {/* Demo accounts */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm">
+              <p className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/30">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Demo hesaplar — tıkla, otomatik doldur
+              </p>
+              <div className="space-y-2.5">
+                {DEMO_ACCOUNTS.map((d) => (
+                  <button
                     key={d.role}
-                    className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 hover:shadow-md transition-shadow"
+                    type="button"
+                    onClick={() => fillDemo(d.email, d.pass)}
+                    className="group w-full flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/5 p-3 text-left transition-all duration-200 hover:bg-white/10 hover:border-white/15"
                   >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${d.color}`}>
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${d.color} text-sm font-bold text-white shadow-lg`}
+                    >
+                      {d.role[0]}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-white/80">
                         {d.role}
-                      </span>
+                      </p>
+                      <p className="text-xs text-white/30">{d.desc}</p>
                     </div>
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-500 dark:text-slate-400 w-16">Email:</span>
-                        <code className="text-xs text-slate-900 dark:text-slate-100 font-mono select-all bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-                          {d.email}
-                        </code>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-slate-500 dark:text-slate-400 w-16">Şifre:</span>
-                        <code className="text-xs text-slate-900 dark:text-slate-100 font-mono select-all bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-                          {d.pass}
-                        </code>
-                      </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-xs font-mono text-white/25 truncate max-w-[140px]">
+                        {d.email}
+                      </p>
+                      <ArrowRight className="ml-auto mt-0.5 h-3.5 w-3.5 text-white/20 transition-transform group-hover:translate-x-0.5 group-hover:text-white/50" />
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
