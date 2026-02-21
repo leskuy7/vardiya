@@ -10,10 +10,9 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { format, parseISO } from "date-fns";
-import { Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Box, Button, Center, Group, Loader, Paper, Stack, Text } from "@mantine/core";
+import { IconPlus } from "@tabler/icons-react";
 import { ShiftCard } from "./ShiftCard";
-import { Spinner } from "@/components/ui/spinner";
 import type { WeeklySchedule, EmployeeSchedule, Shift } from "@/types";
 
 const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
@@ -47,24 +46,27 @@ export function WeeklyGrid({
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <Spinner size="lg" />
-      </div>
+      <Center h={260}>
+        <Loader size="md" />
+      </Center>
     );
   }
 
   if (!schedule || schedule.employees.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-lg border border-dashed">
-        <p className="text-muted-foreground">Bu hafta için program bulunamadı.</p>
-      </div>
+      <Paper withBorder p="xl" radius="lg">
+        <Center h={180}>
+          <Text size="sm" c="dimmed">Bu hafta icin program bulunamadi.</Text>
+        </Center>
+      </Paper>
     );
   }
 
   const findCellIdByShiftId = (shiftId: string): string | null => {
     for (const employeeRow of schedule.employees) {
-      for (const daySchedule of employeeRow.days) {
-        if (daySchedule.shifts?.some((shift) => shift?.id === shiftId)) {
+      const days = Array.isArray(employeeRow.days) ? employeeRow.days : [];
+      for (const daySchedule of days) {
+        if (Array.isArray(daySchedule.shifts) && daySchedule.shifts.some((shift) => shift?.id === shiftId)) {
           return `cell-${employeeRow.employee?.id}-${daySchedule.date}`;
         }
       }
@@ -104,31 +106,53 @@ export function WeeklyGrid({
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="overflow-x-auto print:overflow-visible">
-        <div
-          className="grid min-w-[900px] rounded-xl border border-border/40 bg-card/40 backdrop-blur-xl overflow-hidden shadow-2xl shadow-primary/5"
-          style={{ gridTemplateColumns: "200px repeat(7, 1fr)" }}
+      <Box style={{ overflowX: "auto" }}>
+        <Box
+          style={{
+            minWidth: 980,
+            display: "grid",
+            gridTemplateColumns: "220px repeat(7, 1fr)",
+            border: "1px solid var(--mantine-color-dark-4)",
+            borderRadius: "var(--mantine-radius-lg)",
+            overflow: "hidden",
+            background: "rgba(12, 18, 28, 0.6)",
+            boxShadow: "0 12px 40px rgba(0, 0, 0, 0.35)",
+          }}
         >
           {/* Header row */}
-          <div className="border-b border-border/40 border-r bg-muted/30 px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider backdrop-blur-md">
-            Çalışan
-          </div>
+          <Box
+            style={{
+              padding: "12px 16px",
+              borderBottom: "1px solid var(--mantine-color-dark-4)",
+              borderRight: "1px solid var(--mantine-color-dark-4)",
+              background: "rgba(15, 23, 42, 0.75)",
+            }}
+          >
+            <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.12em" }}>
+              Calisan
+            </Text>
+          </Box>
           {weekDays.map((day, i) => {
             const d = parseISO(day);
             const isToday = day === format(new Date(), "yyyy-MM-dd");
             return (
-              <div
+              <Box
                 key={day}
-                className={cn(
-                  "border-b border-r border-border/40 last:border-r-0 px-2 py-3 text-center text-xs font-medium transition-colors",
-                  isToday ? "bg-primary/10 text-primary shadow-[inset_0_-2px_0_var(--color-primary)]" : "bg-muted/30 text-muted-foreground hover:bg-muted/40"
-                )}
+                style={{
+                  padding: "10px 8px",
+                  borderBottom: "1px solid var(--mantine-color-dark-4)",
+                  borderRight: "1px solid var(--mantine-color-dark-4)",
+                  textAlign: "center",
+                  background: isToday ? "rgba(59, 130, 246, 0.2)" : "rgba(15, 23, 42, 0.6)",
+                }}
               >
-                <div className="text-[11px] uppercase tracking-wider">{DAY_NAMES[i]}</div>
-                <div className={cn("text-lg font-bold mt-0.5", isToday && "text-primary")}>
+                <Text size="10px" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.1em" }}>
+                  {DAY_NAMES[i]}
+                </Text>
+                <Text size="lg" fw={700} c={isToday ? "blue.2" : "gray.2"}>
                   {d.getDate()}
-                </div>
-              </div>
+                </Text>
+              </Box>
             );
           })}
 
@@ -146,8 +170,8 @@ export function WeeklyGrid({
               onAcknowledgeShift={onAcknowledgeShift}
             />
           ))}
-        </div>
-      </div>
+        </Box>
+      </Box>
     </DndContext>
   );
 }
@@ -173,8 +197,9 @@ function EmployeeRow({
   onDeleteShift,
   onAcknowledgeShift,
 }: EmployeeRowProps) {
-  const totalHours = empRow.days
-    .flatMap((d) => d.shifts)
+  const days = Array.isArray(empRow.days) ? empRow.days : [];
+  const totalHours = days
+    .flatMap((d) => (Array.isArray(d.shifts) ? d.shifts : []))
     .reduce((sum, s) => {
       const duration = (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / 3600000;
       return sum + duration;
@@ -183,23 +208,48 @@ function EmployeeRow({
   return (
     <>
       {/* Employee label cell */}
-      <div className="border-b border-border/40 border-r bg-card/40 px-4 py-3 backdrop-blur-sm transition-colors hover:bg-muted/20">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 text-primary shadow-[0_0_10px_-2px_var(--color-primary)] text-xs font-bold">
-            {empRow.employee?.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
-          </div>
-          <div className="min-w-0">
-            <p className="text-[13px] font-medium truncate">{empRow.employee?.user?.name || "Bilinmiyor"}</p>
-            <p className="text-xs text-muted-foreground truncate">
+      <Box
+        style={{
+          padding: "12px 16px",
+          borderBottom: "1px solid var(--mantine-color-dark-4)",
+          borderRight: "1px solid var(--mantine-color-dark-4)",
+          background: "rgba(12, 18, 28, 0.7)",
+        }}
+      >
+        <Group gap="sm" align="center">
+          <Paper
+            radius="xl"
+            p={0}
+            style={{
+              width: 36,
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.08))",
+              border: "1px solid rgba(59, 130, 246, 0.3)",
+            }}
+          >
+            <Text size="sm" fw={700} c="blue.2">
+              {empRow.employee?.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
+            </Text>
+          </Paper>
+          <Box style={{ minWidth: 0 }}>
+            <Text size="sm" fw={600} truncate>
+              {empRow.employee?.user?.name || "Bilinmiyor"}
+            </Text>
+            <Text size="xs" c="dimmed" truncate>
               {empRow.employee?.position ?? empRow.employee?.department ?? ""}
-            </p>
-          </div>
-        </div>
-        <p className="mt-1.5 text-[11px] text-muted-foreground font-medium">{totalHours.toFixed(1)} saat</p>
-      </div>
+            </Text>
+          </Box>
+        </Group>
+        <Text size="xs" c="dimmed" mt={6} fw={600}>
+          {totalHours.toFixed(1)} saat
+        </Text>
+      </Box>
 
       {/* Day cells */}
-      {empRow.days?.map((daySchedule) => {
+      {days.map((daySchedule) => {
         const cellId = `cell-${empRow.employee?.id}-${daySchedule.date}`;
         // Filter out any null/undefined shifts that might come from the API
         const shifts = Array.isArray(daySchedule.shifts) ? daySchedule.shifts.filter(Boolean) : [];
@@ -211,37 +261,43 @@ function EmployeeRow({
             items={shifts.map((s) => s?.id || Math.random().toString())}
             strategy={rectSortingStrategy}
           >
-            <div
+            <Box
               id={cellId}
-              className={cn(
-                "group/cell border-b border-r border-border/40 last:border-r-0 min-h-[100px] p-2 space-y-2 transition-colors",
-                daySchedule.hasConflict ? "bg-destructive/10" : "hover:bg-muted/20"
-              )}
+              style={{
+                borderBottom: "1px solid var(--mantine-color-dark-4)",
+                borderRight: "1px solid var(--mantine-color-dark-4)",
+                minHeight: 110,
+                padding: 8,
+                background: daySchedule.hasConflict ? "rgba(239, 68, 68, 0.12)" : "rgba(12, 18, 28, 0.55)",
+                transition: "background 120ms ease",
+              }}
             >
-              {shifts.map((shift, i) => (
-                <ShiftCard
-                  key={shift?.id || i}
-                  shift={shift}
-                  onEdit={canManage ? onEditShift : undefined}
-                  onDelete={canManage ? onDeleteShift : undefined}
-                  onAcknowledge={isEmployee ? onAcknowledgeShift : undefined}
-                  canManage={canManage}
-                  isEmployee={isEmployee}
-                  isDraggable={canManage}
-                />
-              ))}
+              <Stack gap={6}>
+                {shifts.map((shift, i) => (
+                  <ShiftCard
+                    key={shift?.id || i}
+                    shift={shift}
+                    onEdit={canManage ? onEditShift : undefined}
+                    onDelete={canManage ? onDeleteShift : undefined}
+                    onAcknowledge={isEmployee ? onAcknowledgeShift : undefined}
+                    canManage={canManage}
+                    isEmployee={isEmployee}
+                    isDraggable={canManage}
+                  />
+                ))}
 
-              {/* Add button */}
-              {canManage && (
-                <button
-                  className="hidden group-hover/cell:flex w-full items-center justify-center rounded-lg border border-dashed border-primary/40 py-2 text-[11px] text-primary/70 hover:border-primary hover:text-primary hover:bg-primary/10 transition-all hover:shadow-[0_0_10px_-2px_var(--color-primary)]"
-                  onClick={() => onAddShift(empRow.employee?.id || "", daySchedule.date)}
-                >
-                  <Plus className="h-4 w-4 mr-0.5" />
-                  Ekle
-                </button>
-              )}
-            </div>
+                {canManage && (
+                  <Button
+                    variant="light"
+                    size="xs"
+                    leftSection={<IconPlus size={14} />}
+                    onClick={() => onAddShift(empRow.employee?.id || "", daySchedule.date)}
+                  >
+                    Ekle
+                  </Button>
+                )}
+              </Stack>
+            </Box>
           </SortableContext>
         );
       })}

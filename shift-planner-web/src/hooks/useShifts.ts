@@ -9,6 +9,19 @@ export function useWeeklySchedule(weekStart: string) {
     queryKey: ["schedule", weekStart],
     queryFn: async () => {
       const { data } = await api.get(`/schedule/week?start=${weekStart}`);
+      // Defensive normalization for API responses that may return non-array shapes
+      if (data?.employees && Array.isArray(data.employees)) {
+        data.employees = data.employees.map((employee: any) => {
+          const days = Array.isArray(employee?.days) ? employee.days : [];
+          return {
+            ...employee,
+            days: days.map((day: any) => ({
+              ...day,
+              shifts: Array.isArray(day?.shifts) ? day.shifts : [],
+            })),
+          };
+        });
+      }
       return data;
     },
     enabled: !!weekStart,

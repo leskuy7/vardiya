@@ -2,11 +2,11 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { Center, Loader, Table, Text } from "@mantine/core";
 import { useWeeklySchedule } from "@/hooks/useShifts";
 import { getMonday, getWeekDates, formatTime, getShiftDuration } from "@/lib/utils";
 
-const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
+const DAY_NAMES = ["Pzt", "Sal", "Car", "Per", "Cum", "Cmt", "Paz"];
 
 function PrintContent() {
   const params = useSearchParams();
@@ -17,7 +17,6 @@ function PrintContent() {
 
   useEffect(() => {
     if (!isLoading && schedule) {
-      // Small delay for styles to render before printing
       const timer = setTimeout(() => window.print(), 500);
       return () => clearTimeout(timer);
     }
@@ -25,9 +24,9 @@ function PrintContent() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner size="lg" />
-      </div>
+      <Center h="100vh">
+        <Loader size="md" />
+      </Center>
     );
   }
 
@@ -35,80 +34,76 @@ function PrintContent() {
   const endDate = new Date(weekDays[6] + "T00:00:00+03:00");
 
   return (
-    <div className="mx-auto max-w-[1100px] p-6 font-sans text-[10pt]">
-      {/* Title */}
-      <div className="mb-4 flex items-center justify-between border-b pb-2">
-        <h1 className="text-lg font-bold">Vardiya Programı</h1>
-        <p className="text-sm text-gray-500">
-          {startDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })} –{" "}
+    <div style={{ margin: "0 auto", maxWidth: 1100, padding: 24, fontSize: "10pt" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, borderBottom: "1px solid #e5e7eb", paddingBottom: 8 }}>
+        <Text fw={700}>Vardiya Programi</Text>
+        <Text size="sm" c="dimmed">
+          {startDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })} – {" "}
           {endDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
-        </p>
+        </Text>
       </div>
 
-      {/* Grid */}
-      <table className="w-full border-collapse text-[9pt]">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-2 py-1 text-left font-semibold w-32">Çalışan</th>
+      <Table withTableBorder withColumnBorders verticalSpacing="xs" style={{ fontSize: "9pt" }}>
+        <Table.Thead>
+          <Table.Tr>
+            <Table.Th>Calisan</Table.Th>
             {weekDays.map((day, i) => {
               const d = new Date(day + "T00:00:00+03:00");
               return (
-                <th key={day} className="border px-2 py-1 text-center font-semibold">
+                <Table.Th key={day} style={{ textAlign: "center" }}>
                   <div>{DAY_NAMES[i]}</div>
-                  <div className="font-normal text-[8pt] text-gray-500">
+                  <div style={{ fontSize: "8pt", color: "#6b7280" }}>
                     {d.toLocaleDateString("tr-TR", { day: "numeric", month: "numeric" })}
                   </div>
-                </th>
+                </Table.Th>
               );
             })}
-            <th className="border px-2 py-1 text-center font-semibold w-16">Toplam</th>
-          </tr>
-        </thead>
-        <tbody>
+            <Table.Th style={{ textAlign: "center" }}>Toplam</Table.Th>
+          </Table.Tr>
+        </Table.Thead>
+        <Table.Tbody>
           {schedule?.employees.map((empRow) => {
-            const totalHours = empRow.days
-              .flatMap((d) => d.shifts)
+            const days = Array.isArray(empRow.days) ? empRow.days : [];
+            const totalHours = days
+              .flatMap((d) => (Array.isArray(d.shifts) ? d.shifts : []))
               .reduce((sum, s) => sum + getShiftDuration(s.startTime, s.endTime), 0);
 
             return (
-              <tr key={empRow.employee.id}>
-                <td className="border px-2 py-1 font-medium">
+              <Table.Tr key={empRow.employee.id}>
+                <Table.Td>
                   <div>{empRow.employee.user.name}</div>
                   {empRow.employee.position && (
-                    <div className="text-[8pt] text-gray-500">{empRow.employee.position}</div>
+                    <div style={{ fontSize: "8pt", color: "#6b7280" }}>{empRow.employee.position}</div>
                   )}
-                </td>
-                {empRow.days.map((day) => (
-                  <td key={day.date} className="border px-2 py-1 align-top">
+                </Table.Td>
+                {days.map((day) => (
+                  <Table.Td key={day.date} style={{ verticalAlign: "top" }}>
                     {day.shifts.length === 0 ? (
-                      <span className="text-gray-300">—</span>
+                      <span style={{ color: "#cbd5f5" }}>—</span>
                     ) : (
                       day.shifts.map((shift) => (
-                        <div key={shift.id} className="mb-0.5">
-                          <div className="font-medium">
+                        <div key={shift.id} style={{ marginBottom: 4 }}>
+                          <div style={{ fontWeight: 600 }}>
                             {formatTime(shift.startTime)}–{formatTime(shift.endTime)}
                           </div>
                           {shift.note && (
-                            <div className="text-[8pt] text-gray-500">{shift.note}</div>
+                            <div style={{ fontSize: "8pt", color: "#6b7280" }}>{shift.note}</div>
                           )}
                         </div>
                       ))
                     )}
-                  </td>
+                  </Table.Td>
                 ))}
-                <td className="border px-2 py-1 text-center font-semibold">
-                  {totalHours.toFixed(1)}s
-                </td>
-              </tr>
+                <Table.Td style={{ textAlign: "center", fontWeight: 600 }}>{totalHours.toFixed(1)}s</Table.Td>
+              </Table.Tr>
             );
           })}
-        </tbody>
-      </table>
+        </Table.Tbody>
+      </Table>
 
-      {/* Footer */}
-      <div className="mt-4 flex items-center justify-between text-[8pt] text-gray-400">
-        <span>Vardiya Planlayıcı Sistemi</span>
-        <span>Basım: {new Date().toLocaleDateString("tr-TR", { dateStyle: "long" })}</span>
+      <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", color: "#94a3b8", fontSize: "8pt" }}>
+        <span>Vardiya Planlayici Sistemi</span>
+        <span>Basim: {new Date().toLocaleDateString("tr-TR", { dateStyle: "long" })}</span>
       </div>
     </div>
   );
@@ -116,7 +111,13 @@ function PrintContent() {
 
 export default function PrintPage() {
   return (
-    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Spinner size="lg" /></div>}>
+    <Suspense
+      fallback={
+        <Center h="100vh">
+          <Loader size="md" />
+        </Center>
+      }
+    >
       <PrintContent />
     </Suspense>
   );

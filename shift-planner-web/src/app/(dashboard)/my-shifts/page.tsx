@@ -40,7 +40,7 @@ const STATUS: Record<string, { label: string; color: MantineColor; borderColor: 
   DRAFT:        { label: "Taslak",    color: "gray",  borderColor: "var(--mantine-color-gray-5)"    },
   PUBLISHED:    { label: "Yayında",   color: "teal",  borderColor: "var(--mantine-color-teal-5)"    },
   ACKNOWLEDGED: { label: "Onaylandı", color: "blue",  borderColor: "var(--mantine-color-blue-5)"    },
-  CANCELLED:    { label: "Kıpıl",     color: "red",   borderColor: "var(--mantine-color-red-5)"     },
+  CANCELLED:    { label: "Iptal",     color: "red",   borderColor: "var(--mantine-color-red-5)"     },
 };
 
 type MantineColor =

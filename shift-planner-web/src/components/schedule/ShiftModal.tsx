@@ -1,14 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Dialog, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import {
+  Button,
+  Checkbox,
+  Group,
+  Modal,
+  Select,
+  Stack,
+  TextInput,
+  Textarea,
+} from "@mantine/core";
 import { useToast } from "@/components/ui/toast";
 import { useCreateShift, useUpdateShift } from "@/hooks/useShifts";
 import type { Shift, Employee } from "@/types";
@@ -49,11 +54,9 @@ export function ShiftModal({
   const isEdit = !!shift;
 
   const {
-    register,
+    control,
     handleSubmit,
     reset,
-    watch,
-    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ShiftFormValues>({
     resolver: zodResolver(shiftSchema),
@@ -139,82 +142,138 @@ export function ShiftModal({
     }
   };
 
+  const employeeOptions = useMemo(
+    () =>
+      employees.map((emp) => ({
+        value: emp.id,
+        label: `${emp.user.name} — ${emp.position ?? emp.department ?? ""}`.trim(),
+      })),
+    [employees]
+  );
+
   return (
-    <Dialog
-      open={open}
+    <Modal
+      opened={open}
       onClose={onClose}
-      title={isEdit ? "Vardiyayı Düzenle" : "Yeni Vardiya Ekle"}
+      title={isEdit ? "Vardiyayi Duzenle" : "Yeni Vardiya Ekle"}
       size="md"
+      centered
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Employee */}
-        <div className="space-y-1.5">
-          <Label>Çalışan</Label>
-          <Select error={errors.employeeId?.message} {...register("employeeId")}>
-            <option value="">Çalışan seçin...</option>
-            {employees.map((emp) => (
-              <option key={emp.id} value={emp.id}>
-                {emp.user.name} — {emp.position ?? emp.department ?? ""}
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        {/* Date */}
-        <div className="space-y-1.5">
-          <Label>Tarih</Label>
-          <Input type="date" error={errors.date?.message} {...register("date")} />
-        </div>
-
-        {/* Time range */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="space-y-1.5">
-            <Label>Başlangıç Saati</Label>
-            <Input type="time" error={errors.startTime?.message} {...register("startTime")} />
-          </div>
-          <div className="space-y-1.5">
-            <Label>Bitiş Saati</Label>
-            <Input type="time" error={errors.endTime?.message} {...register("endTime")} />
-          </div>
-        </div>
-
-        {/* Status */}
-        <div className="space-y-1.5">
-          <Label>Durum</Label>
-          <Select {...register("status")}>
-            <option value="DRAFT">Taslak</option>
-            <option value="PUBLISHED">Yayında</option>
-          </Select>
-        </div>
-
-        {/* Note */}
-        <div className="space-y-1.5">
-          <Label>Not (opsiyonel)</Label>
-          <Input type="text" placeholder="Açıklama..." {...register("note")} />
-        </div>
-
-        {/* Force override */}
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            id="forceOverride"
-            className="h-4 w-4"
-            {...register("forceOverride")}
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Stack gap="sm">
+          <Controller
+            name="employeeId"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Calisan"
+                placeholder="Calisan secin..."
+                data={employeeOptions}
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? "")}
+                error={errors.employeeId?.message}
+                searchable
+                nothingFoundMessage="Sonuc yok"
+              />
+            )}
           />
-          <Label htmlFor="forceOverride" className="cursor-pointer text-muted-foreground">
-            Müsaitlik çakışmasını görmezden gel
-          </Label>
-        </div>
 
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-            İptal
-          </Button>
-          <Button type="submit" loading={isSubmitting}>
-            {isEdit ? "Güncelle" : "Oluştur"}
-          </Button>
-        </DialogFooter>
+          <Controller
+            name="date"
+            control={control}
+            render={({ field }) => (
+              <TextInput
+                type="date"
+                label="Tarih"
+                value={field.value}
+                onChange={field.onChange}
+                error={errors.date?.message}
+              />
+            )}
+          />
+
+          <Group grow>
+            <Controller
+              name="startTime"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  type="time"
+                  label="Baslangic Saati"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.startTime?.message}
+                />
+              )}
+            />
+            <Controller
+              name="endTime"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  type="time"
+                  label="Bitis Saati"
+                  value={field.value}
+                  onChange={field.onChange}
+                  error={errors.endTime?.message}
+                />
+              )}
+            />
+          </Group>
+
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Durum"
+                data={[
+                  { value: "DRAFT", label: "Taslak" },
+                  { value: "PUBLISHED", label: "Yayinda" },
+                ]}
+                value={field.value}
+                onChange={(value) => field.onChange(value ?? "DRAFT")}
+              />
+            )}
+          />
+
+          <Controller
+            name="note"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                label="Not (opsiyonel)"
+                placeholder="Aciklama..."
+                autosize
+                minRows={2}
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+
+          <Controller
+            name="forceOverride"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                label="Musaitlik cakismasini gormezden gel"
+                checked={!!field.value}
+                onChange={(event) => field.onChange(event.currentTarget.checked)}
+              />
+            )}
+          />
+
+          <Group justify="flex-end" mt="sm">
+            <Button variant="default" onClick={onClose} disabled={isSubmitting}>
+              Iptal
+            </Button>
+            <Button type="submit" loading={isSubmitting}>
+              {isEdit ? "Guncelle" : "Olustur"}
+            </Button>
+          </Group>
+        </Stack>
       </form>
-    </Dialog>
+    </Modal>
   );
 }

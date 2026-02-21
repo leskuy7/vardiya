@@ -1,7 +1,7 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ActionIcon, Button, Paper, Text } from "@mantine/core";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { getMonday, getWeekDates, formatDate } from "@/lib/utils";
 
 interface WeekPickerProps {
@@ -41,20 +41,20 @@ export function WeekPicker({ currentMonday, onChange }: WeekPickerProps) {
   });
 
   return (
-    <div className="flex items-center gap-2">
-      <Button variant="outline" size="icon" onClick={prevWeek} aria-label="Önceki hafta" className="h-9 w-9">
-        <ChevronLeft className="h-4 w-4" />
-      </Button>
-      <div className="min-w-[220px] text-center">
-        <span className="text-sm font-semibold tracking-tight">
+    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <ActionIcon variant="default" size="lg" onClick={prevWeek} aria-label="Onceki hafta">
+        <IconChevronLeft size={16} />
+      </ActionIcon>
+      <Paper withBorder px="md" py={6} radius="md" style={{ minWidth: 220, textAlign: "center" }}>
+        <Text size="sm" fw={600}>
           {startLabel} – {endLabel}
-        </span>
-      </div>
-      <Button variant="outline" size="icon" onClick={nextWeek} aria-label="Sonraki hafta" className="h-9 w-9">
-        <ChevronRight className="h-4 w-4" />
-      </Button>
-      <Button variant="secondary" size="sm" onClick={goToToday} className="ml-1">
-        Bugün
+        </Text>
+      </Paper>
+      <ActionIcon variant="default" size="lg" onClick={nextWeek} aria-label="Sonraki hafta">
+        <IconChevronRight size={16} />
+      </ActionIcon>
+      <Button variant="default" size="xs" onClick={goToToday}>
+        Bugun
       </Button>
     </div>
   );

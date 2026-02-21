@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ToastProvider } from "@/components/ui/toast";
 import { MantineProvider, createTheme } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 
 const mantineTheme = createTheme({
   primaryColor: "blue",
@@ -54,6 +55,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <MantineProvider theme={mantineTheme} defaultColorScheme="dark">
+      <Notifications position="bottom-right" zIndex={9999} />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ToastProvider>{children}</ToastProvider>

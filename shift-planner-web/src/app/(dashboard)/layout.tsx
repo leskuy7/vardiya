@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { PageLoader } from "@/components/ui/spinner";
+import { Box } from "@mantine/core";
 
 export default function DashboardLayout({
   children,
@@ -25,18 +26,25 @@ export default function DashboardLayout({
   if (!user) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background relative selection:bg-primary/30">
-      {/* Subtle ambient glow effects */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/10 blur-[120px] pointer-events-none z-0" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-500/5 blur-[120px] pointer-events-none z-0" />
-
-      <div className="relative z-10 flex h-full w-full">
-        <Sidebar className="shadow-2xl shadow-black/50 border-r border-white/5" />
-        <div className="flex flex-1 flex-col overflow-hidden backdrop-blur-3xl bg-background/50">
+    <Box
+      style={{
+        height: "100vh",
+        display: "flex",
+        overflow: "hidden",
+        position: "relative",
+        background: "radial-gradient(circle at 10% 10%, rgba(59,130,246,0.12), transparent 40%), radial-gradient(circle at 90% 0%, rgba(236,72,153,0.12), transparent 45%), #0a0f18",
+      }}
+    >
+      <Box style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(120deg, rgba(255,255,255,0.02), transparent)" }} />
+      <Box style={{ position: "relative", zIndex: 1, display: "flex", width: "100%" }}>
+        <Sidebar />
+        <Box style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <Navbar />
-          <main className="flex-1 overflow-auto p-6 lg:p-8">{children}</main>
-        </div>
-      </div>
-    </div>
+          <Box component="main" style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+            {children}
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }

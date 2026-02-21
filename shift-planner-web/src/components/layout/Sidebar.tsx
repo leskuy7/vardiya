@@ -2,50 +2,50 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  CalendarDays,
-  Users,
-  Clock,
-  BarChart3,
-  CalendarCheck,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  LayoutDashboard,
-} from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { ActionIcon, Box, Group, NavLink, Paper, ScrollArea, Stack, Text } from "@mantine/core";
+import {
+  IconCalendarWeek,
+  IconUsers,
+  IconClock,
+  IconChartBar,
+  IconCalendarEvent,
+  IconLogout,
+  IconChevronLeft,
+  IconChevronRight,
+  IconLayoutDashboard,
+} from "@tabler/icons-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   {
     label: "Haftalık Program",
     href: "/schedule",
-    icon: CalendarDays,
+    icon: IconCalendarWeek,
     roles: ["ADMIN", "MANAGER", "EMPLOYEE"],
   },
   {
     label: "Çalışanlar",
     href: "/employees",
-    icon: Users,
+    icon: IconUsers,
     roles: ["ADMIN", "MANAGER"],
   },
   {
     label: "Müsaitlik",
     href: "/availability",
-    icon: CalendarCheck,
+    icon: IconCalendarEvent,
     roles: ["ADMIN", "MANAGER", "EMPLOYEE"],
   },
   {
     label: "Vardiyalarım",
     href: "/my-shifts",
-    icon: Clock,
+    icon: IconClock,
     roles: ["EMPLOYEE"],
   },
   {
     label: "Raporlar",
     href: "/reports",
-    icon: BarChart3,
+    icon: IconChartBar,
     roles: ["ADMIN", "MANAGER"],
   },
 ];
@@ -60,95 +60,133 @@ export function Sidebar({ className }: { className?: string }) {
   );
 
   return (
-    <aside
-      className={cn(
-        "relative flex h-screen flex-col bg-sidebar/95 backdrop-blur-3xl text-sidebar-foreground transition-all duration-300 ease-in-out z-20",
-        collapsed ? "w-[68px]" : "w-64",
-        className
-      )}
+    <Box
+      className={className}
+      style={{
+        width: collapsed ? 76 : 270,
+        transition: "width 180ms ease",
+        background: "rgba(10, 15, 24, 0.96)",
+        borderRight: "1px solid var(--mantine-color-dark-4)",
+        position: "relative",
+      }}
     >
-      {/* Logo */}
-      <div className={cn(
-        "flex h-16 items-center gap-3 px-4 border-b border-white/[0.06]",
-        collapsed && "justify-center px-0"
-      )}>
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-sidebar-primary to-blue-400 text-white shadow-md shadow-primary/20">
-          <CalendarDays className="h-[18px] w-[18px]" />
-        </div>
-        {!collapsed && (
-          <div className="overflow-hidden">
-            <span className="block truncate text-sm font-semibold tracking-tight">Vardiya Planlayıcı</span>
-            <span className="block truncate text-[11px] text-sidebar-foreground/50">Ekip Yönetimi</span>
-          </div>
-        )}
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4">
-        <div className={cn("space-y-1", collapsed && "space-y-2")}>
-          {visibleItems.map(({ label, href, icon: Icon }) => {
-            const active = pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                title={collapsed ? label : undefined}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-150",
-                  collapsed && "justify-center px-0 py-2.5",
-                  active
-                    ? "bg-sidebar-primary/15 text-sidebar-primary shadow-sm"
-                    : "text-sidebar-foreground/60 hover:bg-white/[0.06] hover:text-sidebar-foreground"
-                )}
-              >
-                <Icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-sidebar-primary")} />
-                {!collapsed && <span className="truncate">{label}</span>}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
-
-      {/* User + logout */}
-      <div className="border-t border-white/[0.06] p-3">
-        {!collapsed && user && (
-          <div className="mb-3 rounded-lg bg-white/[0.04] px-3 py-2.5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/20 text-sidebar-primary text-xs font-bold">
-                {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium">{user?.name}</p>
-                <p className="truncate text-[11px] text-sidebar-foreground/45">{user?.email}</p>
-              </div>
-            </div>
-          </div>
-        )}
-        <button
-          onClick={logout}
-          title="Çıkış Yap"
-          className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] text-sidebar-foreground/60 transition-all duration-150 hover:bg-red-500/10 hover:text-red-400",
-            collapsed && "justify-center px-0"
+      <Stack gap={0} style={{ height: "100%" }}>
+        {/* Logo */}
+        <Group px="md" py="md" align="center" justify={collapsed ? "center" : "space-between"}>
+          <Group gap="sm" align="center" wrap="nowrap">
+            <Paper
+              radius="md"
+              p={8}
+              style={{
+                background: "linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(99, 102, 241, 0.85))",
+                boxShadow: "0 10px 30px rgba(59, 130, 246, 0.25)",
+              }}
+            >
+              <IconLayoutDashboard size={18} color="white" />
+            </Paper>
+            {!collapsed && (
+              <Box style={{ minWidth: 0 }}>
+                <Text size="sm" fw={700} truncate>
+                  Vardiya Planlayici
+                </Text>
+                <Text size="xs" c="dimmed" truncate>
+                  Ekip Yonetimi
+                </Text>
+              </Box>
+            )}
+          </Group>
+          {!collapsed && (
+            <ActionIcon variant="subtle" size="sm" onClick={() => setCollapsed(true)}>
+              <IconChevronLeft size={14} />
+            </ActionIcon>
           )}
-        >
-          <LogOut className="h-[18px] w-[18px] shrink-0" />
-          {!collapsed && <span>Çıkış Yap</span>}
-        </button>
-      </div>
+        </Group>
 
-      {/* Collapse toggle */}
-      <button
-        onClick={() => setCollapsed((v) => !v)}
-        className="absolute -right-3 top-[72px] flex h-6 w-6 items-center justify-center rounded-full border border-border bg-card text-muted-foreground shadow-sm transition-all duration-150 hover:bg-accent hover:text-foreground hover:shadow-md"
-        aria-label={collapsed ? "Genişlet" : "Daralt"}
-      >
-        {collapsed ? (
-          <ChevronRight className="h-3 w-3" />
-        ) : (
-          <ChevronLeft className="h-3 w-3" />
-        )}
-      </button>
-    </aside>
+        <ScrollArea style={{ flex: 1 }} px="sm" pb="sm">
+          <Stack gap={6} mt="xs">
+            {visibleItems.map(({ label, href, icon: Icon }) => {
+              const active = pathname.startsWith(href);
+              return (
+                <NavLink
+                  key={href}
+                  component={Link}
+                  href={href}
+                  label={collapsed ? undefined : label}
+                  leftSection={<Icon size={18} />}
+                  active={active}
+                  variant="subtle"
+                  style={{
+                    borderRadius: "var(--mantine-radius-md)",
+                    paddingLeft: collapsed ? 12 : 14,
+                    paddingRight: collapsed ? 12 : 14,
+                  }}
+                />
+              );
+            })}
+          </Stack>
+        </ScrollArea>
+
+        <Box px="sm" pb="sm" pt={6} style={{ borderTop: "1px solid var(--mantine-color-dark-4)" }}>
+          {!collapsed && user && (
+            <Paper
+              withBorder
+              p="sm"
+              radius="md"
+              mb="sm"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+            >
+              <Group gap="sm" wrap="nowrap">
+                <Paper
+                  radius="xl"
+                  p={0}
+                  style={{
+                    width: 34,
+                    height: 34,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    background: "rgba(59, 130, 246, 0.2)",
+                    border: "1px solid rgba(59, 130, 246, 0.4)",
+                  }}
+                >
+                  <Text size="xs" fw={700} c="blue.2">
+                    {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
+                  </Text>
+                </Paper>
+                <Box style={{ minWidth: 0 }}>
+                  <Text size="sm" fw={600} truncate>
+                    {user?.name}
+                  </Text>
+                  <Text size="xs" c="dimmed" truncate>
+                    {user?.email}
+                  </Text>
+                </Box>
+              </Group>
+            </Paper>
+          )}
+
+          <NavLink
+            label={collapsed ? undefined : "Cikis Yap"}
+            leftSection={<IconLogout size={18} />}
+            onClick={logout}
+            color="red"
+            variant="subtle"
+            style={{ borderRadius: "var(--mantine-radius-md)" }}
+          />
+
+          {collapsed && (
+            <ActionIcon
+              variant="default"
+              size="lg"
+              mt="sm"
+              onClick={() => setCollapsed(false)}
+              aria-label="Genislet"
+            >
+              <IconChevronRight size={16} />
+            </ActionIcon>
+          )}
+        </Box>
+      </Stack>
+    </Box>
   );
 }

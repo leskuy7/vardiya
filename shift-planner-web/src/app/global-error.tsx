@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { Button, Center, Paper, Stack, Text, Title } from "@mantine/core";
+import { IconAlertTriangle } from "@tabler/icons-react";
 
 export default function GlobalError({
   error,
@@ -15,116 +17,51 @@ export default function GlobalError({
 
   return (
     <html lang="tr">
-      <body
-        style={{
-          margin: 0,
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(135deg,#0a0820,#130d35)",
-          fontFamily: "system-ui,-apple-system,sans-serif",
-        }}
-      >
-        <div
+      <body style={{ margin: 0 }}>
+        <Center
           style={{
-            maxWidth: "480px",
-            width: "90%",
-            padding: "36px",
-            borderRadius: "20px",
-            border: "1px solid rgba(239,68,68,.25)",
-            background: "rgba(239,68,68,.06)",
-            backdropFilter: "blur(20px)",
-            textAlign: "center",
+            minHeight: "100vh",
+            background: "linear-gradient(135deg,#090c16,#0f1424)",
           }}
         >
-          <div
+          <Paper
+            withBorder
+            radius="xl"
+            p="xl"
             style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "50%",
-              background: "rgba(239,68,68,.15)",
-              border: "1px solid rgba(239,68,68,.35)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 18px",
-              fontSize: "24px",
+              width: "min(520px, 92vw)",
+              background: "rgba(239,68,68,0.08)",
+              borderColor: "rgba(239,68,68,0.25)",
             }}
           >
-            ⚠️
-          </div>
-
-          <h1
-            style={{
-              color: "#fff",
-              fontSize: "20px",
-              fontWeight: 700,
-              margin: "0 0 10px",
-            }}
-          >
-            Beklenmeyen Bir Hata Oluştu
-          </h1>
-
-          <p
-            style={{
-              color: "rgba(255,255,255,.45)",
-              fontSize: "13px",
-              lineHeight: 1.6,
-              margin: "0 0 8px",
-            }}
-          >
-            Uygulama beklenmedik bir sorunla karşılaştı. Lütfen sayfayı
-            yenileyin. Sorun devam ederse yöneticinize bildirin.
-          </p>
-
-          {error.message && (
-            <p
-              style={{
-                color: "#f87171",
-                fontSize: "12px",
-                fontFamily: "monospace",
-                background: "rgba(0,0,0,.35)",
-                borderRadius: "8px",
-                padding: "8px 12px",
-                margin: "0 0 8px",
-                wordBreak: "break-word",
-              }}
-            >
-              {error.message}
-            </p>
-          )}
-
-          {error.digest && (
-            <p
-              style={{
-                color: "rgba(255,255,255,.2)",
-                fontSize: "10px",
-                fontFamily: "monospace",
-                margin: "0 0 22px",
-              }}
-            >
-              Hata kodu: {error.digest}
-            </p>
-          )}
-
-          <button
-            onClick={reset}
-            style={{
-              padding: "11px 28px",
-              borderRadius: "10px",
-              border: "none",
-              cursor: "pointer",
-              background: "linear-gradient(135deg,#3b82f6,#6366f1)",
-              color: "#fff",
-              fontWeight: 700,
-              fontSize: "14px",
-              boxShadow: "0 6px 20px rgba(99,102,241,.35)",
-            }}
-          >
-            Tekrar Dene
-          </button>
-        </div>
+            <Stack gap="sm" align="center">
+              <IconAlertTriangle size={36} color="#f87171" />
+              <Title order={3}>Beklenmeyen Bir Hata Olustu</Title>
+              <Text size="sm" c="dimmed" ta="center">
+                Uygulama beklenmedik bir sorunla karsilasti. Lutfen sayfayi yenileyin.
+              </Text>
+              {error.message && (
+                <Text
+                  size="xs"
+                  style={{
+                    background: "rgba(15,23,42,0.6)",
+                    padding: "8px 12px",
+                    borderRadius: 8,
+                    fontFamily: "monospace",
+                  }}
+                >
+                  {error.message}
+                </Text>
+              )}
+              {error.digest && (
+                <Text size="xs" c="dimmed" style={{ fontFamily: "monospace" }}>
+                  Hata kodu: {error.digest}
+                </Text>
+              )}
+              <Button onClick={reset}>Tekrar Dene</Button>
+            </Stack>
+          </Paper>
+        </Center>
       </body>
     </html>
   );

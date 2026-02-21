@@ -2,9 +2,9 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Edit2, Trash2, CheckCircle } from "lucide-react";
-import { cn, formatTime, getShiftDuration } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { ActionIcon, Badge, Group, Paper, Stack, Text } from "@mantine/core";
+import { IconPencil, IconTrash, IconCircleCheck } from "@tabler/icons-react";
+import { formatTime, getShiftDuration } from "@/lib/utils";
 import type { Shift } from "@/types";
 
 interface ShiftCardProps {
@@ -17,11 +17,11 @@ interface ShiftCardProps {
   isDraggable?: boolean;
 }
 
-const statusConfig = {
-  DRAFT: { label: "Taslak", variant: "secondary" as const },
-  PUBLISHED: { label: "Yayında", variant: "success" as const },
-  ACKNOWLEDGED: { label: "Onaylandı", variant: "info" as const },
-  CANCELLED: { label: "İptal", variant: "destructive" as const },
+const statusConfig: Record<string, { label: string; color: string; border: string }> = {
+  DRAFT: { label: "Taslak", color: "gray", border: "var(--mantine-color-gray-6)" },
+  PUBLISHED: { label: "Yayinda", color: "teal", border: "var(--mantine-color-teal-6)" },
+  ACKNOWLEDGED: { label: "Onaylandi", color: "blue", border: "var(--mantine-color-blue-6)" },
+  CANCELLED: { label: "Iptal", color: "red", border: "var(--mantine-color-red-6)" },
 };
 
 export function ShiftCard({
@@ -49,64 +49,57 @@ export function ShiftCard({
   const isOvernight = duration > 12;
 
   return (
-    <div
+    <Paper
       ref={setNodeRef}
-      style={style}
+      style={{
+        ...style,
+        borderLeftWidth: 3,
+        borderLeftStyle: "solid",
+        borderLeftColor: status.border,
+        opacity: isDragging ? 0.6 : shift.status === "CANCELLED" ? 0.55 : 1,
+        textDecoration: shift.status === "CANCELLED" ? "line-through" : "none",
+        cursor: isDraggable && canManage ? "grab" : "default",
+      }}
       {...(isDraggable && canManage ? { ...attributes, ...listeners } : {})}
-      className={cn(
-        "group relative rounded-xl border border-border/50 bg-card/60 backdrop-blur-md p-3 text-xs shadow-sm shadow-black/5 transition-all duration-300 hover:shadow-[0_4px_20px_-3px_var(--color-primary)] hover:-translate-y-0.5 hover:border-primary/50",
-        isDragging && "opacity-60 shadow-2xl shadow-primary/20 ring-2 ring-primary scale-[1.02] z-50",
-        isDraggable && canManage && "cursor-grab active:cursor-grabbing",
-        shift.status === "CANCELLED" && "opacity-50 line-through"
-      )}
+      p="sm"
+      radius="md"
+      withBorder
     >
-      {/* Time row */}
-      <div className="flex items-center justify-between gap-1 mb-1.5">
-        <span className="font-semibold text-foreground tracking-tight flex items-center gap-1">
-          {formatTime(shift.startTime)} – {formatTime(shift.endTime)}
-          {isOvernight && " 🌙"}
-        </span>
-        <Badge variant={status.variant} className="text-[10px] px-1.5 py-0 font-medium">
-          {status.label}
-        </Badge>
-      </div>
+      <Stack gap={4}>
+        <Group justify="space-between" gap={6}>
+          <Text size="xs" fw={700} style={{ fontVariantNumeric: "tabular-nums" }}>
+            {formatTime(shift.startTime)} – {formatTime(shift.endTime)}{isOvernight ? " \uD83C\uDF19" : ""}
+          </Text>
+          <Badge size="xs" color={status.color} variant="light">
+            {status.label}
+          </Badge>
+        </Group>
 
-      {/* Hours */}
-      <p className="mt-1 text-muted-foreground leading-relaxed">
-        {duration.toFixed(1)} saat
-        {shift.note && <span className="ml-1 text-foreground/60">· {shift.note}</span>}
-      </p>
+        <Text size="xs" c="dimmed">
+          {duration.toFixed(1)} saat
+          {shift.note ? ` · ${shift.note}` : ""}
+        </Text>
 
-      {/* Actions - visible on hover */}
-      <div className="absolute right-1 top-1 hidden gap-1 group-hover:flex backdrop-blur-md bg-card/80 p-1 rounded-lg border border-border/50 shadow-sm animate-fade-in translate-y-[-50%] translate-x-[20%]">
-        {canManage && onEdit && (
-          <button
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-primary/20 hover:text-primary transition-colors"
-            onClick={(e) => { e.stopPropagation(); onEdit(shift); }}
-            title="Düzenle"
-          >
-            <Edit2 className="h-3.5 w-3.5" />
-          </button>
+        {(canManage || (isEmployee && shift.status === "PUBLISHED")) && (
+          <Group gap={6} justify="flex-end" mt={4}>
+            {canManage && onEdit && (
+              <ActionIcon size="sm" variant="subtle" color="blue" onClick={(e) => { e.stopPropagation(); onEdit(shift); }}>
+                <IconPencil size={14} />
+              </ActionIcon>
+            )}
+            {canManage && onDelete && (
+              <ActionIcon size="sm" variant="subtle" color="red" onClick={(e) => { e.stopPropagation(); onDelete(shift); }}>
+                <IconTrash size={14} />
+              </ActionIcon>
+            )}
+            {isEmployee && shift.status === "PUBLISHED" && onAcknowledge && (
+              <ActionIcon size="sm" variant="light" color="teal" onClick={(e) => { e.stopPropagation(); onAcknowledge(shift); }}>
+                <IconCircleCheck size={14} />
+              </ActionIcon>
+            )}
+          </Group>
         )}
-        {canManage && onDelete && (
-          <button
-            className="rounded-md p-1.5 text-muted-foreground hover:bg-destructive/20 hover:text-destructive transition-colors"
-            onClick={(e) => { e.stopPropagation(); onDelete(shift); }}
-            title="Sil"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {isEmployee && shift.status === "PUBLISHED" && onAcknowledge && (
-          <button
-            className="rounded p-0.5 text-muted-foreground hover:bg-green-50 hover:text-green-600"
-            onClick={(e) => { e.stopPropagation(); onAcknowledge(shift); }}
-            title="Onayla"
-          >
-            <CheckCircle className="h-3 w-3" />
-          </button>
-        )}
-      </div>
-    </div>
+      </Stack>
+    </Paper>
   );
 }

@@ -1,33 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, Trash2, CalendarX } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogFooter, ConfirmDialog } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Center,
+  Divider,
+  Group,
+  Loader,
+  Modal,
+  Paper,
+  Select,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import { IconCalendarEvent, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useToast } from "@/components/ui/toast";
 import { useAvailability, useCreateAvailability, useDeleteAvailability } from "@/hooks/useAvailability";
 import { useEmployees } from "@/hooks/useEmployees";
 import { useAuth } from "@/hooks/useAuth";
 import type { AvailabilityBlock } from "@/types";
 
-const DAY_LABELS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
+const DAY_LABELS = ["Pazar", "Pazartesi", "Sali", "Carsamba", "Persembe", "Cuma", "Cumartesi"];
 
 const BLOCK_TYPE_LABELS: Record<string, string> = {
-  UNAVAILABLE: "Müsait Değil",
-  PREFER_NOT: "Tercih Değil",
+  UNAVAILABLE: "Musait Degil",
+  PREFER_NOT: "Tercih Degil",
   AVAILABLE_ONLY: "Sadece Bu Saatler",
 };
 
 const availSchema = z.object({
-  employeeId: z.string().min(1, "Çalışan seçin"),
+  employeeId: z.string().min(1, "Calisan secin"),
   type: z.enum(["UNAVAILABLE", "PREFER_NOT", "AVAILABLE_ONLY"]),
   dayOfWeek: z.coerce.number().min(0).max(6),
   startTime: z.string().optional(),
@@ -38,16 +48,18 @@ const availSchema = z.object({
 
 type AvailFormValues = z.infer<typeof availSchema>;
 
+const TYPE_OPTIONS = [
+  { value: "UNAVAILABLE", label: "Musait Degil" },
+  { value: "PREFER_NOT", label: "Tercih Degil" },
+  { value: "AVAILABLE_ONLY", label: "Sadece Bu Saatler" },
+];
+
 export default function AvailabilityPage() {
   const { user, isAdmin, isManager, isEmployee } = useAuth();
   const { toast } = useToast();
 
   const canManageAll = isAdmin || isManager;
-
   const { data: employees } = useEmployees(true);
-
-  // For employees, show their own availability
-  // For managers/admins, show all
   const myEmployee = employees?.find((e) => e.user?.id === user?.id);
 
   const [filterEmployeeId, setFilterEmployeeId] = useState<string | undefined>(
@@ -64,6 +76,7 @@ export default function AvailabilityPage() {
   });
 
   const {
+    control,
     register,
     handleSubmit,
     reset,
@@ -88,21 +101,13 @@ export default function AvailabilityPage() {
 
   const onSubmit = async (values: AvailFormValues) => {
     try {
-      await createAvail.mutateAsync({
-        employeeId: values.employeeId,
-        type: values.type,
-        dayOfWeek: values.dayOfWeek,
-        startTime: values.startTime,
-        endTime: values.endTime,
-        startDate: values.startDate,
-        endDate: values.endDate,
-      });
-      toast("success", "Müsaitlik bloğu eklendi.");
+      await createAvail.mutateAsync(values);
+      toast("success", "Musaitlik blogu eklendi.");
       setModal(false);
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Bir hata oluştu.";
+        "Bir hata olustu.";
       toast("error", msg);
     }
   };
@@ -113,193 +118,230 @@ export default function AvailabilityPage() {
       await deleteAvail.mutateAsync(deleteDialog.block.id);
       toast("success", "Silindi.");
     } catch {
-      toast("error", "Silme başarısız.");
+      toast("error", "Silme basarisiz.");
     } finally {
       setDeleteDialog({ open: false });
     }
   };
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        {canManageAll && (
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-muted-foreground">Çalışan:</label>
-            <select
-              className="h-8 rounded border border-input text-sm px-2"
-              value={filterEmployeeId ?? ""}
-              onChange={(e) => setFilterEmployeeId(e.target.value || undefined)}
-            >
-              <option value="">Tümü</option>
-              {employees?.map((emp) => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.user.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-        <Button size="sm" onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Engel Ekle
-        </Button>
-      </div>
+    <Stack gap="lg">
+      <Paper
+        withBorder
+        p="md"
+        radius="lg"
+        style={{
+          background: "linear-gradient(135deg, rgba(20, 83, 45, 0.2), rgba(15, 23, 42, 0.2))",
+          borderColor: "var(--mantine-color-dark-4)",
+        }}
+      >
+        <Group justify="space-between" wrap="wrap">
+          <Group gap="sm">
+            <Paper radius="md" p={8} style={{ background: "rgba(16, 185, 129, 0.2)" }}>
+              <IconCalendarEvent size={18} />
+            </Paper>
+            <Box>
+              <Text fw={700}>Musaitlik Engelleri</Text>
+              <Text size="xs" c="dimmed">Takvim kisitlarini yonetin</Text>
+            </Box>
+          </Group>
+          <Group gap="xs" wrap="wrap">
+            {canManageAll && (
+              <Select
+                placeholder="Calisan secin"
+                data={[{ value: "", label: "Tumu" }, ...(employees ?? []).map((emp) => ({
+                  value: emp.id,
+                  label: emp.user.name,
+                }))]}
+                value={filterEmployeeId ?? ""}
+                onChange={(value) => setFilterEmployeeId(value || undefined)}
+                searchable
+                nothingFoundMessage="Sonuc yok"
+              />
+            )}
+            <Button leftSection={<IconPlus size={16} />} onClick={openCreate}>
+              Engel Ekle
+            </Button>
+          </Group>
+        </Group>
+      </Paper>
 
-      {/* List */}
       {isLoading ? (
-        <div className="flex h-48 items-center justify-center">
-          <Spinner size="lg" />
-        </div>
+        <Center h={220}>
+          <Loader size="md" />
+        </Center>
       ) : !blocks?.length ? (
-        <div className="flex h-48 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-muted-foreground">
-          <CalendarX className="h-8 w-8 opacity-40" />
-          <p className="text-sm">Henüz müsaitlik engeli yok</p>
-        </div>
+        <Paper withBorder radius="lg" p="xl">
+          <Center h={160}>
+            <Stack gap={6} align="center">
+              <IconCalendarEvent size={28} color="#64748b" />
+              <Text size="sm" c="dimmed">Henuz musaitlik engeli yok</Text>
+            </Stack>
+          </Center>
+        </Paper>
       ) : (
-        <div className="rounded-lg border overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Çalışan</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Gün</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Tür</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Saat Aralığı</th>
-                <th className="px-4 py-3 text-left font-medium text-muted-foreground">Tarih Aralığı</th>
-                <th className="px-4 py-3 text-right font-medium text-muted-foreground">İşlem</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
+        <Paper withBorder radius="lg" p={0} style={{ overflow: "hidden" }}>
+          <Table verticalSpacing="sm" highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Calisan</Table.Th>
+                <Table.Th>Gun</Table.Th>
+                <Table.Th>Tur</Table.Th>
+                <Table.Th>Saat Araligi</Table.Th>
+                <Table.Th>Tarih Araligi</Table.Th>
+                <Table.Th style={{ textAlign: "right" }}>Islem</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>
               {blocks.map((block) => (
-                <tr key={block.id} className="hover:bg-muted/20">
-                  <td className="px-4 py-3 font-medium">{block.employee?.user?.name ?? "—"}</td>
-                  <td className="px-4 py-3">{DAY_LABELS[block.dayOfWeek]}</td>
-                  <td className="px-4 py-3">
+                <Table.Tr key={block.id}>
+                  <Table.Td>
+                    <Text size="sm" fw={600}>{block.employee?.user?.name ?? "—"}</Text>
+                  </Table.Td>
+                  <Table.Td>
+                    <Text size="sm">{DAY_LABELS[block.dayOfWeek]}</Text>
+                  </Table.Td>
+                  <Table.Td>
                     <Badge
-                      variant={
+                      color={
                         block.type === "UNAVAILABLE"
-                          ? "destructive"
+                          ? "red"
                           : block.type === "PREFER_NOT"
-                            ? "warning"
-                            : "info"
+                            ? "yellow"
+                            : "blue"
                       }
+                      variant="light"
                     >
                       {BLOCK_TYPE_LABELS[block.type] ?? block.type}
                     </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {block.startTime && block.endTime
-                      ? `${block.startTime} – ${block.endTime}`
-                      : "Tüm gün"}
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {block.startDate
-                      ? `${block.startDate}${block.endDate ? ` – ${block.endDate}` : "+"}`
-                      : "Her hafta"}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <Button
-                      variant="ghost"
-                      size="icon"
+                  </Table.Td>
+                  <Table.Td>
+                    <Text size="sm" c="dimmed">
+                      {block.startTime && block.endTime
+                        ? `${block.startTime} – ${block.endTime}`
+                        : "Tum gun"}
+                    </Text>
+                  </Table.Td>
+                  <Table.Td>
+                    <Text size="sm" c="dimmed">
+                      {block.startDate
+                        ? `${block.startDate}${block.endDate ? ` – ${block.endDate}` : "+"}`
+                        : "Her hafta"}
+                    </Text>
+                  </Table.Td>
+                  <Table.Td style={{ textAlign: "right" }}>
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
                       onClick={() => setDeleteDialog({ open: true, block })}
-                      className="hover:text-destructive"
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
+                      <IconTrash size={16} />
+                    </ActionIcon>
+                  </Table.Td>
+                </Table.Tr>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </Table.Tbody>
+          </Table>
+        </Paper>
       )}
 
-      {/* Create Modal */}
-      <Dialog
-        open={modal}
-        onClose={() => setModal(false)}
-        title="Müsaitlik Engeli Ekle"
-        size="md"
-      >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {canManageAll && (
-            <div className="space-y-1.5">
-              <Label>Çalışan</Label>
-              <Select error={errors.employeeId?.message} {...register("employeeId")}>
-                <option value="">Seçin...</option>
-                {employees?.map((emp) => (
-                  <option key={emp.id} value={emp.id}>
-                    {emp.user.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-          )}
+      <Modal opened={modal} onClose={() => setModal(false)} title="Musaitlik Engeli Ekle" size="lg" centered>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Stack gap="sm">
+            {canManageAll && (
+              <Controller
+                name="employeeId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Calisan"
+                    placeholder="Secin..."
+                    data={(employees ?? []).map((emp) => ({
+                      value: emp.id,
+                      label: emp.user.name,
+                    }))}
+                    value={field.value}
+                    onChange={(value) => field.onChange(value ?? "")}
+                    error={errors.employeeId?.message}
+                    searchable
+                    nothingFoundMessage="Sonuc yok"
+                  />
+                )}
+              />
+            )}
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Gün</Label>
-              <Select {...register("dayOfWeek")}>
-                {DAY_LABELS.map((d, i) => (
-                  <option key={i} value={i}>
-                    {d}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Engellin Türü</Label>
-              <Select {...register("type")}>
-                <option value="UNAVAILABLE">Müsait Değil</option>
-                <option value="PREFER_NOT">Tercih Değil</option>
-                <option value="AVAILABLE_ONLY">Sadece Bu Saatler</option>
-              </Select>
-            </div>
-          </div>
+            <Group grow>
+              <Controller
+                name="dayOfWeek"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Gun"
+                    data={DAY_LABELS.map((d, i) => ({ value: String(i), label: d }))}
+                    value={String(field.value)}
+                    onChange={(value) => field.onChange(Number(value ?? 0))}
+                  />
+                )}
+              />
+              <Controller
+                name="type"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Engel Turu"
+                    data={TYPE_OPTIONS}
+                    value={field.value}
+                    onChange={(value) => field.onChange(value ?? "UNAVAILABLE")}
+                  />
+                )}
+              />
+            </Group>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Başlangıç Saati (opsiyonel)</Label>
-              <Input type="time" {...register("startTime")} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Bitiş Saati (opsiyonel)</Label>
-              <Input type="time" {...register("endTime")} />
-            </div>
-          </div>
+            <Group grow>
+              <TextInput label="Baslangic Saati (opsiyonel)" type="time" {...register("startTime")} />
+              <TextInput label="Bitis Saati (opsiyonel)" type="time" {...register("endTime")} />
+            </Group>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label>Başlangıç Tarihi (opsiyonel)</Label>
-              <Input type="date" {...register("startDate")} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Bitiş Tarihi (opsiyonel)</Label>
-              <Input type="date" {...register("endDate")} />
-            </div>
-          </div>
+            <Group grow>
+              <TextInput label="Baslangic Tarihi (opsiyonel)" type="date" {...register("startDate")} />
+              <TextInput label="Bitis Tarihi (opsiyonel)" type="date" {...register("endDate")} />
+            </Group>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setModal(false)} disabled={isSubmitting}>
-              İptal
-            </Button>
-            <Button type="submit" loading={isSubmitting}>
-              Ekle
-            </Button>
-          </DialogFooter>
+            <Divider />
+            <Group justify="flex-end">
+              <Button variant="default" onClick={() => setModal(false)} disabled={isSubmitting}>
+                Iptal
+              </Button>
+              <Button type="submit" loading={isSubmitting}>
+                Ekle
+              </Button>
+            </Group>
+          </Stack>
         </form>
-      </Dialog>
+      </Modal>
 
-      {/* Delete Confirm */}
-      <ConfirmDialog
-        open={deleteDialog.open}
+      <Modal
+        opened={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false })}
-        onConfirm={handleDeleteConfirm}
-        title="Müsaitlik Engelini Sil"
-        description="Bu müsaitlik engelini silmek istediğinizden emin misiniz?"
-        confirmLabel="Sil"
-        loading={deleteAvail.isPending}
-      />
-    </div>
+        title="Musaitlik Engelini Sil"
+        size="sm"
+        centered
+      >
+        <Stack gap="sm">
+          <Text size="sm" c="dimmed">
+            Bu musaitlik engelini silmek istediginizden emin misiniz?
+          </Text>
+          <Divider />
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setDeleteDialog({ open: false })}>
+              Iptal
+            </Button>
+            <Button color="red" onClick={handleDeleteConfirm} loading={deleteAvail.isPending}>
+              Sil
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </Stack>
   );
 }

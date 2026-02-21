@@ -1,16 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Dialog, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, Group, Modal, Stack, TextInput } from "@mantine/core";
 import { useToast } from "@/components/ui/toast";
 import { useCopyWeek } from "@/hooks/useShifts";
-import { getMonday } from "@/lib/utils";
 
 const copySchema = z.object({
   sourceWeek: z.string().min(1, "Kaynak hafta seçin"),
@@ -62,25 +57,31 @@ export function CopyWeekModal({ open, onClose, currentWeek }: CopyWeekModalProps
   };
 
   return (
-    <Dialog open={open} onClose={onClose} title="Haftayı Kopyala" size="sm">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-1.5">
-          <Label>Kaynak Hafta (Pazartesi)</Label>
-          <Input type="date" error={errors.sourceWeek?.message} {...register("sourceWeek")} />
-        </div>
-        <div className="space-y-1.5">
-          <Label>Hedef Hafta (Pazartesi)</Label>
-          <Input type="date" error={errors.targetWeek?.message} {...register("targetWeek")} />
-        </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
-            İptal
-          </Button>
-          <Button type="submit" loading={isSubmitting}>
-            Kopyala
-          </Button>
-        </DialogFooter>
+    <Modal opened={open} onClose={onClose} title="Haftayi Kopyala" size="sm" centered>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Stack gap="sm">
+          <TextInput
+            type="date"
+            label="Kaynak Hafta (Pazartesi)"
+            error={errors.sourceWeek?.message}
+            {...register("sourceWeek")}
+          />
+          <TextInput
+            type="date"
+            label="Hedef Hafta (Pazartesi)"
+            error={errors.targetWeek?.message}
+            {...register("targetWeek")}
+          />
+          <Group justify="flex-end" mt="sm">
+            <Button variant="default" onClick={onClose} disabled={isSubmitting}>
+              Iptal
+            </Button>
+            <Button type="submit" loading={isSubmitting}>
+              Kopyala
+            </Button>
+          </Group>
+        </Stack>
       </form>
-    </Dialog>
+    </Modal>
   );
 }

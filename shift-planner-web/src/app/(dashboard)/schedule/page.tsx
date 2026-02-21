@@ -1,10 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Copy } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/ui/dialog";
-import { WeekPicker } from "@/components/schedule/WeekPicker";
+import { useMemo, useState } from "react";
+import {
+  ActionIcon,
+  Badge,
+  Box,
+  Button,
+  Center,
+  Divider,
+  Group,
+  Modal,
+  Paper,
+  Stack,
+  Text,
+} from "@mantine/core";
+import {
+  IconChevronLeft,
+  IconChevronRight,
+  IconCopy,
+  IconPlus,
+  IconCalendarWeek,
+  IconUsers,
+  IconClock,
+  IconAlertTriangle,
+} from "@tabler/icons-react";
 import { WeeklyGrid } from "@/components/schedule/WeeklyGrid";
 import { ShiftModal } from "@/components/schedule/ShiftModal";
 import { CopyWeekModal } from "@/components/schedule/CopyWeekModal";
@@ -77,9 +96,11 @@ export default function SchedulePage() {
   const handleMoveShift = async (shiftId: string, newEmployeeId: string, newDate: string) => {
     try {
       // Find the shift to calculate the time offset
-      const allShifts = schedule?.employees.flatMap((e) =>
-        e.days.flatMap((d) => d.shifts)
-      ) ?? [];
+      const allShifts =
+        schedule?.employees.flatMap((e) => {
+          const days = Array.isArray(e.days) ? e.days : [];
+          return days.flatMap((d) => (Array.isArray(d.shifts) ? d.shifts : []));
+        }) ?? [];
       const shift = allShifts.find((s) => s.id === shiftId);
       if (!shift) return;
 
@@ -110,36 +131,118 @@ export default function SchedulePage() {
     }
   };
 
+  const weekLabel = useMemo(() => {
+    const start = new Date(weekDays[0] + "T00:00:00+03:00");
+    const end = new Date(weekDays[6] + "T00:00:00+03:00");
+    const startLabel = start.toLocaleDateString("tr-TR", { day: "numeric", month: "long" });
+    const endLabel = end.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" });
+    return `${startLabel} – ${endLabel}`;
+  }, [weekDays]);
+
+  const summary = useMemo(() => {
+    const employees = schedule?.employees ?? [];
+    const shifts = employees.flatMap((e) => {
+      const days = Array.isArray(e.days) ? e.days : [];
+      return days.flatMap((d) => (Array.isArray(d.shifts) ? d.shifts : []));
+    });
+    const totalHours = shifts.reduce((sum, s) => {
+      const duration = (new Date(s.endTime).getTime() - new Date(s.startTime).getTime()) / 3600000;
+      return sum + duration;
+    }, 0);
+    const conflicts = employees.flatMap((e) => (Array.isArray(e.days) ? e.days : [])).filter((d) => d.hasConflict).length;
+    return {
+      totalShifts: shifts.length,
+      totalHours,
+      totalEmployees: employees.length,
+      conflictDays: conflicts,
+    };
+  }, [schedule]);
+
   return (
-    <div className="flex flex-col gap-5 h-full">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between flex-wrap gap-3 no-print bg-card/40 backdrop-blur-xl border border-border/40 p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-60 pointer-events-none" />
-        <div className="relative z-10 flex items-center gap-3">
-          <WeekPicker currentMonday={currentMonday} onChange={setCurrentMonday} />
-        </div>
-        {canManage && (
-          <div className="relative z-10 flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="bg-background/50 backdrop-blur-md hover:bg-background/80 transition-all shadow-sm"
-              onClick={() => setCopyModal(true)}
-            >
-              <Copy className="h-4 w-4 mr-1.5" />
-              Haftayı Kopyala
-            </Button>
-            <Button
-              size="sm"
-              className="shadow-[0_0_15px_-3px_var(--color-primary)] hover:shadow-[0_0_20px_0_var(--color-primary)] transition-all"
-              onClick={() => setShiftModal({ open: true })}
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Vardiya Ekle
-            </Button>
-          </div>
-        )}
-      </div>
+    <Stack gap="lg" style={{ height: "100%" }}>
+      {/* Header */}
+      <Paper
+        withBorder
+        p="md"
+        radius="lg"
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          background:
+            "linear-gradient(140deg, rgba(14, 22, 36, 0.95) 0%, rgba(12, 18, 28, 0.95) 55%, rgba(9, 15, 25, 0.95) 100%)",
+          borderColor: "var(--mantine-color-dark-4)",
+          boxShadow: "0 16px 60px rgba(0, 0, 0, 0.35)",
+        }}
+      >
+        <Box
+          style={{
+            position: "absolute",
+            inset: -120,
+            background:
+              "radial-gradient(600px 240px at 10% 0%, rgba(59, 130, 246, 0.18), transparent 60%), radial-gradient(500px 260px at 90% 20%, rgba(244, 63, 94, 0.16), transparent 60%)",
+            opacity: 0.9,
+          }}
+        />
+        <Box
+          style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "repeating-linear-gradient(120deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 12px)",
+            opacity: 0.5,
+          }}
+        />
+
+        <Stack gap="md" style={{ position: "relative" }}>
+          <Group justify="space-between" wrap="wrap">
+            <Group gap="sm">
+              <Badge size="lg" radius="sm" variant="light" leftSection={<IconCalendarWeek size={14} />}>Haftalik Vardiya Programi</Badge>
+              <Text size="sm" c="dimmed">{weekLabel}</Text>
+            </Group>
+            {canManage && (
+              <Group gap="xs">
+                <Button
+                  variant="light"
+                  leftSection={<IconCopy size={16} />}
+                  onClick={() => setCopyModal(true)}
+                >
+                  Haftayi Kopyala
+                </Button>
+                <Button
+                  leftSection={<IconPlus size={16} />}
+                  onClick={() => setShiftModal({ open: true })}
+                >
+                  Vardiya Ekle
+                </Button>
+              </Group>
+            )}
+          </Group>
+
+          <Group justify="space-between" wrap="wrap">
+            <Group gap={6}>
+              <ActionIcon variant="default" size="lg" onClick={() => setCurrentMonday((m) => shiftWeek(m, -1))} aria-label="Onceki hafta">
+                <IconChevronLeft size={16} />
+              </ActionIcon>
+              <Paper withBorder px="md" py={6} radius="md">
+                <Text size="sm" fw={600}>{weekLabel}</Text>
+              </Paper>
+              <ActionIcon variant="default" size="lg" onClick={() => setCurrentMonday((m) => shiftWeek(m, 1))} aria-label="Sonraki hafta">
+                <IconChevronRight size={16} />
+              </ActionIcon>
+              <Button variant="default" size="xs" onClick={() => setCurrentMonday(getMonday(new Date()))}>Bugun</Button>
+            </Group>
+
+            <Group gap="xs">
+              <StatChip icon={<IconUsers size={14} />} label="Calisan" value={String(summary.totalEmployees)} />
+              <StatChip icon={<IconCalendarWeek size={14} />} label="Vardiya" value={String(summary.totalShifts)} />
+              <StatChip icon={<IconClock size={14} />} label="Saat" value={summary.totalHours.toFixed(1)} />
+              {summary.conflictDays > 0 && (
+                <StatChip icon={<IconAlertTriangle size={14} />} label="Cakisma" value={String(summary.conflictDays)} accent="red" />
+              )}
+            </Group>
+          </Group>
+        </Stack>
+      </Paper>
 
       {/* Grid */}
       <WeeklyGrid
@@ -171,15 +274,59 @@ export default function SchedulePage() {
         currentWeek={currentMonday}
       />
 
-      <ConfirmDialog
-        open={deleteDialog.open}
-        onClose={() => setDeleteDialog({ open: false })}
-        onConfirm={handleDeleteConfirm}
-        title="Vardiyayı Sil"
-        description="Bu vardiyayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
-        confirmLabel="Sil"
-        loading={deleteShift.isPending}
-      />
-    </div>
+      <Modal opened={deleteDialog.open} onClose={() => setDeleteDialog({ open: false })} title="Vardiyayi Sil" centered>
+        <Stack gap="sm">
+          <Text size="sm" c="dimmed">
+            Bu vardiyayi silmek istediginizden emin misiniz? Bu islem geri alinamaz.
+          </Text>
+          <Divider />
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setDeleteDialog({ open: false })}>
+              Iptal
+            </Button>
+            <Button color="red" onClick={handleDeleteConfirm} loading={deleteShift.isPending}>
+              Sil
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+    </Stack>
+  );
+}
+
+function shiftWeek(monday: string, direction: -1 | 1): string {
+  const d = new Date(monday + "T12:00:00Z");
+  d.setDate(d.getDate() + direction * 7);
+  return d.toISOString().split("T")[0];
+}
+
+function StatChip({
+  icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  accent?: "red";
+}) {
+  return (
+    <Paper
+      withBorder
+      px="sm"
+      py={6}
+      radius="md"
+      style={{
+        background: "rgba(255,255,255,0.03)",
+        borderColor: accent ? "var(--mantine-color-red-6)" : "var(--mantine-color-dark-4)",
+      }}
+    >
+      <Group gap={6}>
+        <Text c={accent ?? "dimmed"}>{icon}</Text>
+        <Text size="xs" c="dimmed">{label}:</Text>
+        <Text size="xs" fw={700}>{value}</Text>
+      </Group>
+    </Paper>
   );
 }
