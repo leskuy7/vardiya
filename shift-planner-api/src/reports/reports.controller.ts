@@ -11,13 +11,13 @@ import { Roles } from '../common/decorators';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class ReportsController {
-  constructor(private readonly reportsService: ReportsService) {}
+  constructor(private readonly reportsService: ReportsService) { }
 
   @Get('weekly-hours')
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Haftalık saat ve maliyet raporu' })
-  @ApiQuery({ name: 'start', required: true, example: '2026-02-16' })
-  getWeeklyHoursReport(@Query('start') start: string) {
+  @ApiQuery({ name: 'weekStart', required: true, example: '2026-02-16' })
+  getWeeklyHoursReport(@Query('weekStart') start: string) {
     return this.reportsService.getWeeklyHoursReport(start);
   }
 }

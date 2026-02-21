@@ -6,7 +6,7 @@ import { DateTime } from 'luxon';
 export class ScheduleService {
   private readonly logger = new Logger(ScheduleService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getWeeklySchedule(weekStartStr: string) {
     const weekStart = DateTime.fromISO(weekStartStr, {
@@ -63,7 +63,7 @@ export class ScheduleService {
       }, 0);
 
       // Group by days
-      const days: Record<string, { shifts: any[]; unavailable: any[] }> = {};
+      const days = [];
       for (let i = 0; i < 7; i++) {
         const day = weekStart.plus({ days: i });
         const dayStr = day.toFormat('yyyy-MM-dd');
@@ -90,15 +90,24 @@ export class ScheduleService {
             endTime: b.endTime,
           }));
 
-        days[dayStr] = { shifts: dayShifts, unavailable: dayUnavailable };
+        days.push({
+          date: dayStr,
+          shifts: dayShifts,
+          unavailable: dayUnavailable,
+          hasConflict: dayShifts.length > 0 && dayUnavailable.length > 0,
+        });
       }
 
       return {
-        id: emp.id,
-        name: emp.user.name,
-        position: emp.position,
+        employee: {
+          id: emp.id,
+          position: emp.position,
+          maxWeeklyHours: emp.maxWeeklyHours,
+          user: {
+            name: emp.user.name,
+          }
+        },
         totalHours: Math.round(totalHours * 10) / 10,
-        maxWeeklyHours: emp.maxWeeklyHours,
         isOverLimit: totalHours > emp.maxWeeklyHours,
         days,
       };
