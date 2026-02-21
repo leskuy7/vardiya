@@ -48,7 +48,7 @@ export default function AvailabilityPage() {
 
   // For employees, show their own availability
   // For managers/admins, show all
-  const myEmployee = employees?.find((e) => e.user.id === user?.id);
+  const myEmployee = employees?.find((e) => e.user?.id === user?.id);
 
   const [filterEmployeeId, setFilterEmployeeId] = useState<string | undefined>(
     isEmployee ? myEmployee?.id : undefined
@@ -180,8 +180,8 @@ export default function AvailabilityPage() {
                         block.type === "UNAVAILABLE"
                           ? "destructive"
                           : block.type === "PREFER_NOT"
-                          ? "warning"
-                          : "info"
+                            ? "warning"
+                            : "info"
                       }
                     >
                       {BLOCK_TYPE_LABELS[block.type] ?? block.type}

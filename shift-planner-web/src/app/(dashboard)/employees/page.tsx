@@ -65,8 +65,8 @@ export default function EmployeesPage() {
 
   const openEdit = (emp: Employee) => {
     reset({
-      name: emp.user.name,
-      email: emp.user.email,
+      name: emp.user?.name,
+      email: emp.user?.email,
       role: emp.user.role as any,
       position: emp.position ?? "",
       department: emp.department ?? "",
@@ -172,29 +172,29 @@ export default function EmployeesPage() {
                 <td className="px-4 py-3.5">
                   <div className="flex items-center gap-2.5">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
-                      {emp.user.name?.charAt(0)?.toUpperCase() ?? "?"}
+                      {emp.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
                     </div>
-                    <span className="font-medium text-[13px]">{emp.user.name}</span>
+                    <span className="font-medium text-[13px]">{emp.user?.name}</span>
                   </div>
                 </td>
-                <td className="px-4 py-3.5 text-muted-foreground text-[13px]">{emp.user.email}</td>
+                <td className="px-4 py-3.5 text-muted-foreground text-[13px]">{emp.user?.email}</td>
                 <td className="px-4 py-3.5 text-muted-foreground text-[13px]">{emp.position ?? "—"}</td>
                 <td className="px-4 py-3.5 text-muted-foreground text-[13px]">{emp.department ?? "—"}</td>
                 <td className="px-4 py-3">
                   <Badge
                     variant={
-                      emp.user.role === "ADMIN"
+                      emp.user?.role === "ADMIN"
                         ? "default"
-                        : emp.user.role === "MANAGER"
-                        ? "info"
-                        : "secondary"
+                        : emp.user?.role === "MANAGER"
+                          ? "info"
+                          : "secondary"
                     }
                   >
-                    {emp.user.role === "ADMIN"
+                    {emp.user?.role === "ADMIN"
                       ? "Admin"
-                      : emp.user.role === "MANAGER"
-                      ? "Yönetici"
-                      : "Çalışan"}
+                      : emp.user?.role === "MANAGER"
+                        ? "Yönetici"
+                        : "Çalışan"}
                   </Badge>
                 </td>
                 <td className="px-4 py-3.5">

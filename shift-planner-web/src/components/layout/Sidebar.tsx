@@ -56,7 +56,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
 
   const visibleItems = navItems.filter(
-    (item) => user && item.roles.includes(user.role)
+    (item) => user?.role && item.roles.includes(user.role)
   );
 
   return (
@@ -114,11 +114,11 @@ export function Sidebar() {
           <div className="mb-3 rounded-lg bg-white/[0.04] px-3 py-2.5">
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sidebar-primary/20 text-sidebar-primary text-xs font-bold">
-                {user.name?.charAt(0)?.toUpperCase() ?? "U"}
+                {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium">{user.name}</p>
-                <p className="truncate text-[11px] text-sidebar-foreground/45">{user.email}</p>
+                <p className="truncate text-[13px] font-medium">{user?.name}</p>
+                <p className="truncate text-[11px] text-sidebar-foreground/45">{user?.email}</p>
               </div>
             </div>
           </div>
