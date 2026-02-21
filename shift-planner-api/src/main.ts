@@ -20,8 +20,14 @@ async function bootstrap() {
   app.use(cookieParser());
 
   // CORS
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const allowedOrigins = [
+    frontendUrl,
+    'https://shift-planner-web.vercel.app' // Hardcode the new Vercel frontend to bypass CORS blockers
+  ];
+
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

@@ -28,7 +28,7 @@ export default function MyShiftsPage() {
   const acknowledgeShift = useAcknowledgeShift();
 
   // Find the current user's employee row
-  const myRow = schedule?.employees.find((e) => e.employee.user.id === user?.id || e.employee.userId === user?.id);
+  const myRow = schedule?.employees.find((e) => e.employee.user?.id === user?.id || e.employee.userId === user?.id);
   const myShifts: { shift: Shift; date: string }[] =
     myRow?.days.flatMap((d) => d.shifts.map((s) => ({ shift: s, date: d.date }))) ?? [];
 
