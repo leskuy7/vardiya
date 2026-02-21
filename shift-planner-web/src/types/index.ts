@@ -144,8 +144,10 @@ export interface EmployeeReport {
   totalHours: number;
   regularHours: number;
   overtimeHours: number;
+  regularPay: number;
+  overtimePay: number;
   hourlyRate?: number;
-  totalCost: number;
+  totalPay: number;
 }
 
 export interface WeeklyReport {

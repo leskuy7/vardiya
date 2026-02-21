@@ -47,7 +47,7 @@ export default function ReportsPage() {
 
   const totalRegular = report?.employees.reduce((s, e) => s + e.regularHours, 0) ?? 0;
   const totalOvertime = report?.employees.reduce((s, e) => s + e.overtimeHours, 0) ?? 0;
-  const totalCost = report?.employees.reduce((s, e) => s + e.totalCost, 0) ?? 0;
+  const totalCost = report?.employees.reduce((s, e) => s + e.totalPay, 0) ?? 0;
 
   return (
     <Stack gap="lg">
@@ -186,8 +186,8 @@ export default function ReportsPage() {
                   </Table.Td>
                   <Table.Td style={{ textAlign: "right" }}>
                     <Text size="sm" fw={700}>
-                      {emp.totalCost > 0
-                        ? `₺${emp.totalCost.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`
+                      {emp.totalPay > 0
+                        ? `₺${emp.totalPay.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}`
                         : "—"}
                     </Text>
                   </Table.Td>
