@@ -64,7 +64,7 @@ export function WeeklyGrid({
   const findCellIdByShiftId = (shiftId: string): string | null => {
     for (const employeeRow of schedule.employees) {
       for (const daySchedule of employeeRow.days) {
-        if (daySchedule.shifts.some((shift) => shift.id === shiftId)) {
+        if (daySchedule.shifts?.some((shift) => shift?.id === shiftId)) {
           return `cell-${employeeRow.employee?.id}-${daySchedule.date}`;
         }
       }
