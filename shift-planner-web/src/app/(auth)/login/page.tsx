@@ -198,7 +198,7 @@ export default function LoginPage() {
           {/* Top Controls */}
           <div className="flex items-center justify-between mb-6">
             {/* Tab Switcher */}
-            <div className="flex rounded-xl bg-white/[0.06] p-1">
+            <div className="flex gap-1 rounded-xl bg-white/[0.06] p-1">
               <button
                 type="button"
                 onClick={() => setMode("login")}
@@ -433,9 +433,9 @@ export default function LoginPage() {
               { role: "Yönetici", email: "manager@shiftplanner.com", pass: "Manager1234!" },
               { role: "Çalışan", email: "ali@shiftplanner.com", pass: "Employee1234!" },
             ].map((d) => (
-              <div key={d.role} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2">
+              <div key={d.role} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-4 rounded-lg bg-white/[0.03] px-3 py-2">
                 <span className="text-xs font-medium text-blue-300/70">{d.role}</span>
-                <span className="text-xs text-white/30 font-mono">{d.email} / {d.pass}</span>
+                <span className="text-xs text-white/30 font-mono break-all">{d.email} / {d.pass}</span>
               </div>
             ))}
           </div>
