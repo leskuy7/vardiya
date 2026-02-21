@@ -12,11 +12,11 @@ import {
   ArrowRight,
   Zap,
   Shield,
-  TrendingUp,
+  BarChart3,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 
-/* ─── Schemas ─── */
 const loginSchema = z.object({
   email: z.string().email("Geçerli bir e-posta girin"),
   password: z.string().min(6, "Şifre en az 6 karakter olmalıdır"),
@@ -24,17 +24,14 @@ const loginSchema = z.object({
 
 const registerSchema = z
   .object({
-    firstName: z.string().min(2, "Ad en az 2 karakter olmalıdır"),
-    lastName: z.string().min(2, "Soyad en az 2 karakter olmalıdır"),
+    firstName: z.string().min(2, "Ad en az 2 karakter"),
+    lastName: z.string().min(2, "Soyad en az 2 karakter"),
     email: z.string().email("Geçerli bir e-posta girin"),
     password: z
       .string()
-      .min(8, "Şifre en az 8 karakter olmalıdır")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Büyük/küçük harf ve rakam içermelidir",
-      ),
-    confirmPassword: z.string().min(1, "Şifre tekrarı zorunludur"),
+      .min(8, "En az 8 karakter")
+      .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Büyük/küçük harf + rakam içermeli"),
+    confirmPassword: z.string().min(1, "Zorunlu"),
   })
   .refine((d) => d.password === d.confirmPassword, {
     message: "Şifreler eşleşmiyor",
@@ -44,40 +41,26 @@ const registerSchema = z
 type LoginForm = z.infer<typeof loginSchema>;
 type RegisterForm = z.infer<typeof registerSchema>;
 
-function getErrorMessage(err: unknown, fallback: string) {
-  const data = (err as { response?: { data?: unknown } })?.response?.data;
-  if (typeof data === "string") return data;
-  if (data && typeof data === "object") {
-    const m = (data as { message?: unknown }).message;
+function getErr(err: unknown, fallback: string) {
+  const d = (err as { response?: { data?: unknown } })?.response?.data;
+  if (typeof d === "string") return d;
+  if (d && typeof d === "object") {
+    const m = (d as { message?: unknown }).message;
     if (Array.isArray(m) && m.length > 0) return String(m[0]);
     if (typeof m === "string") return m;
   }
   return fallback;
 }
 
-const DEMO_ACCOUNTS = [
-  {
-    role: "Admin",
-    email: "admin@shiftplanner.com",
-    pass: "Admin1234!",
-    color: "from-purple-500 to-violet-600",
-    desc: "Tam yönetici erişimi",
-  },
-  {
-    role: "Müdür",
-    email: "manager@shiftplanner.com",
-    pass: "Manager1234!",
-    color: "from-blue-500 to-cyan-600",
-    desc: "Ekip yönetimi",
-  },
-  {
-    role: "Çalışan",
-    email: "ali@shiftplanner.com",
-    pass: "Employee1234!",
-    color: "from-emerald-500 to-teal-600",
-    desc: "Çalışan görünümü",
-  },
+const DEMOS = [
+  { role: "Admin", email: "admin@shiftplanner.com", pass: "Admin1234!", bg: "#7c3aed" },
+  { role: "Müdür", email: "manager@shiftplanner.com", pass: "Manager1234!", bg: "#2563eb" },
+  { role: "Çalışan", email: "ali@shiftplanner.com", pass: "Employee1234!", bg: "#059669" },
 ];
+
+const inputCls =
+  "w-full rounded-xl px-4 py-3 text-sm outline-none transition-all duration-150" +
+  " border focus:ring-2";
 
 export default function LoginPage() {
   const { login, register: registerUser } = useAuth();
@@ -101,446 +84,452 @@ export default function LoginPage() {
   } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) });
 
   const onLogin = async (data: LoginForm) => {
-    try {
-      await login(data.email, data.password);
-    } catch (err: unknown) {
-      toast("error", getErrorMessage(err, "E-posta veya şifre hatalı."));
-    }
+    try { await login(data.email, data.password); }
+    catch (err: unknown) { toast("error", getErr(err, "E-posta veya şifre hatalı.")); }
   };
 
   const onRegister = async (data: RegisterForm) => {
     try {
-      await registerUser({
-        firstName: data.firstName,
-        lastName: data.lastName,
-        email: data.email,
-        password: data.password,
-      });
+      await registerUser({ firstName: data.firstName, lastName: data.lastName, email: data.email, password: data.password });
       toast("success", "Hesabınız oluşturuldu!");
-    } catch (err: unknown) {
-      toast("error", getErrorMessage(err, "Kayıt başarısız."));
-    }
+    } catch (err: unknown) { toast("error", getErr(err, "Kayıt başarısız.")); }
   };
 
   const fillDemo = (email: string, pass: string) => {
     setValue("email", email);
     setValue("password", pass);
-    if (mode !== "login") setMode("login");
+    setMode("login");
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#050818]">
-      {/* Ambient blobs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-40 -left-40 h-[600px] w-[600px] rounded-full bg-blue-600/20 blur-[120px]" />
-        <div className="absolute -bottom-40 -right-40 h-[600px] w-[600px] rounded-full bg-violet-600/20 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[400px] rounded-full bg-indigo-500/10 blur-[100px]" />
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        background: "linear-gradient(135deg, #0f0c29 0%, #1a1a3e 40%, #24243e 100%)",
+        fontFamily: "system-ui, -apple-system, sans-serif",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* decorative blobs */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden" }}>
+        <div style={{ position: "absolute", top: "-200px", left: "-200px", width: "600px", height: "600px", borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", bottom: "-200px", right: "-100px", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%)" }} />
+        <div style={{ position: "absolute", top: "40%", left: "35%", width: "300px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)" }} />
       </div>
 
-      {/* Grid */}
+      {/* ── LEFT ── */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.03]"
         style={{
-          backgroundImage:
-            "linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px)",
-          backgroundSize: "64px 64px",
+          flex: "0 0 52%",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          padding: "52px 56px",
+          position: "relative",
+          zIndex: 1,
         }}
-      />
-
-      <div className="relative z-10 flex min-h-screen">
-        {/* ── Left panel ── */}
-        <div className="hidden lg:flex lg:w-[52%] flex-col justify-between p-14">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/30">
-              <CalendarDays className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="text-lg font-bold text-white tracking-tight leading-none">
-                Vardiya Planlayıcı
-              </p>
-              <p className="text-xs text-white/40 mt-0.5">
-                Ekip Yönetim Platformu
-              </p>
-            </div>
+        className="hidden lg:flex"
+      >
+        {/* logo */}
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "44px", height: "44px", borderRadius: "14px",
+              background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              boxShadow: "0 8px 24px rgba(99,102,241,0.35)",
+            }}
+          >
+            <CalendarDays size={20} color="#fff" />
           </div>
-
-          {/* Hero copy */}
-          <div className="max-w-lg space-y-10">
-            <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-xs font-medium text-white/60 backdrop-blur-sm">
-                <Zap className="h-3.5 w-3.5 text-yellow-400" />
-                Gerçek zamanlı vardiya yönetimi
-              </div>
-              <h1 className="text-6xl font-extrabold leading-tight tracking-tight text-white">
-                Ekibinizi{" "}
-                <span className="relative">
-                  <span className="relative z-10 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400">
-                    Akıllıca
-                  </span>
-                  <span className="absolute -bottom-1 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 opacity-60" />
-                </span>
-                <br />
-                Yönetin
-              </h1>
-              <p className="text-lg leading-relaxed text-white/50">
-                Sürükle-bırak ile vardiya planla, mesaileri takip et,
-                <br />
-                raporları anında görüntüle.
-              </p>
-            </div>
-
-            {/* Feature pills */}
-            <div className="flex flex-wrap gap-3">
-              {[
-                { icon: CalendarDays, label: "Haftalık Planlama" },
-                { icon: TrendingUp, label: "Fazla Mesai Takibi" },
-                { icon: Shield, label: "Rol Tabanlı Erişim" },
-              ].map(({ icon: Icon, label }) => (
-                <div
-                  key={label}
-                  className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 backdrop-blur-sm"
-                >
-                  <Icon className="h-4 w-4 text-indigo-400" />
-                  <span className="text-sm font-medium text-white/70">
-                    {label}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { value: "500+", label: "Çalışan" },
-                { value: "99.9%", label: "Uptime" },
-                { value: "24/7", label: "Destek" },
-              ].map((s) => (
-                <div
-                  key={s.label}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm"
-                >
-                  <p className="text-2xl font-bold text-white">{s.value}</p>
-                  <p className="text-xs text-white/40 mt-1">{s.label}</p>
-                </div>
-              ))}
-            </div>
+          <div>
+            <div style={{ color: "#fff", fontWeight: 700, fontSize: "17px", lineHeight: 1.2 }}>Vardiya Planlayıcı</div>
+            <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px", marginTop: "2px" }}>Ekip Yönetim Platformu</div>
           </div>
-
-          <p className="text-xs text-white/20">
-            © 2026 Vardiya Planlayıcı • Tüm hakları saklıdır
-          </p>
         </div>
 
-        {/* ── Right panel ── */}
-        <div className="flex flex-1 items-center justify-center p-6 lg:p-12">
-          <div className="w-full max-w-md space-y-4">
-            {/* Mobile logo */}
-            <div className="flex lg:hidden items-center gap-3 mb-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600">
-                <CalendarDays className="h-5 w-5 text-white" />
+        {/* hero */}
+        <div style={{ maxWidth: "480px" }}>
+          {/* badge */}
+          <div
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "7px",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: "999px", padding: "6px 14px",
+              color: "rgba(255,255,255,0.55)", fontSize: "12px", fontWeight: 500,
+              marginBottom: "28px", backdropFilter: "blur(8px)",
+              background: "rgba(255,255,255,0.05)",
+            }}
+          >
+            <Zap size={13} color="#facc15" />
+            Gerçek zamanlı vardiya yönetimi
+          </div>
+
+          <h1
+            style={{
+              fontSize: "clamp(42px, 4vw, 60px)", fontWeight: 800,
+              lineHeight: 1.1, color: "#fff", margin: "0 0 20px",
+              letterSpacing: "-1.5px",
+            }}
+          >
+            Ekibinizi{" "}
+            <span
+              style={{
+                background: "linear-gradient(90deg, #60a5fa, #818cf8, #a78bfa)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Akıllıca
+            </span>
+            <br />Yönetin
+          </h1>
+
+          <p style={{ color: "rgba(255,255,255,0.45)", fontSize: "17px", lineHeight: 1.7, margin: "0 0 40px" }}>
+            Sürükle-bırak ile vardiya planla,<br />
+            mesaileri takip et, raporları anında gör.
+          </p>
+
+          {/* features */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "48px" }}>
+            {[
+              { icon: CalendarDays, label: "Haftalık Planlama", desc: "Sürükle-bırak ile kolayca vardiya oluştur" },
+              { icon: Users, label: "Çalışan Takibi", desc: "Uygunluk ve mesai kontrolü" },
+              { icon: BarChart3, label: "Detaylı Raporlar", desc: "Maliyet ve fazla mesai analizi" },
+              { icon: Shield, label: "Güvenli Erişim", desc: "Rol tabanlı yetkilendirme sistemi" },
+            ].map(({ icon: Icon, label, desc }) => (
+              <div key={label} style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+                <div
+                  style={{
+                    width: "38px", height: "38px", borderRadius: "10px",
+                    background: "rgba(99,102,241,0.15)",
+                    border: "1px solid rgba(99,102,241,0.25)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon size={16} color="#818cf8" />
+                </div>
+                <div>
+                  <div style={{ color: "#fff", fontWeight: 600, fontSize: "14px" }}>{label}</div>
+                  <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px", marginTop: "1px" }}>{desc}</div>
+                </div>
               </div>
-              <p className="text-base font-bold text-white">
-                Vardiya Planlayıcı
+            ))}
+          </div>
+
+          {/* stats */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
+            {[
+              { v: "500+", l: "Çalışan" },
+              { v: "99.9%", l: "Uptime" },
+              { v: "24/7", l: "Destek" },
+            ].map((s) => (
+              <div
+                key={s.l}
+                style={{
+                  border: "1px solid rgba(255,255,255,0.08)",
+                  borderRadius: "14px", padding: "16px",
+                  background: "rgba(255,255,255,0.04)",
+                }}
+              >
+                <div style={{ color: "#fff", fontSize: "24px", fontWeight: 700 }}>{s.v}</div>
+                <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "12px", marginTop: "4px" }}>{s.l}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ color: "rgba(255,255,255,0.18)", fontSize: "12px" }}>
+          © 2026 Vardiya Planlayıcı
+        </div>
+      </div>
+
+      {/* ── RIGHT ── */}
+      <div
+        style={{
+          flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "32px 24px", position: "relative", zIndex: 1,
+        }}
+      >
+        <div style={{ width: "100%", maxWidth: "420px", display: "flex", flexDirection: "column", gap: "14px" }}>
+
+          {/* main card */}
+          <div
+            style={{
+              borderRadius: "24px",
+              border: "1px solid rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.04)",
+              backdropFilter: "blur(24px)",
+              padding: "32px",
+            }}
+          >
+            <div style={{ marginBottom: "24px" }}>
+              <h2 style={{ color: "#fff", fontSize: "24px", fontWeight: 700, margin: 0 }}>
+                {mode === "login" ? "Hoş Geldiniz 👋" : "Hesap Oluştur"}
+              </h2>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "14px", marginTop: "6px" }}>
+                {mode === "login" ? "Devam etmek için giriş yapın" : "Birkaç dakikada başlayın"}
               </p>
             </div>
 
-            {/* Main card */}
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-xl shadow-2xl shadow-black/50">
-              {/* Header */}
-              <div className="mb-7 space-y-1">
-                <h2 className="text-2xl font-bold text-white">
-                  {mode === "login" ? "Hoş Geldiniz 👋" : "Hesap Oluştur"}
-                </h2>
-                <p className="text-sm text-white/40">
-                  {mode === "login"
-                    ? "Devam etmek için giriş yapın"
-                    : "Birkaç dakikada başlayın"}
-                </p>
-              </div>
+            {/* switcher */}
+            <div
+              style={{
+                display: "flex", gap: "4px", padding: "4px",
+                background: "rgba(0,0,0,0.25)", borderRadius: "12px",
+                border: "1px solid rgba(255,255,255,0.07)",
+                marginBottom: "24px",
+              }}
+            >
+              {(["login", "register"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
+                  style={{
+                    flex: 1, padding: "9px", borderRadius: "9px", border: "none",
+                    cursor: "pointer", fontSize: "14px", fontWeight: 600,
+                    transition: "all 0.2s",
+                    background: mode === m
+                      ? "linear-gradient(135deg, #3b82f6, #6366f1)"
+                      : "transparent",
+                    color: mode === m ? "#fff" : "rgba(255,255,255,0.35)",
+                    boxShadow: mode === m ? "0 4px 16px rgba(99,102,241,0.3)" : "none",
+                  }}
+                >
+                  {m === "login" ? "Giriş Yap" : "Kayıt Ol"}
+                </button>
+              ))}
+            </div>
 
-              {/* Tab switcher */}
-              <div className="mb-7 flex h-11 rounded-xl bg-white/5 p-1 border border-white/10">
-                {(["login", "register"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setMode(m)}
-                    className={`flex-1 rounded-lg text-sm font-semibold transition-all duration-200 ${
-                      mode === m
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25"
-                        : "text-white/40 hover:text-white/70"
-                    }`}
-                  >
-                    {m === "login" ? "Giriş Yap" : "Kayıt Ol"}
-                  </button>
-                ))}
-              </div>
+            {mode === "login" ? (
+              <form onSubmit={handleSubmit(onLogin)} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                <div>
+                  <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "7px" }}>
+                    E-posta
+                  </label>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    placeholder="ornek@sirket.com"
+                    className={inputCls}
+                    style={{
+                      background: "rgba(0,0,0,0.3)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      color: "#fff",
+                      borderRadius: "12px",
+                    }}
+                    {...register("email")}
+                  />
+                  {errors.email && <p style={{ color: "#f87171", fontSize: "12px", marginTop: "5px" }}>{errors.email.message}</p>}
+                </div>
 
-              {/* Login form */}
-              {mode === "login" ? (
-                <form onSubmit={handleSubmit(onLogin)} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                      E-posta
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "7px" }}>
+                    <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                      Şifre
                     </label>
-                    <input
-                      type="email"
-                      autoComplete="email"
-                      placeholder="ornek@sirket.com"
-                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
-                      {...register("email")}
-                    />
-                    {errors.email && (
-                      <p className="text-xs text-red-400">
-                        {errors.email.message}
-                      </p>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => toast("info", "Şifre sıfırlama için yöneticinize başvurun.")}
+                      style={{ background: "none", border: "none", cursor: "pointer", color: "#60a5fa", fontSize: "12px", fontWeight: 500, padding: 0 }}
+                    >
+                      Şifremi unuttum
+                    </button>
                   </div>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPw ? "text" : "password"}
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      className={inputCls}
+                      style={{
+                        background: "rgba(0,0,0,0.3)",
+                        border: "1px solid rgba(255,255,255,0.1)",
+                        color: "#fff",
+                        borderRadius: "12px",
+                        paddingRight: "48px",
+                      }}
+                      {...register("password")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw((v) => !v)}
+                      style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.3)", display: "flex" }}
+                    >
+                      {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+                    </button>
+                  </div>
+                  {errors.password && <p style={{ color: "#f87171", fontSize: "12px", marginTop: "5px" }}>{errors.password.message}</p>}
+                </div>
 
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                        Şifre
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    height: "48px", borderRadius: "13px", border: "none", cursor: "pointer",
+                    background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+                    color: "#fff", fontWeight: 700, fontSize: "15px",
+                    boxShadow: "0 8px 24px rgba(99,102,241,0.35)",
+                    transition: "all 0.2s", marginTop: "4px",
+                    opacity: isSubmitting ? 0.65 : 1,
+                  }}
+                >
+                  {isSubmitting ? (
+                    <svg style={{ animation: "spin 1s linear infinite", width: 20, height: 20 }} viewBox="0 0 24 24" fill="none">
+                      <circle opacity="0.25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <><span>Giriş Yap</span><ArrowRight size={17} /></>
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleReg(onRegister)} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  {(["firstName", "lastName"] as const).map((field) => (
+                    <div key={field}>
+                      <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "7px" }}>
+                        {field === "firstName" ? "Ad" : "Soyad"}
                       </label>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toast(
-                            "info",
-                            "Şifre sıfırlama için yöneticinize başvurun.",
-                          )
-                        }
-                        className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-                      >
-                        Şifremi unuttum
-                      </button>
-                    </div>
-                    <div className="relative">
                       <input
-                        type={showPw ? "text" : "password"}
-                        autoComplete="current-password"
-                        placeholder="••••••••"
-                        className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 pr-12 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
-                        {...register("password")}
+                        placeholder={field === "firstName" ? "Ali" : "Yılmaz"}
+                        className={inputCls}
+                        style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", borderRadius: "12px" }}
+                        {...reg(field)}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPw((v) => !v)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
-                      >
-                        {showPw ? (
-                          <EyeOff className="h-4 w-4" />
-                        ) : (
-                          <Eye className="h-4 w-4" />
-                        )}
-                      </button>
-                    </div>
-                    {errors.password && (
-                      <p className="text-xs text-red-400">
-                        {errors.password.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="group mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.01] disabled:pointer-events-none disabled:opacity-50"
-                  >
-                    {isSubmitting ? (
-                      <svg
-                        className="h-5 w-5 animate-spin"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
-                      </svg>
-                    ) : (
-                      <>
-                        Giriş Yap
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              ) : (
-                /* Register form */
-                <form onSubmit={handleReg(onRegister)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    {(["firstName", "lastName"] as const).map((field) => (
-                      <div key={field} className="space-y-1.5">
-                        <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                          {field === "firstName" ? "Ad" : "Soyad"}
-                        </label>
-                        <input
-                          placeholder={
-                            field === "firstName" ? "Ali" : "Yılmaz"
-                          }
-                          className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
-                          {...reg(field)}
-                        />
-                        {rErr[field] && (
-                          <p className="text-xs text-red-400">
-                            {rErr[field]?.message}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                      E-posta
-                    </label>
-                    <input
-                      type="email"
-                      placeholder="ornek@sirket.com"
-                      className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
-                      {...reg("email")}
-                    />
-                    {rErr.email && (
-                      <p className="text-xs text-red-400">
-                        {rErr.email.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {(
-                    [
-                      {
-                        field: "password" as const,
-                        show: showPw2,
-                        toggle: () => setShowPw2((v) => !v),
-                        label: "Şifre",
-                        placeholder: "En az 8 karakter",
-                      },
-                      {
-                        field: "confirmPassword" as const,
-                        show: showPw3,
-                        toggle: () => setShowPw3((v) => !v),
-                        label: "Şifre Tekrar",
-                        placeholder: "Tekrar girin",
-                      },
-                    ]
-                  ).map(({ field, show, toggle, label, placeholder }) => (
-                    <div key={field} className="space-y-1.5">
-                      <label className="text-xs font-semibold uppercase tracking-wider text-white/40">
-                        {label}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={show ? "text" : "password"}
-                          placeholder={placeholder}
-                          className="h-12 w-full rounded-xl border border-white/10 bg-white/5 px-4 pr-12 text-sm text-white placeholder:text-white/20 outline-none transition-all focus:border-blue-500/60 focus:bg-white/10 focus:ring-2 focus:ring-blue-500/20"
-                          {...reg(field)}
-                        />
-                        <button
-                          type="button"
-                          onClick={toggle}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/70 transition-colors"
-                        >
-                          {show ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                      {rErr[field] && (
-                        <p className="text-xs text-red-400">
-                          {rErr[field]?.message}
-                        </p>
-                      )}
+                      {rErr[field] && <p style={{ color: "#f87171", fontSize: "11px", marginTop: "4px" }}>{rErr[field]?.message}</p>}
                     </div>
                   ))}
+                </div>
 
-                  <button
-                    type="submit"
-                    disabled={rSub}
-                    className="group mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold text-white shadow-lg shadow-blue-500/30 transition-all duration-200 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-[1.01] disabled:pointer-events-none disabled:opacity-50"
-                  >
-                    {rSub ? (
-                      <svg
-                        className="h-5 w-5 animate-spin"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                        />
-                      </svg>
-                    ) : (
-                      <>
-                        Hesap Oluştur
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              )}
-            </div>
+                <div>
+                  <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "7px" }}>E-posta</label>
+                  <input type="email" placeholder="ornek@sirket.com" className={inputCls} style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", borderRadius: "12px" }} {...reg("email")} />
+                  {rErr.email && <p style={{ color: "#f87171", fontSize: "12px", marginTop: "5px" }}>{rErr.email.message}</p>}
+                </div>
 
-            {/* Demo accounts */}
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm">
-              <p className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/30">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Demo hesaplar — tıkla, otomatik doldur
-              </p>
-              <div className="space-y-2.5">
-                {DEMO_ACCOUNTS.map((d) => (
-                  <button
-                    key={d.role}
-                    type="button"
-                    onClick={() => fillDemo(d.email, d.pass)}
-                    className="group w-full flex items-center gap-3 rounded-xl border border-white/[0.08] bg-white/5 p-3 text-left transition-all duration-200 hover:bg-white/10 hover:border-white/15"
-                  >
-                    <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${d.color} text-sm font-bold text-white shadow-lg`}
-                    >
-                      {d.role[0]}
+                {([
+                  { field: "password" as const, show: showPw2, toggle: () => setShowPw2((v) => !v), label: "Şifre", ph: "En az 8 karakter" },
+                  { field: "confirmPassword" as const, show: showPw3, toggle: () => setShowPw3((v) => !v), label: "Şifre Tekrar", ph: "Tekrar girin" },
+                ]).map(({ field, show, toggle, label, ph }) => (
+                  <div key={field}>
+                    <label style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", display: "block", marginBottom: "7px" }}>{label}</label>
+                    <div style={{ position: "relative" }}>
+                      <input
+                        type={show ? "text" : "password"}
+                        placeholder={ph}
+                        className={inputCls}
+                        style={{ background: "rgba(0,0,0,0.3)", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", borderRadius: "12px", paddingRight: "48px" }}
+                        {...reg(field)}
+                      />
+                      <button type="button" onClick={toggle} style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.3)", display: "flex" }}>
+                        {show ? <EyeOff size={17} /> : <Eye size={17} />}
+                      </button>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-white/80">
-                        {d.role}
-                      </p>
-                      <p className="text-xs text-white/30">{d.desc}</p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      <p className="text-xs font-mono text-white/25 truncate max-w-[140px]">
-                        {d.email}
-                      </p>
-                      <ArrowRight className="ml-auto mt-0.5 h-3.5 w-3.5 text-white/20 transition-transform group-hover:translate-x-0.5 group-hover:text-white/50" />
-                    </div>
-                  </button>
+                    {rErr[field] && <p style={{ color: "#f87171", fontSize: "12px", marginTop: "5px" }}>{rErr[field]?.message}</p>}
+                  </div>
                 ))}
-              </div>
+
+                <button
+                  type="submit"
+                  disabled={rSub}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: "8px",
+                    height: "48px", borderRadius: "13px", border: "none", cursor: "pointer",
+                    background: "linear-gradient(135deg, #3b82f6, #6366f1)",
+                    color: "#fff", fontWeight: 700, fontSize: "15px",
+                    boxShadow: "0 8px 24px rgba(99,102,241,0.35)",
+                    marginTop: "4px", opacity: rSub ? 0.65 : 1,
+                  }}
+                >
+                  {rSub ? (
+                    <svg style={{ animation: "spin 1s linear infinite", width: 20, height: 20 }} viewBox="0 0 24 24" fill="none">
+                      <circle opacity="0.25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                  ) : (
+                    <><span>Hesap Oluştur</span><ArrowRight size={17} /></>
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
+
+          {/* demo card */}
+          <div
+            style={{
+              borderRadius: "20px",
+              border: "1px solid rgba(255,255,255,0.07)",
+              background: "rgba(255,255,255,0.02)",
+              backdropFilter: "blur(16px)",
+              padding: "20px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "14px" }}>
+              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#34d399", display: "inline-block", animation: "pulse 2s infinite" }} />
+              <span style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em" }}>
+                Demo Hesaplar — tıkla, otomatik doldur
+              </span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              {DEMOS.map((d) => (
+                <button
+                  key={d.role}
+                  type="button"
+                  onClick={() => fillDemo(d.email, d.pass)}
+                  style={{
+                    display: "flex", alignItems: "center", gap: "12px",
+                    width: "100%", padding: "11px 14px",
+                    background: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: "12px", cursor: "pointer",
+                    transition: "all 0.15s", textAlign: "left",
+                  }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.14)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)";
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.07)";
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "36px", height: "36px", borderRadius: "10px",
+                      background: d.bg,
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "#fff", fontWeight: 700, fontSize: "15px", flexShrink: 0,
+                      boxShadow: `0 4px 12px ${d.bg}55`,
+                    }}
+                  >
+                    {d.role[0]}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ color: "rgba(255,255,255,0.85)", fontWeight: 600, fontSize: "13px" }}>{d.role}</div>
+                    <div style={{ color: "rgba(255,255,255,0.25)", fontSize: "11px", fontFamily: "monospace", marginTop: "1px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{d.email}</div>
+                  </div>
+                  <ArrowRight size={14} color="rgba(255,255,255,0.2)" />
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+        input::placeholder { color: rgba(255,255,255,0.2) !important; }
+        input { color: #fff !important; }
+        input:focus { border-color: rgba(99,102,241,0.6) !important; box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important; outline: none !important; }
+      `}</style>
     </div>
   );
 }
