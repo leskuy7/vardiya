@@ -7,14 +7,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/toast";
 import {
   CalendarDays,
-  KeyRound,
-  UserPlus,
   Eye,
   EyeOff,
   Moon,
   Sun,
-  Globe2,
   Shield,
+  Clock,
+  BarChart3,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -186,70 +185,122 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen font-sans bg-gray-50 dark:bg-[#0A0A0B] text-foreground selection:bg-blue-500/30">
-      {/* Left side - Branding/Hero (Visible on md+) */}
-      <div className="hidden w-1/2 flex-col justify-between bg-zinc-900 p-12 lg:flex relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-purple-900/20 mix-blend-multiply" />
-        <div className="relative z-10 flex items-center gap-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md">
-            <CalendarDays className="h-5 w-5" />
+    <div className="flex min-h-screen font-sans">
+      {/* Left side - Branding/Hero (Visible on lg+) */}
+      <div className="hidden lg:flex lg:w-1/2 xl:w-[45%] relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900">
+        {/* Background pattern */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiM0MjY2ZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2djI4SDI0VjE2aDEyem0yNC0yNHYyOEg0OFYwaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40 dark:opacity-10"></div>
+        
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/25">
+              <CalendarDays className="h-6 w-6" />
+            </div>
+            <div>
+              <span className="block text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Vardiya Planlayıcı
+              </span>
+              <span className="block text-xs text-slate-600 dark:text-slate-400 font-medium">
+                Ekip Yönetim Platformu
+              </span>
+            </div>
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">
-            Vardiya Planlayıcı
-          </span>
-        </div>
 
-        <div className="relative z-10 max-w-md">
-          <h2 className="text-4xl font-semibold tracking-tight text-white mb-6">
-            Ekibinizin Mesaisini <br />
-            <span className="text-blue-400">Akıllıca Yönetin.</span>
-          </h2>
-          <p className="text-lg text-zinc-400">
-            Vardiya Planlayıcı ile çalışanlarınızın mesai saatlerini, izinlerini
-            ve uygunluk durumlarını tek bir merkezden kolayca organize edin.
-          </p>
-        </div>
+          {/* Hero content */}
+          <div className="max-w-md space-y-8">
+            <div>
+              <h1 className="text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-4">
+                Ekibinizin Mesaisini{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                  Akıllıca Yönetin
+                </span>
+              </h1>
+              <p className="text-lg text-slate-600 dark:text-slate-300">
+                Vardiya planlamayı basitleştirin, ekibinizin üretkenliğini artırın
+              </p>
+            </div>
 
-        <div className="relative z-10 flex items-center gap-4 text-sm font-medium text-zinc-500">
-          <Globe2 className="h-4 w-4" />
-          <span>tr-TR / en-US</span>
+            {/* Features */}
+            <div className="space-y-4">
+              {[
+                {
+                  icon: CalendarDays,
+                  title: t.feature1,
+                  desc: t.feature1Desc,
+                },
+                {
+                  icon: Clock,
+                  title: t.feature2,
+                  desc: t.feature2Desc,
+                },
+                {
+                  icon: BarChart3,
+                  title: t.feature3,
+                  desc: t.feature3Desc,
+                },
+              ].map((feature, idx) => (
+                <div key={idx} className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400">
+                    <feature.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm">
+                      {feature.title}
+                    </h3>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">
+                      {feature.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <Shield className="h-4 w-4" />
+            <span>{t.noGoogle}</span>
+          </div>
         </div>
       </div>
 
       {/* Right side - Forms */}
-      <div className="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:px-20 xl:px-24 bg-white dark:bg-[#0A0A0B]">
-        <div className="mx-auto w-full max-w-sm lg:w-[400px]">
+      <div className="flex flex-1 flex-col justify-center px-6 py-12 sm:px-12 lg:px-16 xl:px-24 bg-white dark:bg-slate-950">
+        <div className="mx-auto w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="flex lg:hidden items-center gap-3 mb-8">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg">
+              <CalendarDays className="h-5 w-5" />
+            </div>
+            <span className="text-xl font-bold tracking-tight">
+              Vardiya Planlayıcı
+            </span>
+          </div>
+
           {/* Header */}
           <div className="mb-8">
-            <div className="flex lg:hidden items-center gap-2 mb-6">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
-                <CalendarDays className="h-4 w-4" />
-              </div>
-              <span className="text-lg font-bold tracking-tight">
-                Vardiya Planlayıcı
-              </span>
-            </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between mb-6">
               <div>
-                <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
                   {mode === "login" ? t.titleLogin : t.titleRegister}
                 </h1>
-                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                   {mode === "login" ? t.subtitleLogin : t.subtitleRegister}
                 </p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1.5">
                 <button
                   type="button"
                   onClick={toggleLang}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                 >
                   {lang.toUpperCase()}
                 </button>
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
                 >
                   {theme === "light" ? (
                     <Moon className="h-4 w-4" />
@@ -262,13 +313,13 @@ export default function LoginPage() {
           </div>
 
           {/* Form container */}
-          <div className="mt-8 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 shadow-sm p-6 sm:p-8">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/50 dark:shadow-none p-8">
             {mode === "login" ? (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 <div className="space-y-2">
                   <label
                     htmlFor="email"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
                   >
                     {t.email}
                   </label>
@@ -277,11 +328,11 @@ export default function LoginPage() {
                     type="email"
                     autoComplete="email"
                     placeholder="ornek@sirket.com"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                    className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                     {...register("email")}
                   />
                   {errors.email?.message && (
-                    <p className="text-[13px] text-destructive">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       {errors.email.message}
                     </p>
                   )}
@@ -291,7 +342,7 @@ export default function LoginPage() {
                   <div className="flex items-center justify-between">
                     <label
                       htmlFor="password"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-sm font-semibold text-slate-700 dark:text-slate-200"
                     >
                       {t.password}
                     </label>
@@ -306,7 +357,7 @@ export default function LoginPage() {
                           );
                         }
                       }}
-                      className="text-[13px] font-medium text-primary hover:underline"
+                      className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
                     >
                       {t.forgot}
                     </button>
@@ -317,23 +368,23 @@ export default function LoginPage() {
                       type={showLoginPassword ? "text" : "password"}
                       autoComplete="current-password"
                       placeholder="••••••••"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10 transition-all"
+                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 pr-11"
                       {...register("password")}
                     />
                     <button
                       type="button"
                       onClick={() => setShowLoginPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     >
                       {showLoginPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-5 w-5" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-5 w-5" />
                       )}
                     </button>
                   </div>
                   {errors.password?.message && (
-                    <p className="text-[13px] text-destructive">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       {errors.password.message}
                     </p>
                   )}
@@ -343,11 +394,11 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                   >
                     {isSubmitting ? (
                       <svg
-                        className="h-4 w-4 animate-spin"
+                        className="h-5 w-5 animate-spin"
                         viewBox="0 0 24 24"
                         fill="none"
                       >
@@ -380,18 +431,18 @@ export default function LoginPage() {
                   <div className="space-y-2">
                     <label
                       htmlFor="firstName"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-sm font-semibold text-slate-700 dark:text-slate-200"
                     >
                       {t.firstName}
                     </label>
                     <input
                       id="firstName"
                       placeholder="Ali"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                       {...registerField("firstName")}
                     />
                     {registerErrors.firstName?.message && (
-                      <p className="text-[13px] text-destructive">
+                      <p className="text-sm text-red-600 dark:text-red-400">
                         {registerErrors.firstName.message}
                       </p>
                     )}
@@ -399,18 +450,18 @@ export default function LoginPage() {
                   <div className="space-y-2">
                     <label
                       htmlFor="lastName"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-sm font-semibold text-slate-700 dark:text-slate-200"
                     >
                       {t.lastName}
                     </label>
                     <input
                       id="lastName"
                       placeholder="Yılmaz"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                       {...registerField("lastName")}
                     />
                     {registerErrors.lastName?.message && (
-                      <p className="text-[13px] text-destructive">
+                      <p className="text-sm text-red-600 dark:text-red-400">
                         {registerErrors.lastName.message}
                       </p>
                     )}
@@ -420,7 +471,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="registerEmail"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
                   >
                     {t.email}
                   </label>
@@ -429,11 +480,11 @@ export default function LoginPage() {
                     type="email"
                     autoComplete="email"
                     placeholder="ornek@sirket.com"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 transition-all"
+                    className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50"
                     {...registerField("email")}
                   />
                   {registerErrors.email?.message && (
-                    <p className="text-[13px] text-destructive">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       {registerErrors.email.message}
                     </p>
                   )}
@@ -442,7 +493,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="registerPassword"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
                   >
                     {t.password}
                   </label>
@@ -452,23 +503,23 @@ export default function LoginPage() {
                       type={showRegisterPassword ? "text" : "password"}
                       autoComplete="new-password"
                       placeholder="En az 8 karakter"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10 transition-all"
+                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 pr-11"
                       {...registerField("password")}
                     />
                     <button
                       type="button"
                       onClick={() => setShowRegisterPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     >
                       {showRegisterPassword ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-5 w-5" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-5 w-5" />
                       )}
                     </button>
                   </div>
                   {registerErrors.password?.message && (
-                    <p className="text-[13px] text-destructive">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       {registerErrors.password.message}
                     </p>
                   )}
@@ -477,7 +528,7 @@ export default function LoginPage() {
                 <div className="space-y-2">
                   <label
                     htmlFor="confirmPassword"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-semibold text-slate-700 dark:text-slate-200"
                   >
                     {t.passwordAgain}
                   </label>
@@ -487,23 +538,23 @@ export default function LoginPage() {
                       type={showRegisterPassword2 ? "text" : "password"}
                       autoComplete="new-password"
                       placeholder="Şifrenizi tekrar girin"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10 transition-all"
+                      className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50 pr-11"
                       {...registerField("confirmPassword")}
                     />
                     <button
                       type="button"
                       onClick={() => setShowRegisterPassword2((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     >
                       {showRegisterPassword2 ? (
-                        <EyeOff className="h-4 w-4" />
+                        <EyeOff className="h-5 w-5" />
                       ) : (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-5 w-5" />
                       )}
                     </button>
                   </div>
                   {registerErrors.confirmPassword?.message && (
-                    <p className="text-[13px] text-destructive">
+                    <p className="text-sm text-red-600 dark:text-red-400">
                       {registerErrors.confirmPassword.message}
                     </p>
                   )}
@@ -513,11 +564,11 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={isRegisterSubmitting}
-                    className="inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                    className="flex h-11 w-full items-center justify-center rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                   >
                     {isRegisterSubmitting ? (
                       <svg
-                        className="h-4 w-4 animate-spin"
+                        className="h-5 w-5 animate-spin"
                         viewBox="0 0 24 24"
                         fill="none"
                       >
@@ -543,13 +594,13 @@ export default function LoginPage() {
               </form>
             )}
 
-            <div className="relative mt-6">
+            <div className="relative mt-8">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
+                <span className="w-full border-t border-slate-200 dark:border-slate-800" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Veya
+                <span className="bg-white dark:bg-slate-900 px-3 text-slate-500 dark:text-slate-400 font-medium">
+                  veya
                 </span>
               </div>
             </div>
@@ -558,7 +609,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setMode(mode === "login" ? "register" : "login")}
-                className="text-[13px] text-muted-foreground hover:text-foreground transition-colors font-medium"
+                className="text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors font-medium"
               >
                 {mode === "login"
                   ? "Hesabınız yok mu? Kayıt olun"
@@ -568,10 +619,10 @@ export default function LoginPage() {
           </div>
 
           {/* Demo Accounts Panel */}
-          <div className="mt-8 overflow-hidden rounded-xl border bg-muted/30">
-            <div className="border-b bg-muted/50 px-4 py-3">
-              <h3 className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+          <div className="mt-6 overflow-hidden rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20">
+            <div className="border-b border-blue-200 dark:border-blue-900 bg-blue-100/50 dark:bg-blue-950/50 px-4 py-3">
+              <h3 className="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400 animate-pulse" />
                 {t.demoTitle}
               </h3>
             </div>
@@ -582,29 +633,44 @@ export default function LoginPage() {
                     role: "Admin",
                     email: "admin@shiftplanner.com",
                     pass: "Admin1234!",
+                    color: "bg-violet-100 dark:bg-violet-950 text-violet-700 dark:text-violet-300",
                   },
                   {
                     role: "Müdür",
                     email: "manager@shiftplanner.com",
                     pass: "Manager1234!",
+                    color: "bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300",
                   },
                   {
                     role: "Çalışan",
                     email: "ali@shiftplanner.com",
                     pass: "Employee1234!",
+                    color: "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300",
                   },
                 ].map((d) => (
                   <div
                     key={d.role}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-border/50 pb-3 last:border-0 last:pb-0"
+                    className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3 hover:shadow-md transition-shadow"
                   >
-                    <span className="text-[13px] font-medium text-foreground">
-                      {d.role}
-                    </span>
-                    <span className="text-[12px] text-muted-foreground font-mono select-all">
-                      {d.email} <span className="mx-1 text-border">/</span>{" "}
-                      {d.pass}
-                    </span>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${d.color}`}>
+                        {d.role}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 w-16">Email:</span>
+                        <code className="text-xs text-slate-900 dark:text-slate-100 font-mono select-all bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                          {d.email}
+                        </code>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-500 dark:text-slate-400 w-16">Şifre:</span>
+                        <code className="text-xs text-slate-900 dark:text-slate-100 font-mono select-all bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                          {d.pass}
+                        </code>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
