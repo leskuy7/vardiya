@@ -173,13 +173,13 @@ export default function SchedulePage() {
           overflow: "hidden",
           background: isDark
             ? "linear-gradient(140deg, rgba(14, 22, 36, 0.95) 0%, rgba(12, 18, 28, 0.95) 55%, rgba(9, 15, 25, 0.95) 100%)"
-            : "linear-gradient(140deg, rgba(239, 246, 255, 0.95) 0%, rgba(219, 234, 254, 0.95) 55%, rgba(224, 231, 255, 0.95) 100%)",
+            : "#fff",
           borderColor: isDark
             ? "var(--mantine-color-dark-4)"
-            : "var(--mantine-color-gray-3)",
+            : "#e2e8f0",
           boxShadow: isDark
             ? "0 16px 60px rgba(0, 0, 0, 0.35)"
-            : "0 16px 50px rgba(37, 99, 235, 0.12)",
+            : "0 16px 50px rgba(37, 99, 235, 0.08)",
         }}
       >
         <Box
@@ -329,12 +329,15 @@ function StatChip({
       py={6}
       radius="md"
       style={{
-        background: isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.85)",
+        background: isDark ? "rgba(255,255,255,0.03)" : "#fff",
         borderColor: accent
           ? "var(--mantine-color-red-6)"
           : isDark
             ? "var(--mantine-color-dark-4)"
-            : "var(--mantine-color-gray-3)",
+            : "#e2e8f0",
+        boxShadow: isDark
+          ? undefined
+          : "0 2px 8px rgba(37, 99, 235, 0.04)",
       }}
     >
       <Group gap={6}>

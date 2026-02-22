@@ -159,10 +159,13 @@ export default function AvailabilityPage() {
         style={{
           background: isDark
             ? "linear-gradient(135deg, rgba(20, 83, 45, 0.2), rgba(15, 23, 42, 0.2))"
-            : "linear-gradient(135deg, rgba(236, 253, 245, 0.9), rgba(219, 234, 254, 0.9))",
+            : "#fff",
           borderColor: isDark
             ? "var(--mantine-color-dark-4)"
-            : "var(--mantine-color-gray-3)",
+            : "#e2e8f0",
+          boxShadow: isDark
+            ? undefined
+            : "0 2px 8px rgba(37, 99, 235, 0.04)",
         }}
       >
         <Group justify="space-between" wrap="wrap">

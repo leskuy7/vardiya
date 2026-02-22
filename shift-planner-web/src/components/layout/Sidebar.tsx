@@ -90,8 +90,12 @@ export function Sidebar({ className }: { className?: string }) {
               radius="md"
               p={8}
               style={{
-                background: "linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(99, 102, 241, 0.85))",
-                boxShadow: "0 10px 30px rgba(59, 130, 246, 0.25)",
+                background: isDark
+                  ? "var(--mantine-color-body)"
+                  : "#f8fafc", // light tema için daha beyaz
+                borderRight: isDark
+                  ? "1px solid var(--mantine-color-default-border)"
+                  : "1px solid #e2e8f0", // light tema için daha açık border
               }}
             >
               <IconLayoutDashboard size={18} color="white" />
@@ -164,10 +168,10 @@ export function Sidebar({ className }: { className?: string }) {
                     justifyContent: "center",
                     background: isDark
                       ? "rgba(59, 130, 246, 0.2)"
-                      : "rgba(59, 130, 246, 0.12)",
+                      : "#e0e7ff",
                     border: isDark
                       ? "1px solid rgba(59, 130, 246, 0.4)"
-                      : "1px solid rgba(59, 130, 246, 0.25)",
+                      : "1px solid #bae6fd",
                   }}
                 >
                   <Text size="xs" fw={700} c="blue.2">
