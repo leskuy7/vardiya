@@ -15,6 +15,7 @@ import {
   Loader,
   Modal,
   Paper,
+  SegmentedControl,
   Select,
   Stack,
   Table,
@@ -28,18 +29,18 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { useAuth } from "@/hooks/useAuth";
 import type { AvailabilityBlock } from "@/types";
 
-const DAY_LABELS = ["Pazar", "Pazartesi", "Sali", "Carsamba", "Persembe", "Cuma", "Cumartesi"];
+const DAY_LABELS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 
 const BLOCK_TYPE_LABELS: Record<string, string> = {
-  UNAVAILABLE: "Musait Degil",
-  PREFER_NOT: "Tercih Degil",
+  UNAVAILABLE: "Müsait Değil",
+  PREFER_NOT: "Tercih Değil",
   AVAILABLE_ONLY: "Sadece Bu Saatler",
 };
 
 const availSchema = z.object({
-  employeeId: z.string().min(1, "Calisan secin"),
+  employeeId: z.string().min(1, "Çalışan seçin"),
   type: z.enum(["UNAVAILABLE", "PREFER_NOT", "AVAILABLE_ONLY"]),
-  dayOfWeek: z.coerce.number().min(0).max(6),
+  dayOfWeek: z.coerce.number().min(0).max(6).optional(),
   startTime: z.string().optional(),
   endTime: z.string().optional(),
   startDate: z.string().optional(),
@@ -49,8 +50,8 @@ const availSchema = z.object({
 type AvailFormValues = z.infer<typeof availSchema>;
 
 const TYPE_OPTIONS = [
-  { value: "UNAVAILABLE", label: "Musait Degil" },
-  { value: "PREFER_NOT", label: "Tercih Degil" },
+  { value: "UNAVAILABLE", label: "Müsait Değil" },
+  { value: "PREFER_NOT", label: "Tercih Değil" },
   { value: "AVAILABLE_ONLY", label: "Sadece Bu Saatler" },
 ];
 
@@ -71,6 +72,7 @@ export default function AvailabilityPage() {
   const deleteAvail = useDeleteAvailability();
 
   const [modal, setModal] = useState(false);
+  const [isRecurring, setIsRecurring] = useState("true");
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; block?: AvailabilityBlock }>({
     open: false,
   });
@@ -101,7 +103,24 @@ export default function AvailabilityPage() {
 
   const onSubmit = async (values: AvailFormValues) => {
     try {
-      await createAvail.mutateAsync(values);
+      let finalDayOfWeek = values.dayOfWeek ?? 1;
+
+      if (isRecurring === "false") {
+        if (!values.startDate) {
+          toast("error", "Lutfen baslangic tarihi secin");
+          return;
+        }
+        finalDayOfWeek = new Date(values.startDate).getDay();
+      }
+
+      const payload = {
+        ...values,
+        dayOfWeek: finalDayOfWeek,
+        startDate: isRecurring === "true" ? undefined : values.startDate,
+        endDate: isRecurring === "true" ? undefined : values.endDate,
+      };
+
+      await createAvail.mutateAsync(payload);
       toast("success", "Musaitlik blogu eklendi.");
       setModal(false);
     } catch (err: unknown) {
@@ -141,22 +160,22 @@ export default function AvailabilityPage() {
               <IconCalendarEvent size={18} />
             </Paper>
             <Box>
-              <Text fw={700}>Musaitlik Engelleri</Text>
-              <Text size="xs" c="dimmed">Takvim kisitlarini yonetin</Text>
+              <Text fw={700}>Müsaitlik Engelleri</Text>
+              <Text size="xs" c="dimmed">Takvim kısıtlarını yönetin</Text>
             </Box>
           </Group>
           <Group gap="xs" wrap="wrap">
             {canManageAll && (
               <Select
-                placeholder="Calisan secin"
-                data={[{ value: "", label: "Tumu" }, ...(employees ?? []).map((emp) => ({
+                placeholder="Çalışan seçin"
+                data={[{ value: "", label: "Tümü" }, ...(employees ?? []).map((emp) => ({
                   value: emp.id,
                   label: emp.user.name,
                 }))]}
                 value={filterEmployeeId ?? ""}
                 onChange={(value) => setFilterEmployeeId(value || undefined)}
                 searchable
-                nothingFoundMessage="Sonuc yok"
+                nothingFoundMessage="Sonuç yok"
               />
             )}
             <Button leftSection={<IconPlus size={16} />} onClick={openCreate}>
@@ -184,12 +203,12 @@ export default function AvailabilityPage() {
           <Table verticalSpacing="sm" highlightOnHover>
             <Table.Thead>
               <Table.Tr>
-                <Table.Th>Calisan</Table.Th>
-                <Table.Th>Gun</Table.Th>
-                <Table.Th>Tur</Table.Th>
-                <Table.Th>Saat Araligi</Table.Th>
-                <Table.Th>Tarih Araligi</Table.Th>
-                <Table.Th style={{ textAlign: "right" }}>Islem</Table.Th>
+                <Table.Th>Çalışan</Table.Th>
+                <Table.Th>Gün</Table.Th>
+                <Table.Th>Tür</Table.Th>
+                <Table.Th>Saat Aralığı</Table.Th>
+                <Table.Th>Tarih Aralığı</Table.Th>
+                <Table.Th style={{ textAlign: "right" }}>İşlem</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -245,7 +264,7 @@ export default function AvailabilityPage() {
         </Paper>
       )}
 
-      <Modal opened={modal} onClose={() => setModal(false)} title="Musaitlik Engeli Ekle" size="lg" centered>
+      <Modal opened={modal} onClose={() => setModal(false)} title="Müsaitlik Engeli Ekle" size="lg" centered>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack gap="sm">
             {canManageAll && (
@@ -254,8 +273,8 @@ export default function AvailabilityPage() {
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Calisan"
-                    placeholder="Secin..."
+                    label="Çalışan"
+                    placeholder="Seçin..."
                     data={(employees ?? []).map((emp) => ({
                       value: emp.id,
                       label: emp.user.name,
@@ -264,31 +283,49 @@ export default function AvailabilityPage() {
                     onChange={(value) => field.onChange(value ?? "")}
                     error={errors.employeeId?.message}
                     searchable
-                    nothingFoundMessage="Sonuc yok"
+                    nothingFoundMessage="Sonuç yok"
                   />
                 )}
               />
             )}
 
+            <SegmentedControl
+              value={isRecurring}
+              onChange={setIsRecurring}
+              data={[
+                { label: "Haftalık Tekrar (Sürekli)", value: "true" },
+                { label: "Belirli Bir Tarih", value: "false" },
+              ]}
+              fullWidth
+            />
+
             <Group grow>
-              <Controller
-                name="dayOfWeek"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    label="Gun"
-                    data={DAY_LABELS.map((d, i) => ({ value: String(i), label: d }))}
-                    value={String(field.value)}
-                    onChange={(value) => field.onChange(Number(value ?? 0))}
-                  />
-                )}
-              />
+              {isRecurring === "true" ? (
+                <Controller
+                  name="dayOfWeek"
+                  control={control}
+                  render={({ field }) => (
+                    <Select
+                      label="Gün"
+                      data={DAY_LABELS.map((d, i) => ({ value: String(i), label: d }))}
+                      value={String(field.value)}
+                      onChange={(value) => field.onChange(Number(value ?? 0))}
+                    />
+                  )}
+                />
+              ) : (
+                <Group grow>
+                  <TextInput label="Tarih" type="date" {...register("startDate")} />
+                  <TextInput label="Bitiş Tarihi (opsiyonel)" type="date" {...register("endDate")} />
+                </Group>
+              )}
+
               <Controller
                 name="type"
                 control={control}
                 render={({ field }) => (
                   <Select
-                    label="Engel Turu"
+                    label="Engel Türü"
                     data={TYPE_OPTIONS}
                     value={field.value}
                     onChange={(value) => field.onChange(value ?? "UNAVAILABLE")}
@@ -298,19 +335,14 @@ export default function AvailabilityPage() {
             </Group>
 
             <Group grow>
-              <TextInput label="Baslangic Saati (opsiyonel)" type="time" {...register("startTime")} />
-              <TextInput label="Bitis Saati (opsiyonel)" type="time" {...register("endTime")} />
-            </Group>
-
-            <Group grow>
-              <TextInput label="Baslangic Tarihi (opsiyonel)" type="date" {...register("startDate")} />
-              <TextInput label="Bitis Tarihi (opsiyonel)" type="date" {...register("endDate")} />
+              <TextInput size="md" label="Başlangıç Saati (opsiyonel)" type="time" {...register("startTime")} />
+              <TextInput size="md" label="Bitiş Saati (opsiyonel)" type="time" {...register("endTime")} />
             </Group>
 
             <Divider />
             <Group justify="flex-end">
               <Button variant="default" onClick={() => setModal(false)} disabled={isSubmitting}>
-                Iptal
+                İptal
               </Button>
               <Button type="submit" loading={isSubmitting}>
                 Ekle
@@ -323,18 +355,18 @@ export default function AvailabilityPage() {
       <Modal
         opened={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false })}
-        title="Musaitlik Engelini Sil"
+        title="Müsaitlik Engelini Sil"
         size="sm"
         centered
       >
         <Stack gap="sm">
           <Text size="sm" c="dimmed">
-            Bu musaitlik engelini silmek istediginizden emin misiniz?
+            Bu müsaitlik engelini silmek istediğinizden emin misiniz?
           </Text>
           <Divider />
           <Group justify="flex-end">
             <Button variant="default" onClick={() => setDeleteDialog({ open: false })}>
-              Iptal
+              İptal
             </Button>
             <Button color="red" onClick={handleDeleteConfirm} loading={deleteAvail.isPending}>
               Sil

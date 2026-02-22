@@ -35,6 +35,11 @@ export class CreateShiftDto {
   @IsBoolean()
   @IsOptional()
   forceOverride?: boolean;
+
+  @ApiPropertyOptional({ enum: ['DRAFT', 'PUBLISHED'] })
+  @IsString()
+  @IsOptional()
+  status?: string;
 }
 
 export class UpdateShiftDto {
@@ -67,6 +72,11 @@ export class UpdateShiftDto {
   @IsBoolean()
   @IsOptional()
   forceOverride?: boolean;
+
+  @ApiPropertyOptional({ enum: ['DRAFT', 'PUBLISHED'] })
+  @IsString()
+  @IsOptional()
+  status?: string;
 }
 
 export class CopyWeekDto {

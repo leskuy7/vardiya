@@ -56,7 +56,7 @@ export function WeeklyGrid({
     return (
       <Paper withBorder p="xl" radius="lg">
         <Center h={180}>
-          <Text size="sm" c="dimmed">Bu hafta icin program bulunamadi.</Text>
+          <Text size="sm" c="dimmed">Bu hafta için program bulunamadı.</Text>
         </Center>
       </Paper>
     );
@@ -129,7 +129,7 @@ export function WeeklyGrid({
             }}
           >
             <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.12em" }}>
-              Calisan
+              Çalışan
             </Text>
           </Box>
           {weekDays.map((day, i) => {

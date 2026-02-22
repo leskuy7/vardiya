@@ -6,7 +6,7 @@ import { Center, Loader, Table, Text } from "@mantine/core";
 import { useWeeklySchedule } from "@/hooks/useShifts";
 import { getMonday, getWeekDates, formatTime, getShiftDuration } from "@/lib/utils";
 
-const DAY_NAMES = ["Pzt", "Sal", "Car", "Per", "Cum", "Cmt", "Paz"];
+const DAY_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
 function PrintContent() {
   const params = useSearchParams();
@@ -35,8 +35,16 @@ function PrintContent() {
 
   return (
     <div style={{ margin: "0 auto", maxWidth: 1100, padding: 24, fontSize: "10pt" }}>
+      <style>
+        {`
+          @media print {
+            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: landscape; margin: 10mm; }
+          }
+        `}
+      </style>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, borderBottom: "1px solid #e5e7eb", paddingBottom: 8 }}>
-        <Text fw={700}>Vardiya Programi</Text>
+        <Text fw={700}>Vardiya Programı</Text>
         <Text size="sm" c="dimmed">
           {startDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })} – {" "}
           {endDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
@@ -46,7 +54,7 @@ function PrintContent() {
       <Table withTableBorder withColumnBorders verticalSpacing="xs" style={{ fontSize: "9pt" }}>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Calisan</Table.Th>
+            <Table.Th>Çalışan</Table.Th>
             {weekDays.map((day, i) => {
               const d = new Date(day + "T00:00:00+03:00");
               return (
@@ -102,8 +110,8 @@ function PrintContent() {
       </Table>
 
       <div style={{ marginTop: 14, display: "flex", justifyContent: "space-between", color: "#94a3b8", fontSize: "8pt" }}>
-        <span>Vardiya Planlayici Sistemi</span>
-        <span>Basim: {new Date().toLocaleDateString("tr-TR", { dateStyle: "long" })}</span>
+        <span>Vardiya Planlayıcı Sistemi</span>
+        <span>Basım: {new Date().toLocaleDateString("tr-TR", { dateStyle: "long" })}</span>
       </div>
     </div>
   );

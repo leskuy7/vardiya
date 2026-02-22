@@ -12,7 +12,7 @@ import { CreateAvailabilityDto } from './dto';
 export class AvailabilityService {
   private readonly logger = new Logger(AvailabilityService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(filters: { employeeId?: string; dayOfWeek?: number }) {
     const where: any = {};
@@ -76,8 +76,12 @@ export class AvailabilityService {
       });
     }
 
-    // Only owner or admin can delete
-    if (block.employeeId !== employeeId && userRole !== 'ADMIN') {
+    // Only owner, admin, or manager can delete
+    if (
+      block.employeeId !== employeeId &&
+      userRole !== 'ADMIN' &&
+      userRole !== 'MANAGER'
+    ) {
       throw new ForbiddenException({
         code: 'FORBIDDEN',
         message: 'Bu müsaitlik bloğunu silme yetkiniz yok',

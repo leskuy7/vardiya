@@ -6,8 +6,6 @@ import { ActionIcon, Badge, Button, Group, Paper, Text, Tooltip } from "@mantine
 import { useMantineColorScheme } from "@mantine/core";
 import {
   IconPrinter,
-  IconMoonStars,
-  IconSun,
   IconCalendarWeek,
 } from "@tabler/icons-react";
 
@@ -26,9 +24,6 @@ export function Navbar() {
   )?.[1] ?? "Vardiya Planlayıcı";
 
   const showPrint = pathname.startsWith("/schedule");
-
-  const { colorScheme, setColorScheme } = useMantineColorScheme();
-  const toggleTheme = () => setColorScheme(colorScheme === "dark" ? "light" : "dark");
 
   const todayLabel = useMemo(
     () =>
@@ -69,14 +64,9 @@ export function Navbar() {
               onClick={() => window.open("/schedule/print", "_blank")}
               className="no-print"
             >
-              Yazdir
+              Yazdır
             </Button>
           )}
-          <Tooltip label={colorScheme === "dark" ? "Aydinlik" : "Koyu"}>
-            <ActionIcon variant="default" size="lg" onClick={toggleTheme} aria-label="Tema degistir">
-              {colorScheme === "dark" ? <IconSun size={18} /> : <IconMoonStars size={18} />}
-            </ActionIcon>
-          </Tooltip>
         </Group>
       </Group>
     </Paper>

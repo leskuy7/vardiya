@@ -145,8 +145,9 @@ export function ShiftModal({
   const employeeOptions = useMemo(
     () =>
       employees.map((emp) => ({
+        group: emp.department || "Belirtilmemiş",
         value: emp.id,
-        label: `${emp.user.name} — ${emp.position ?? emp.department ?? ""}`.trim(),
+        label: emp.position ? `${emp.user.name} — ${emp.position}` : emp.user.name,
       })),
     [employees]
   );
@@ -155,7 +156,7 @@ export function ShiftModal({
     <Modal
       opened={open}
       onClose={onClose}
-      title={isEdit ? "Vardiyayi Duzenle" : "Yeni Vardiya Ekle"}
+      title={isEdit ? "Vardiyayı Düzenle" : "Yeni Vardiya Ekle"}
       size="md"
       centered
     >
@@ -166,14 +167,14 @@ export function ShiftModal({
             control={control}
             render={({ field }) => (
               <Select
-                label="Calisan"
-                placeholder="Calisan secin..."
+                label="Çalışan"
+                placeholder="Çalışan seçin..."
                 data={employeeOptions}
                 value={field.value}
                 onChange={(value) => field.onChange(value ?? "")}
                 error={errors.employeeId?.message}
                 searchable
-                nothingFoundMessage="Sonuc yok"
+                nothingFoundMessage="Sonuç yok"
               />
             )}
           />
@@ -199,7 +200,7 @@ export function ShiftModal({
               render={({ field }) => (
                 <TextInput
                   type="time"
-                  label="Baslangic Saati"
+                  label="Başlangıç Saati"
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.startTime?.message}
@@ -212,7 +213,7 @@ export function ShiftModal({
               render={({ field }) => (
                 <TextInput
                   type="time"
-                  label="Bitis Saati"
+                  label="Bitiş Saati"
                   value={field.value}
                   onChange={field.onChange}
                   error={errors.endTime?.message}
@@ -229,7 +230,7 @@ export function ShiftModal({
                 label="Durum"
                 data={[
                   { value: "DRAFT", label: "Taslak" },
-                  { value: "PUBLISHED", label: "Yayinda" },
+                  { value: "PUBLISHED", label: "Yayında" },
                 ]}
                 value={field.value}
                 onChange={(value) => field.onChange(value ?? "DRAFT")}
@@ -243,7 +244,7 @@ export function ShiftModal({
             render={({ field }) => (
               <Textarea
                 label="Not (opsiyonel)"
-                placeholder="Aciklama..."
+                placeholder="Açıklama..."
                 autosize
                 minRows={2}
                 value={field.value}
@@ -257,7 +258,7 @@ export function ShiftModal({
             control={control}
             render={({ field }) => (
               <Checkbox
-                label="Musaitlik cakismasini gormezden gel"
+                label="Müsaitlik çakışmasını görmezden gel"
                 checked={!!field.value}
                 onChange={(event) => field.onChange(event.currentTarget.checked)}
               />
@@ -266,10 +267,10 @@ export function ShiftModal({
 
           <Group justify="flex-end" mt="sm">
             <Button variant="default" onClick={onClose} disabled={isSubmitting}>
-              Iptal
+              İptal
             </Button>
             <Button type="submit" loading={isSubmitting}>
-              {isEdit ? "Guncelle" : "Olustur"}
+              {isEdit ? "Güncelle" : "Oluştur"}
             </Button>
           </Group>
         </Stack>

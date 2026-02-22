@@ -195,32 +195,8 @@ export default function SchedulePage() {
 
         <Stack gap="md" style={{ position: "relative" }}>
           <Group justify="space-between" wrap="wrap">
-            <Group gap="sm">
-              <Badge size="lg" radius="sm" variant="light" leftSection={<IconCalendarWeek size={14} />}>Haftalik Vardiya Programi</Badge>
-              <Text size="sm" c="dimmed">{weekLabel}</Text>
-            </Group>
-            {canManage && (
-              <Group gap="xs">
-                <Button
-                  variant="light"
-                  leftSection={<IconCopy size={16} />}
-                  onClick={() => setCopyModal(true)}
-                >
-                  Haftayi Kopyala
-                </Button>
-                <Button
-                  leftSection={<IconPlus size={16} />}
-                  onClick={() => setShiftModal({ open: true })}
-                >
-                  Vardiya Ekle
-                </Button>
-              </Group>
-            )}
-          </Group>
-
-          <Group justify="space-between" wrap="wrap">
             <Group gap={6}>
-              <ActionIcon variant="default" size="lg" onClick={() => setCurrentMonday((m) => shiftWeek(m, -1))} aria-label="Onceki hafta">
+              <ActionIcon variant="default" size="lg" onClick={() => setCurrentMonday((m) => shiftWeek(m, -1))} aria-label="Önceki hafta">
                 <IconChevronLeft size={16} />
               </ActionIcon>
               <Paper withBorder px="md" py={6} radius="md">
@@ -229,15 +205,34 @@ export default function SchedulePage() {
               <ActionIcon variant="default" size="lg" onClick={() => setCurrentMonday((m) => shiftWeek(m, 1))} aria-label="Sonraki hafta">
                 <IconChevronRight size={16} />
               </ActionIcon>
-              <Button variant="default" size="xs" onClick={() => setCurrentMonday(getMonday(new Date()))}>Bugun</Button>
+              <Button variant="default" size="xs" onClick={() => setCurrentMonday(getMonday(new Date()))}>Bugün</Button>
+
+              {canManage && (
+                <>
+                  <Divider orientation="vertical" mx="xs" />
+                  <Button
+                    variant="light"
+                    leftSection={<IconCopy size={16} />}
+                    onClick={() => setCopyModal(true)}
+                  >
+                    Haftayı Kopyala
+                  </Button>
+                  <Button
+                    leftSection={<IconPlus size={16} />}
+                    onClick={() => setShiftModal({ open: true })}
+                  >
+                    Vardiya Ekle
+                  </Button>
+                </>
+              )}
             </Group>
 
             <Group gap="xs">
-              <StatChip icon={<IconUsers size={14} />} label="Calisan" value={String(summary.totalEmployees)} />
+              <StatChip icon={<IconUsers size={14} />} label="Çalışan" value={String(summary.totalEmployees)} />
               <StatChip icon={<IconCalendarWeek size={14} />} label="Vardiya" value={String(summary.totalShifts)} />
               <StatChip icon={<IconClock size={14} />} label="Saat" value={summary.totalHours.toFixed(1)} />
               {summary.conflictDays > 0 && (
-                <StatChip icon={<IconAlertTriangle size={14} />} label="Cakisma" value={String(summary.conflictDays)} accent="red" />
+                <StatChip icon={<IconAlertTriangle size={14} />} label="Çakışma" value={String(summary.conflictDays)} accent="red" />
               )}
             </Group>
           </Group>
@@ -274,15 +269,15 @@ export default function SchedulePage() {
         currentWeek={currentMonday}
       />
 
-      <Modal opened={deleteDialog.open} onClose={() => setDeleteDialog({ open: false })} title="Vardiyayi Sil" centered>
+      <Modal opened={deleteDialog.open} onClose={() => setDeleteDialog({ open: false })} title="Vardiyayı Sil" centered>
         <Stack gap="sm">
           <Text size="sm" c="dimmed">
-            Bu vardiyayi silmek istediginizden emin misiniz? Bu islem geri alinamaz.
+            Bu vardiyayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
           </Text>
           <Divider />
           <Group justify="flex-end">
             <Button variant="default" onClick={() => setDeleteDialog({ open: false })}>
-              Iptal
+              İptal
             </Button>
             <Button color="red" onClick={handleDeleteConfirm} loading={deleteShift.isPending}>
               Sil

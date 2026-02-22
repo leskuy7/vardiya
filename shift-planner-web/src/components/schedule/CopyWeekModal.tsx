@@ -57,7 +57,7 @@ export function CopyWeekModal({ open, onClose, currentWeek }: CopyWeekModalProps
   };
 
   return (
-    <Modal opened={open} onClose={onClose} title="Haftayi Kopyala" size="sm" centered>
+    <Modal opened={open} onClose={onClose} title="Haftayı Kopyala" size="sm" centered>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack gap="sm">
           <TextInput
@@ -74,7 +74,7 @@ export function CopyWeekModal({ open, onClose, currentWeek }: CopyWeekModalProps
           />
           <Group justify="flex-end" mt="sm">
             <Button variant="default" onClick={onClose} disabled={isSubmitting}>
-              Iptal
+              İptal
             </Button>
             <Button type="submit" loading={isSubmitting}>
               Kopyala
