@@ -112,21 +112,21 @@ export function WeeklyGrid({
             minWidth: 980,
             display: "grid",
             gridTemplateColumns: "220px repeat(7, 1fr)",
-            border: "1px solid var(--mantine-color-dark-4)",
+            border: "1px solid var(--mantine-color-default-border)",
             borderRadius: "var(--mantine-radius-lg)",
             overflow: "hidden",
-            background: "rgba(12, 18, 28, 0.6)",
-            boxShadow: "0 12px 40px rgba(0, 0, 0, 0.35)",
+            boxShadow: "0 12px 40px rgba(0, 0, 0, 0.1)",
           }}
+          className="bg-white dark:bg-[#0c121c]/60"
         >
           {/* Header row */}
           <Box
             style={{
               padding: "12px 16px",
-              borderBottom: "1px solid var(--mantine-color-dark-4)",
-              borderRight: "1px solid var(--mantine-color-dark-4)",
-              background: "rgba(15, 23, 42, 0.75)",
+              borderBottom: "1px solid var(--mantine-color-default-border)",
+              borderRight: "1px solid var(--mantine-color-default-border)",
             }}
+            className="bg-gray-50 dark:bg-[#0f172a]/75"
           >
             <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.12em" }}>
               Çalışan
@@ -140,11 +140,11 @@ export function WeeklyGrid({
                 key={day}
                 style={{
                   padding: "10px 8px",
-                  borderBottom: "1px solid var(--mantine-color-dark-4)",
-                  borderRight: "1px solid var(--mantine-color-dark-4)",
+                  borderBottom: "1px solid var(--mantine-color-default-border)",
+                  borderRight: "1px solid var(--mantine-color-default-border)",
                   textAlign: "center",
-                  background: isToday ? "rgba(59, 130, 246, 0.2)" : "rgba(15, 23, 42, 0.6)",
                 }}
+                className={isToday ? "bg-blue-50/50 dark:bg-blue-500/10" : "bg-gray-50 dark:bg-[#0f172a]/60"}
               >
                 <Text size="10px" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.1em" }}>
                   {DAY_NAMES[i]}
@@ -172,7 +172,7 @@ export function WeeklyGrid({
           ))}
         </Box>
       </Box>
-    </DndContext>
+    </DndContext >
   );
 }
 
@@ -211,10 +211,10 @@ function EmployeeRow({
       <Box
         style={{
           padding: "12px 16px",
-          borderBottom: "1px solid var(--mantine-color-dark-4)",
-          borderRight: "1px solid var(--mantine-color-dark-4)",
-          background: "rgba(12, 18, 28, 0.7)",
+          borderBottom: "1px solid var(--mantine-color-default-border)",
+          borderRight: "1px solid var(--mantine-color-default-border)",
         }}
+        className="bg-gray-50 dark:bg-[#0c121c]/70"
       >
         <Group gap="sm" align="center">
           <Paper
@@ -264,13 +264,13 @@ function EmployeeRow({
             <Box
               id={cellId}
               style={{
-                borderBottom: "1px solid var(--mantine-color-dark-4)",
-                borderRight: "1px solid var(--mantine-color-dark-4)",
+                borderBottom: "1px solid var(--mantine-color-default-border)",
+                borderRight: "1px solid var(--mantine-color-default-border)",
                 minHeight: 110,
                 padding: 8,
-                background: daySchedule.hasConflict ? "rgba(239, 68, 68, 0.12)" : "rgba(12, 18, 28, 0.55)",
                 transition: "background 120ms ease",
               }}
+              className={daySchedule.hasConflict ? "bg-red-50 dark:bg-red-500/15" : "bg-white dark:bg-[#0c121c]/55"}
             >
               <Stack gap={6}>
                 {shifts.map((shift, i) => (

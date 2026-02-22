@@ -7,6 +7,8 @@ import { useMantineColorScheme } from "@mantine/core";
 import {
   IconPrinter,
   IconCalendarWeek,
+  IconSun,
+  IconMoon,
 } from "@tabler/icons-react";
 
 const pageTitles: Record<string, string> = {
@@ -22,6 +24,8 @@ export function Navbar() {
   const title = Object.entries(pageTitles).find(([key]) =>
     pathname.startsWith(key)
   )?.[1] ?? "Vardiya Planlayıcı";
+
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
 
   const showPrint = pathname.startsWith("/schedule");
 
@@ -57,6 +61,15 @@ export function Navbar() {
         </Group>
 
         <Group gap="xs">
+          <ActionIcon
+            variant="default"
+            size="lg"
+            onClick={() => toggleColorScheme()}
+            aria-label="Tema Değiştir"
+          >
+            {colorScheme === "dark" ? <IconSun size={18} /> : <IconMoon size={18} />}
+          </ActionIcon>
+
           {showPrint && (
             <Button
               variant="light"

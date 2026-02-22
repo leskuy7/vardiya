@@ -175,21 +175,21 @@ export default function SchedulePage() {
         }}
       >
         <Box
+          className="dark:opacity-90 opacity-10"
           style={{
             position: "absolute",
             inset: -120,
             background:
-              "radial-gradient(600px 240px at 10% 0%, rgba(59, 130, 246, 0.18), transparent 60%), radial-gradient(500px 260px at 90% 20%, rgba(244, 63, 94, 0.16), transparent 60%)",
-            opacity: 0.9,
+              "radial-gradient(600px 240px at 10% 0%, rgba(59, 130, 246, 0.4), transparent 60%), radial-gradient(500px 260px at 90% 20%, rgba(244, 63, 94, 0.3), transparent 60%)",
           }}
         />
         <Box
+          className="dark:opacity-50 opacity-10"
           style={{
             position: "absolute",
             inset: 0,
             background:
-              "repeating-linear-gradient(120deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 12px)",
-            opacity: 0.5,
+              "repeating-linear-gradient(120deg, rgba(150,150,150,0.1) 0, rgba(150,150,150,0.1) 1px, transparent 1px, transparent 12px)",
           }}
         />
 

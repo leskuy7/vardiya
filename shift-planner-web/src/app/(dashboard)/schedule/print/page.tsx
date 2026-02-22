@@ -38,29 +38,35 @@ function PrintContent() {
       <style>
         {`
           @media print {
-            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { 
+              background: white !important; 
+              color: black !important;
+              -webkit-print-color-adjust: exact !important; 
+              print-color-adjust: exact !important; 
+            }
             @page { size: landscape; margin: 10mm; }
+            * { color: black !important; border-color: #ddd !important; }
           }
         `}
       </style>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, borderBottom: "1px solid #e5e7eb", paddingBottom: 8 }}>
-        <Text fw={700}>Vardiya Programı</Text>
-        <Text size="sm" c="dimmed">
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16, borderBottom: "2px solid #000", paddingBottom: 8 }}>
+        <Text fw={700} size="lg">Vardiya Programı</Text>
+        <Text size="sm" fw={600}>
           {startDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long" })} – {" "}
           {endDate.toLocaleDateString("tr-TR", { day: "numeric", month: "long", year: "numeric" })}
         </Text>
       </div>
 
-      <Table withTableBorder withColumnBorders verticalSpacing="xs" style={{ fontSize: "9pt" }}>
+      <Table withTableBorder withColumnBorders verticalSpacing="xs" style={{ fontSize: "10pt" }}>
         <Table.Thead>
           <Table.Tr>
-            <Table.Th>Çalışan</Table.Th>
+            <Table.Th style={{ color: "black" }}>Çalışan</Table.Th>
             {weekDays.map((day, i) => {
               const d = new Date(day + "T00:00:00+03:00");
               return (
-                <Table.Th key={day} style={{ textAlign: "center" }}>
-                  <div>{DAY_NAMES[i]}</div>
-                  <div style={{ fontSize: "8pt", color: "#6b7280" }}>
+                <Table.Th key={day} style={{ textAlign: "center", color: "black" }}>
+                  <div style={{ fontWeight: 700 }}>{DAY_NAMES[i]}</div>
+                  <div style={{ fontSize: "9pt", fontWeight: 400 }}>
                     {d.toLocaleDateString("tr-TR", { day: "numeric", month: "numeric" })}
                   </div>
                 </Table.Th>
@@ -78,10 +84,10 @@ function PrintContent() {
 
             return (
               <Table.Tr key={empRow.employee.id}>
-                <Table.Td>
-                  <div>{empRow.employee.user.name}</div>
+                <Table.Td style={{ color: "black" }}>
+                  <div style={{ fontWeight: 600 }}>{empRow.employee.user.name}</div>
                   {empRow.employee.position && (
-                    <div style={{ fontSize: "8pt", color: "#6b7280" }}>{empRow.employee.position}</div>
+                    <div style={{ fontSize: "8pt", color: "#4b5563" }}>{empRow.employee.position}</div>
                   )}
                 </Table.Td>
                 {days.map((day) => (
@@ -90,19 +96,19 @@ function PrintContent() {
                       <span style={{ color: "#cbd5f5" }}>—</span>
                     ) : (
                       day.shifts.map((shift) => (
-                        <div key={shift.id} style={{ marginBottom: 4 }}>
+                        <div key={shift.id} style={{ marginBottom: 4, color: "black" }}>
                           <div style={{ fontWeight: 600 }}>
                             {formatTime(shift.startTime)}–{formatTime(shift.endTime)}
                           </div>
                           {shift.note && (
-                            <div style={{ fontSize: "8pt", color: "#6b7280" }}>{shift.note}</div>
+                            <div style={{ fontSize: "8pt", color: "#4b5563" }}>{shift.note}</div>
                           )}
                         </div>
                       ))
                     )}
                   </Table.Td>
                 ))}
-                <Table.Td style={{ textAlign: "center", fontWeight: 600 }}>{totalHours.toFixed(1)}s</Table.Td>
+                <Table.Td style={{ textAlign: "center", fontWeight: 700, color: "black" }}>{totalHours.toFixed(1)}s</Table.Td>
               </Table.Tr>
             );
           })}
