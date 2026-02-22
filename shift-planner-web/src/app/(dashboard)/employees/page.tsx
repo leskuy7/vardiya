@@ -43,7 +43,7 @@ import type { Employee } from "@/types";
 const employeeSchema = z.object({
   name: z.string().min(2, "Ad en az 2 karakter"),
   email: z.string().email("Gecerli e-posta girin"),
-  password: z.string().min(8, "Sifre en az 8 karakter").optional().or(z.literal("")),
+  password: z.string().min(8, "Şifre en az 8 karakter").optional().or(z.literal("")),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
   position: z.string().optional(),
   department: z.string().optional(),
@@ -55,8 +55,8 @@ type EmployeeFormValues = z.infer<typeof employeeSchema>;
 
 const ROLE_OPTIONS = [
   { value: "ADMIN", label: "Admin" },
-  { value: "MANAGER", label: "Yonetici" },
-  { value: "EMPLOYEE", label: "Calisan" },
+  { value: "MANAGER", label: "Yönetici" },
+  { value: "EMPLOYEE", label: "Çalışan" },
 ];
 
 const ROLE_COLOR: Record<string, string> = {
@@ -120,7 +120,7 @@ export default function EmployeesPage() {
             hourlyRate: values.hourlyRate,
           },
         });
-        toast("success", "Calisan guncellendi.");
+        toast("success", "Çalışan güncellendi.");
       } else {
         await createEmployee.mutateAsync({
           name: values.name,
@@ -132,13 +132,13 @@ export default function EmployeesPage() {
           phone: values.phone,
           hourlyRate: values.hourlyRate,
         });
-        toast("success", "Calisan olusturuldu.");
+        toast("success", "Çalışan oluşturuldu.");
       }
       setModal({ open: false });
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-        "Bir hata olustu.";
+        "Bir hata oluştu.";
       toast("error", msg);
     }
   };
@@ -147,9 +147,9 @@ export default function EmployeesPage() {
     if (!deleteDialog.employee) return;
     try {
       await deleteEmployee.mutateAsync(deleteDialog.employee.id);
-      toast("success", "Calisan pasife alindi.");
+      toast("success", "Çalışan pasife alındı.");
     } catch {
-      toast("error", "Islem basarisiz.");
+      toast("error", "İşlem başarısız.");
     } finally {
       setDeleteDialog({ open: false });
     }
@@ -180,12 +180,12 @@ export default function EmployeesPage() {
               <IconUsers size={18} />
             </Paper>
             <Box>
-              <Title order={4}>Calisan Listesi</Title>
-              <Text size="xs" c="dimmed">{employees?.length ?? 0} kayitli calisan</Text>
+              <Title order={4}>Çalışan Listesi</Title>
+              <Text size="xs" c="dimmed">{employees?.length ?? 0} kayıtlı çalışan</Text>
             </Box>
           </Group>
           <Button leftSection={<IconPlus size={16} />} onClick={openCreate}>
-            Yeni Calisan
+            Yeni Çalışan
           </Button>
         </Group>
       </Paper>
@@ -200,7 +200,7 @@ export default function EmployeesPage() {
               <Table.Th>Departman</Table.Th>
               <Table.Th>Rol</Table.Th>
               <Table.Th>Durum</Table.Th>
-              <Table.Th style={{ textAlign: "right" }}>Islem</Table.Th>
+              <Table.Th style={{ textAlign: "right" }}>İşlem</Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -242,8 +242,8 @@ export default function EmployeesPage() {
                     {emp.user?.role === "ADMIN"
                       ? "Admin"
                       : emp.user?.role === "MANAGER"
-                        ? "Yonetici"
-                        : "Calisan"}
+                        ? "Yönetici"
+                        : "Çalışan"}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
@@ -284,7 +284,7 @@ export default function EmployeesPage() {
       <Modal
         opened={modal.open}
         onClose={() => setModal({ open: false })}
-        title={isEdit ? "Calisani Duzenle" : "Yeni Calisan Ekle"}
+        title={isEdit ? "Çalışanı Düzenle" : "Yeni Çalışan Ekle"}
         size="lg"
         centered
       >
@@ -304,7 +304,7 @@ export default function EmployeesPage() {
             {!isEdit && (
               <Group grow>
                 <TextInput
-                  label="Sifre"
+                  label="Şifre"
                   type="password"
                   placeholder="En az 8 karakter"
                   error={errors.password?.message}
@@ -337,7 +337,7 @@ export default function EmployeesPage() {
                 control={control}
                 render={({ field }) => (
                   <NumberInput
-                    label="Saatlik Ucret (₺)"
+                    label="Saatlik Ücret (₺)"
                     min={0}
                     step={0.5}
                     value={field.value}
@@ -350,10 +350,10 @@ export default function EmployeesPage() {
             <Divider />
             <Group justify="flex-end">
               <Button variant="default" onClick={() => setModal({ open: false })} disabled={isSubmitting}>
-                Iptal
+                İptal
               </Button>
               <Button type="submit" loading={isSubmitting}>
-                {isEdit ? "Guncelle" : "Olustur"}
+                {isEdit ? "Güncelle" : "Oluştur"}
               </Button>
             </Group>
           </Stack>
@@ -363,18 +363,18 @@ export default function EmployeesPage() {
       <Modal
         opened={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false })}
-        title="Calisani Pasife Al"
+        title="Çalışanı Pasife Al"
         size="sm"
         centered
       >
         <Stack gap="sm">
           <Text size="sm" c="dimmed">
-            {deleteDialog.employee?.user.name} adli calisan pasife alinacak. Gecmis vardiyalari silinmeyecek.
+            {deleteDialog.employee?.user.name} adlı çalışan pasife alınacak. Geçmiş vardiyaları silinmeyecek.
           </Text>
           <Divider />
           <Group justify="flex-end">
             <Button variant="default" onClick={() => setDeleteDialog({ open: false })}>
-              Iptal
+              İptal
             </Button>
             <Button color="red" onClick={handleDeleteConfirm} loading={deleteEmployee.isPending}>
               Pasife Al
