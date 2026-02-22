@@ -54,7 +54,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <MantineProvider theme={mantineTheme} defaultColorScheme="dark">
+    <MantineProvider theme={mantineTheme} defaultColorScheme="auto">
       <Notifications position="bottom-right" zIndex={9999} />
       <QueryClientProvider client={queryClient}>
         <AuthProvider>

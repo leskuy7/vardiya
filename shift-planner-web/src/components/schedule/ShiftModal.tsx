@@ -109,8 +109,15 @@ export function ShiftModal({
   const onSubmit = async (values: ShiftFormValues) => {
     try {
       // Build ISO datetimes using Istanbul offset (+03:00)
-      const start = new Date(`${values.date}T${values.startTime}:00+03:00`).toISOString();
-      const end = new Date(`${values.date}T${values.endTime}:00+03:00`).toISOString();
+      const startDate = new Date(`${values.date}T${values.startTime}:00+03:00`);
+      let endDate = new Date(`${values.date}T${values.endTime}:00+03:00`);
+
+      if (endDate.getTime() <= startDate.getTime()) {
+        endDate = new Date(endDate.getTime() + 24 * 60 * 60 * 1000);
+      }
+
+      const start = startDate.toISOString();
+      const end = endDate.toISOString();
 
       const payload = {
         employeeId: values.employeeId,
@@ -126,7 +133,9 @@ export function ShiftModal({
         toast("success", "Vardiya güncellendi.");
       } else {
         const result = await createShift.mutateAsync(payload);
-        const warnings = (result as { _warnings?: string[] })?._warnings;
+        const warnings =
+          (result as { _warnings?: string[] })?._warnings ??
+          (result as { warnings?: string[] })?.warnings;
         if (warnings?.length) {
           toast("warning", warnings.join(" | "));
         } else {

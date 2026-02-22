@@ -14,6 +14,7 @@ import {
   Table,
   Text,
   Title,
+  useMantineColorScheme,
 } from "@mantine/core";
 import {
   IconChevronLeft,
@@ -35,6 +36,8 @@ function shiftWeek(monday: string, direction: -1 | 1): string {
 export default function ReportsPage() {
   const [currentMonday, setCurrentMonday] = useState(() => getMonday(new Date()));
   const { data: report, isLoading } = useWeeklyReport(currentMonday);
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   const weekDays = getWeekDates(currentMonday);
   const weekLabel = useMemo(() => {
@@ -56,8 +59,12 @@ export default function ReportsPage() {
         p="md"
         radius="lg"
         style={{
-          background: "linear-gradient(140deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.9))",
-          borderColor: "var(--mantine-color-dark-4)",
+          background: isDark
+            ? "linear-gradient(140deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.9))"
+            : "linear-gradient(140deg, rgba(239, 246, 255, 0.95), rgba(219, 234, 254, 0.95))",
+          borderColor: isDark
+            ? "var(--mantine-color-dark-4)"
+            : "var(--mantine-color-gray-3)",
         }}
       >
         <Group justify="space-between" wrap="wrap">
@@ -172,11 +179,11 @@ export default function ReportsPage() {
                     <Text size="sm" c="dimmed">{emp.shiftCount}</Text>
                   </Table.Td>
                   <Table.Td style={{ textAlign: "right" }}>
-                    <Text size="sm" fw={600}>{emp.regularHours.toFixed(1)}s</Text>
+                    <Text size="sm" fw={600}>{emp.regularHours.toFixed(1)} saat</Text>
                   </Table.Td>
                   <Table.Td style={{ textAlign: "right" }}>
                     {emp.overtimeHours > 0 ? (
-                      <Text size="sm" fw={700} c="yellow.4">{emp.overtimeHours.toFixed(1)}s</Text>
+                      <Text size="sm" fw={700} c="yellow.4">{emp.overtimeHours.toFixed(1)} saat</Text>
                     ) : (
                       <Text size="sm" c="dimmed">—</Text>
                     )}

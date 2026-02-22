@@ -4,6 +4,19 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { WeeklySchedule, CreateShiftData, UpdateShiftData, Shift } from "@/types";
 
+function decodeWarnings(rawHeader: unknown): string[] | undefined {
+  if (typeof rawHeader !== "string" || !rawHeader) return undefined;
+  try {
+    const decoded = JSON.parse(atob(rawHeader));
+    if (Array.isArray(decoded)) {
+      return decoded.map((item) => String(item));
+    }
+  } catch {
+    return undefined;
+  }
+  return undefined;
+}
+
 export function useWeeklySchedule(weekStart: string) {
   return useQuery<WeeklySchedule>({
     queryKey: ["schedule", weekStart],
@@ -33,8 +46,9 @@ export function useCreateShift() {
 
   return useMutation({
     mutationFn: async (data: CreateShiftData) => {
-      const res = await api.post<Shift & { _warnings?: string[] }>("/shifts", data);
-      return res.data;
+      const res = await api.post<Shift>("/shifts", data);
+      const warnings = decodeWarnings(res.headers?.["x-warnings"]);
+      return warnings?.length ? { ...res.data, _warnings: warnings } : res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedule"] });
@@ -49,7 +63,8 @@ export function useUpdateShift() {
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: UpdateShiftData }) => {
       const res = await api.patch<Shift>(`/shifts/${id}`, data);
-      return res.data;
+      const warnings = decodeWarnings(res.headers?.["x-warnings"]);
+      return warnings?.length ? { ...res.data, _warnings: warnings } : res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedule"] });

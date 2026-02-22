@@ -22,9 +22,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr" className="dark scroll-smooth">
+    <html lang="tr" className="scroll-smooth" suppressHydrationWarning>
       <head>
-        <ColorSchemeScript defaultColorScheme="dark" />
+        <ColorSchemeScript defaultColorScheme="auto" />
       </head>
       <body className={`${spaceGrotesk.className} antialiased selection:bg-primary/30`}>
         <Providers>{children}</Providers>

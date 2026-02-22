@@ -24,6 +24,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const isProd = process.env.NODE_ENV === 'production';
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let code = 'INTERNAL_ERROR';
@@ -49,12 +50,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
           code = 'VALIDATION_ERROR';
         }
       }
+      if (isProd && status >= 500) {
+        message = 'Beklenmeyen bir hata oluştu';
+        details = undefined;
+        code = this.getCodeFromStatus(status);
+      }
     } else if (exception instanceof Error) {
       this.logger.error(
         `Unhandled exception: ${exception.message}`,
         exception.stack,
       );
-      message = exception.message;
+      message = isProd ? 'Beklenmeyen bir hata oluştu' : exception.message;
+      if (isProd) {
+        details = undefined;
+      }
     }
 
     const errorResponse: ErrorResponse = {

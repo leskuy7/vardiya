@@ -9,7 +9,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
-import { Response } from 'express';
+import { Response, CookieOptions } from 'express';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto } from './dto';
@@ -20,6 +20,17 @@ import { CurrentUser } from '../common/decorators';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  private getRefreshCookieOptions(): CookieOptions {
+    const isProd = process.env.NODE_ENV === 'production';
+    return {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/api/auth',
+    };
+  }
 
   @Post('register')
   @Throttle({ short: { ttl: 60000, limit: 5 } })
@@ -42,13 +53,7 @@ export class AuthController {
     const result = await this.authService.login(dto);
 
     // Set refresh token as httpOnly cookie
-    res.cookie('refresh_token', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth',
-    });
+    res.cookie('refresh_token', result.refreshToken, this.getRefreshCookieOptions());
 
     return {
       accessToken: result.accessToken,
@@ -69,13 +74,7 @@ export class AuthController {
       user.refreshToken,
     );
 
-    res.cookie('refresh_token', result.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/api/auth',
-    });
+    res.cookie('refresh_token', result.refreshToken, this.getRefreshCookieOptions());
 
     return {
       accessToken: result.accessToken,
@@ -94,7 +93,12 @@ export class AuthController {
   ) {
     await this.authService.logout(userId);
 
-    res.clearCookie('refresh_token', { path: '/api/auth' });
+    res.clearCookie('refresh_token', {
+      path: '/api/auth',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
 
     return { message: 'Başarıyla çıkış yapıldı' };
   }

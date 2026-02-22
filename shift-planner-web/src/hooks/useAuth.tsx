@@ -39,16 +39,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Try to restore session on mount
   useEffect(() => {
-    const token = getStoredAccessToken();
-    const storedUser = getStoredUser<User>();
+    let active = true;
 
-    if (token && storedUser) {
-      setUser(storedUser);
-    } else {
-      clearStoredAuth();
-    }
+    const restoreSession = async () => {
+      const token = getStoredAccessToken();
+      const storedUser = getStoredUser<User>();
 
-    setIsLoading(false);
+      if (token && storedUser) {
+        if (active) {
+          setUser(storedUser);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const response = await api.post<LoginResponse>("/auth/refresh");
+        const { accessToken, user: userData } = response.data;
+        if (!active) return;
+        setStoredAuth(accessToken, userData);
+        setUser(userData);
+      } catch {
+        clearStoredAuth();
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    restoreSession();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const login = useCallback(
@@ -59,7 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       const { accessToken, user: userData } = response.data;
-  setStoredAuth(accessToken, userData);
+      setStoredAuth(accessToken, userData);
       setUser(userData);
 
       // Redirect based on role

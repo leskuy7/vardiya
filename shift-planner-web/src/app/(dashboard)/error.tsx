@@ -32,7 +32,9 @@ export default function DashboardError({
           <Title order={4}>Sayfa Yuklenemedi</Title>
           <Text size="sm" c="dimmed" ta="center">
             Bu bolum yuklenirken bir sorun yasandi.
-            {error.message ? ` (${error.message})` : ""}
+            {process.env.NODE_ENV !== "production" && error.message
+              ? ` (${error.message})`
+              : ""}
           </Text>
           <Button onClick={reset}>Tekrar Dene</Button>
         </Stack>

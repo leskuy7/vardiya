@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { DateTime } from 'luxon';
+import { parseISO, startOfWeek, addDays, format } from 'date-fns';
+import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
+
+const TZ = 'Europe/Istanbul';
 
 @Injectable()
 export class ScheduleService {
@@ -9,23 +12,29 @@ export class ScheduleService {
   constructor(private prisma: PrismaService) { }
 
   async getWeeklySchedule(weekStartStr: string) {
-    const weekStart = DateTime.fromISO(weekStartStr, {
-      zone: 'Europe/Istanbul',
-    }).startOf('week');
-    const weekEnd = weekStart.plus({ days: 7 });
+    // Parse the date string as zoned in Istanbul and get Monday
+    const parsed = parseISO(weekStartStr);
+    const weekStartLocal = startOfWeek(parsed, { weekStartsOn: 1 });
+    const weekEndLocal = addDays(weekStartLocal, 7);
 
-    const weekStartUtc = weekStart.toUTC().toJSDate();
-    const weekEndUtc = weekEnd.toUTC().toJSDate();
+    const weekStartUtc = fromZonedTime(weekStartLocal, TZ);
+    const weekEndUtc = fromZonedTime(weekEndLocal, TZ);
 
     // Fetch all active employees
     const employees = await this.prisma.employee.findMany({
       where: { isActive: true, deletedAt: null },
       select: {
         id: true,
+        userId: true,
         position: true,
+        department: true,
+        phone: true,
         maxWeeklyHours: true,
         hourlyRate: true,
-        user: { select: { name: true } },
+        isActive: true,
+        deletedAt: true,
+        createdAt: true,
+        user: { select: { id: true, email: true, name: true, role: true } },
       },
       orderBy: { user: { name: 'asc' } },
     });
@@ -65,10 +74,10 @@ export class ScheduleService {
       // Group by days
       const days = [];
       for (let i = 0; i < 7; i++) {
-        const day = weekStart.plus({ days: i });
-        const dayStr = day.toFormat('yyyy-MM-dd');
-        const dayStartUtc = day.toUTC().toJSDate();
-        const dayEndUtc = day.plus({ days: 1 }).toUTC().toJSDate();
+        const dayLocal = addDays(weekStartLocal, i);
+        const dayStr = format(dayLocal, 'yyyy-MM-dd');
+        const dayStartUtc = fromZonedTime(dayLocal, TZ);
+        const dayEndUtc = fromZonedTime(addDays(dayLocal, 1), TZ);
 
         const dayShifts = empShifts
           .filter((s) => s.startTime >= dayStartUtc && s.startTime < dayEndUtc)
@@ -80,15 +89,25 @@ export class ScheduleService {
             status: s.status,
           }));
 
-        const jsDay = day.toJSDate().getDay(); // 0=Sun..6=Sat
+        const isoDay = Number(formatInTimeZone(dayLocal, TZ, 'i'));
+        const jsDay = isoDay % 7; // 0=Sun..6=Sat
         const dayUnavailable = empBlocks
           .filter((b) => b.dayOfWeek === jsDay && b.type === 'UNAVAILABLE')
-          .map((b) => ({
-            id: b.id,
-            dayOfWeek: b.dayOfWeek,
-            startTime: b.startTime,
-            endTime: b.endTime,
-          }));
+          .map((b) => {
+            const fmtTime = (d: Date | string | null) => {
+              if (!d) return null;
+              if (typeof d === 'string') {
+                return d.length >= 5 ? d.slice(0, 5) : d;
+              }
+              return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`;
+            };
+            return {
+              id: b.id,
+              dayOfWeek: b.dayOfWeek,
+              startTime: fmtTime(b.startTime),
+              endTime: fmtTime(b.endTime),
+            };
+          });
 
         days.push({
           date: dayStr,
@@ -100,12 +119,8 @@ export class ScheduleService {
 
       return {
         employee: {
-          id: emp.id,
-          position: emp.position,
-          maxWeeklyHours: emp.maxWeeklyHours,
-          user: {
-            name: emp.user.name,
-          }
+          ...emp,
+          hourlyRate: emp.hourlyRate ? Number(emp.hourlyRate) : undefined,
         },
         totalHours: Math.round(totalHours * 10) / 10,
         isOverLimit: totalHours > emp.maxWeeklyHours,
@@ -114,8 +129,8 @@ export class ScheduleService {
     });
 
     return {
-      weekStart: weekStart.toFormat('yyyy-MM-dd'),
-      weekEnd: weekEnd.minus({ days: 1 }).toFormat('yyyy-MM-dd'),
+      weekStart: format(weekStartLocal, 'yyyy-MM-dd'),
+      weekEnd: format(addDays(weekStartLocal, 6), 'yyyy-MM-dd'),
       employees: schedule,
     };
   }

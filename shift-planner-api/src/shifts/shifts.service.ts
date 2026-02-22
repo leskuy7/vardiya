@@ -10,7 +10,18 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ShiftsValidator } from './shifts.validator';
 import { CreateShiftDto, UpdateShiftDto, CopyWeekDto } from './dto';
-import { DateTime } from 'luxon';
+import {
+  parseISO,
+  startOfWeek,
+  addDays,
+  differenceInDays,
+  startOfDay,
+  endOfDay,
+} from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
+import { ShiftStatus } from '@prisma/client';
+
+const TZ = 'Europe/Istanbul';
 
 @Injectable()
 export class ShiftsService {
@@ -32,10 +43,13 @@ export class ShiftsService {
 
     if (filters.employeeId) where.employeeId = filters.employeeId;
     if (filters.status) where.status = filters.status;
-    if (filters.start || filters.end) {
-      where.startTime = {};
-      if (filters.start) where.startTime.gte = new Date(filters.start);
-      if (filters.end) where.endTime = { lte: new Date(filters.end) };
+    if (filters.start) {
+      const startLocal = startOfDay(parseISO(filters.start));
+      where.startTime = { gte: fromZonedTime(startLocal, TZ) };
+    }
+    if (filters.end) {
+      const endLocal = endOfDay(parseISO(filters.end));
+      where.endTime = { lte: fromZonedTime(endLocal, TZ) };
     }
 
     return this.prisma.shift.findMany({
@@ -114,6 +128,7 @@ export class ShiftsService {
         startTime,
         endTime,
         note: dto.note,
+        status: dto.status ? (dto.status as ShiftStatus) : undefined,
       },
       include: {
         employee: {
@@ -200,6 +215,7 @@ export class ShiftsService {
         startTime,
         endTime,
         note: dto.note ?? (existing as any).note,
+        ...(dto.status ? { status: dto.status as ShiftStatus } : {}),
       },
       include: {
         employee: {
@@ -264,26 +280,22 @@ export class ShiftsService {
   }
 
   async copyWeek(dto: CopyWeekDto, userId: string) {
-    const sourceStart = DateTime.fromISO(dto.sourceWeekStart, {
-      zone: 'Europe/Istanbul',
-    })
-      .startOf('week')
-      .toUTC();
-    const sourceEnd = sourceStart.plus({ days: 7 });
+    const sourceParsed = parseISO(dto.sourceWeekStart);
+    const sourceStartLocal = startOfWeek(sourceParsed, { weekStartsOn: 1 });
+    const sourceStartUtc = fromZonedTime(sourceStartLocal, TZ);
+    const sourceEndUtc = fromZonedTime(addDays(sourceStartLocal, 7), TZ);
 
-    const targetStart = DateTime.fromISO(dto.targetWeekStart, {
-      zone: 'Europe/Istanbul',
-    })
-      .startOf('week')
-      .toUTC();
+    const targetParsed = parseISO(dto.targetWeekStart);
+    const targetStartLocal = startOfWeek(targetParsed, { weekStartsOn: 1 });
+    const targetStartUtc = fromZonedTime(targetStartLocal, TZ);
 
-    const dayDiff = targetStart.diff(sourceStart, 'days').days;
+    const dayDiff = differenceInDays(targetStartUtc, sourceStartUtc);
 
     // Get source week shifts
     const sourceShifts = await this.prisma.shift.findMany({
       where: {
-        startTime: { gte: sourceStart.toJSDate() },
-        endTime: { lte: sourceEnd.toJSDate() },
+        startTime: { gte: sourceStartUtc },
+        endTime: { lte: sourceEndUtc },
         status: { not: 'CANCELLED' },
       },
     });
@@ -299,12 +311,8 @@ export class ShiftsService {
     const errors = [];
 
     for (const sourceShift of sourceShifts) {
-      const newStartTime = DateTime.fromJSDate(sourceShift.startTime)
-        .plus({ days: dayDiff })
-        .toJSDate();
-      const newEndTime = DateTime.fromJSDate(sourceShift.endTime)
-        .plus({ days: dayDiff })
-        .toJSDate();
+      const newStartTime = addDays(sourceShift.startTime, dayDiff);
+      const newEndTime = addDays(sourceShift.endTime, dayDiff);
 
       try {
         const validation = await this.validator.validateShift(

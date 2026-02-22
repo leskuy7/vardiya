@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
+import * as Joi from 'joi';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { EmployeesModule } from './employees/employees.module';
@@ -17,8 +18,25 @@ import { RootController } from './root.controller';
 @Module({
   controllers: [RootController],
   imports: [
-    // Config
-    ConfigModule.forRoot({ isGlobal: true }),
+    // Config — fail fast if critical env vars missing
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: Joi.object({
+        DATABASE_URL: Joi.string().uri().required(),
+        JWT_SECRET: Joi.string().min(8).required(),
+        JWT_REFRESH_SECRET: Joi.string().min(8).required(),
+        JWT_ACCESS_EXPIRATION: Joi.string().default('15m'),
+        JWT_REFRESH_EXPIRATION: Joi.string().default('7d'),
+        FRONTEND_URL: Joi.string().default('http://localhost:3000'),
+        PORT: Joi.number().default(3001),
+        NODE_ENV: Joi.string()
+          .valid('development', 'production', 'test')
+          .default('development'),
+      }),
+      validationOptions: {
+        abortEarly: true,
+      },
+    }),
 
     // Logging
     LoggerModule.forRoot({

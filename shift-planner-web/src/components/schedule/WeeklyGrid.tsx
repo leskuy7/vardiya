@@ -149,7 +149,7 @@ export function WeeklyGrid({
                 <Text size="10px" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.1em" }}>
                   {DAY_NAMES[i]}
                 </Text>
-                <Text size="lg" fw={700} c={isToday ? "blue.2" : "gray.2"}>
+                <Text size="lg" fw={700} c={isToday ? "blue" : undefined}>
                   {d.getDate()}
                 </Text>
               </Box>
@@ -230,7 +230,7 @@ function EmployeeRow({
               border: "1px solid rgba(59, 130, 246, 0.3)",
             }}
           >
-            <Text size="sm" fw={700} c="blue.2">
+            <Text size="sm" fw={700} c="blue">
               {empRow.employee?.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
             </Text>
           </Paper>

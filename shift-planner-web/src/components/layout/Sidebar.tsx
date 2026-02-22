@@ -3,7 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ActionIcon, Box, Group, NavLink, Paper, ScrollArea, Stack, Text } from "@mantine/core";
+import {
+  ActionIcon,
+  Box,
+  Group,
+  NavLink,
+  Paper,
+  ScrollArea,
+  Stack,
+  Text,
+  useMantineColorScheme,
+} from "@mantine/core";
 import {
   IconCalendarWeek,
   IconUsers,
@@ -54,6 +64,8 @@ export function Sidebar({ className }: { className?: string }) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   const visibleItems = navItems.filter(
     (item) => user?.role && item.roles.includes(user.role)
@@ -65,8 +77,8 @@ export function Sidebar({ className }: { className?: string }) {
       style={{
         width: collapsed ? 76 : 270,
         transition: "width 180ms ease",
-        background: "rgba(10, 15, 24, 0.96)",
-        borderRight: "1px solid var(--mantine-color-dark-4)",
+        background: "var(--mantine-color-body)",
+        borderRight: "1px solid var(--mantine-color-default-border)",
         position: "relative",
       }}
     >
@@ -126,14 +138,19 @@ export function Sidebar({ className }: { className?: string }) {
           </Stack>
         </ScrollArea>
 
-        <Box px="sm" pb="sm" pt={6} style={{ borderTop: "1px solid var(--mantine-color-dark-4)" }}>
+        <Box px="sm" pb="sm" pt={6} style={{ borderTop: "1px solid var(--mantine-color-default-border)" }}>
           {!collapsed && user && (
             <Paper
               withBorder
               p="sm"
               radius="md"
               mb="sm"
-              style={{ background: "rgba(255,255,255,0.02)" }}
+              style={{
+                background: isDark ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.9)",
+                borderColor: isDark
+                  ? "var(--mantine-color-dark-4)"
+                  : "var(--mantine-color-gray-3)",
+              }}
             >
               <Group gap="sm" wrap="nowrap">
                 <Paper
@@ -145,8 +162,12 @@ export function Sidebar({ className }: { className?: string }) {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    background: "rgba(59, 130, 246, 0.2)",
-                    border: "1px solid rgba(59, 130, 246, 0.4)",
+                    background: isDark
+                      ? "rgba(59, 130, 246, 0.2)"
+                      : "rgba(59, 130, 246, 0.12)",
+                    border: isDark
+                      ? "1px solid rgba(59, 130, 246, 0.4)"
+                      : "1px solid rgba(59, 130, 246, 0.25)",
                   }}
                 >
                   <Text size="xs" fw={700} c="blue.2">

@@ -3,7 +3,6 @@
 import { useMemo, useState } from "react";
 import {
   ActionIcon,
-  Badge,
   Box,
   Button,
   Center,
@@ -13,6 +12,7 @@ import {
   Paper,
   Stack,
   Text,
+  useMantineColorScheme,
 } from "@mantine/core";
 import {
   IconChevronLeft,
@@ -33,6 +33,7 @@ import { useEmployees } from "@/hooks/useEmployees";
 import { useToast } from "@/components/ui/toast";
 import { getMonday, getWeekDates } from "@/lib/utils";
 import type { Shift } from "@/types";
+import { formatInTimeZone, fromZonedTime } from "date-fns-tz";
 
 export default function SchedulePage() {
   const { user, isAdmin, isManager, isEmployee } = useAuth();
@@ -47,6 +48,8 @@ export default function SchedulePage() {
   const deleteShift = useDeleteShift();
   const acknowledgeShift = useAcknowledgeShift();
   const updateShift = useUpdateShift();
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   const canManage = isAdmin || isManager;
 
@@ -107,11 +110,11 @@ export default function SchedulePage() {
       const origStart = new Date(shift.startTime);
       const origEnd = new Date(shift.endTime);
       const duration = origEnd.getTime() - origStart.getTime();
-
-      // Build new start time on newDate with the same hour
-      const [year, month, day] = newDate.split("-").map(Number);
-      const newStart = new Date(origStart);
-      newStart.setFullYear(year, month - 1, day);
+      const timeStr = formatInTimeZone(origStart, "Europe/Istanbul", "HH:mm");
+      const newStart = fromZonedTime(
+        `${newDate}T${timeStr}:00`,
+        "Europe/Istanbul"
+      );
       const newEnd = new Date(newStart.getTime() + duration);
 
       await updateShift.mutateAsync({
@@ -168,28 +171,33 @@ export default function SchedulePage() {
         style={{
           position: "relative",
           overflow: "hidden",
-          background:
-            "linear-gradient(140deg, rgba(14, 22, 36, 0.95) 0%, rgba(12, 18, 28, 0.95) 55%, rgba(9, 15, 25, 0.95) 100%)",
-          borderColor: "var(--mantine-color-dark-4)",
-          boxShadow: "0 16px 60px rgba(0, 0, 0, 0.35)",
+          background: isDark
+            ? "linear-gradient(140deg, rgba(14, 22, 36, 0.95) 0%, rgba(12, 18, 28, 0.95) 55%, rgba(9, 15, 25, 0.95) 100%)"
+            : "linear-gradient(140deg, rgba(239, 246, 255, 0.95) 0%, rgba(219, 234, 254, 0.95) 55%, rgba(224, 231, 255, 0.95) 100%)",
+          borderColor: isDark
+            ? "var(--mantine-color-dark-4)"
+            : "var(--mantine-color-gray-3)",
+          boxShadow: isDark
+            ? "0 16px 60px rgba(0, 0, 0, 0.35)"
+            : "0 16px 50px rgba(37, 99, 235, 0.12)",
         }}
       >
         <Box
-          className="dark:opacity-90 opacity-10"
           style={{
             position: "absolute",
             inset: -120,
             background:
               "radial-gradient(600px 240px at 10% 0%, rgba(59, 130, 246, 0.4), transparent 60%), radial-gradient(500px 260px at 90% 20%, rgba(244, 63, 94, 0.3), transparent 60%)",
+            opacity: isDark ? 0.9 : 0.18,
           }}
         />
         <Box
-          className="dark:opacity-50 opacity-10"
           style={{
             position: "absolute",
             inset: 0,
             background:
               "repeating-linear-gradient(120deg, rgba(150,150,150,0.1) 0, rgba(150,150,150,0.1) 1px, transparent 1px, transparent 12px)",
+            opacity: isDark ? 0.5 : 0.2,
           }}
         />
 
@@ -228,11 +236,17 @@ export default function SchedulePage() {
             </Group>
 
             <Group gap="xs">
-              <StatChip icon={<IconUsers size={14} />} label="Çalışan" value={String(summary.totalEmployees)} />
-              <StatChip icon={<IconCalendarWeek size={14} />} label="Vardiya" value={String(summary.totalShifts)} />
-              <StatChip icon={<IconClock size={14} />} label="Saat" value={summary.totalHours.toFixed(1)} />
+              <StatChip icon={<IconUsers size={14} />} label="Çalışan" value={String(summary.totalEmployees)} isDark={isDark} />
+              <StatChip icon={<IconCalendarWeek size={14} />} label="Vardiya" value={String(summary.totalShifts)} isDark={isDark} />
+              <StatChip icon={<IconClock size={14} />} label="Saat" value={summary.totalHours.toFixed(1)} isDark={isDark} />
               {summary.conflictDays > 0 && (
-                <StatChip icon={<IconAlertTriangle size={14} />} label="Çakışma" value={String(summary.conflictDays)} accent="red" />
+                <StatChip
+                  icon={<IconAlertTriangle size={14} />}
+                  label="Çakışma"
+                  value={String(summary.conflictDays)}
+                  accent="red"
+                  isDark={isDark}
+                />
               )}
             </Group>
           </Group>
@@ -300,11 +314,13 @@ function StatChip({
   label,
   value,
   accent,
+  isDark,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   accent?: "red";
+  isDark: boolean;
 }) {
   return (
     <Paper
@@ -313,8 +329,12 @@ function StatChip({
       py={6}
       radius="md"
       style={{
-        background: "rgba(255,255,255,0.03)",
-        borderColor: accent ? "var(--mantine-color-red-6)" : "var(--mantine-color-dark-4)",
+        background: isDark ? "rgba(255,255,255,0.03)" : "rgba(255,255,255,0.85)",
+        borderColor: accent
+          ? "var(--mantine-color-red-6)"
+          : isDark
+            ? "var(--mantine-color-dark-4)"
+            : "var(--mantine-color-gray-3)",
       }}
     >
       <Group gap={6}>

@@ -72,7 +72,7 @@ function PrintContent() {
                 </Table.Th>
               );
             })}
-            <Table.Th style={{ textAlign: "center" }}>Toplam</Table.Th>
+            <Table.Th style={{ textAlign: "center", color: "black" }}>Toplam</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -93,7 +93,7 @@ function PrintContent() {
                 {days.map((day) => (
                   <Table.Td key={day.date} style={{ verticalAlign: "top" }}>
                     {day.shifts.length === 0 ? (
-                      <span style={{ color: "#cbd5f5" }}>—</span>
+                      <span style={{ color: "#999" }}>—</span>
                     ) : (
                       day.shifts.map((shift) => (
                         <div key={shift.id} style={{ marginBottom: 4, color: "black" }}>
@@ -108,7 +108,7 @@ function PrintContent() {
                     )}
                   </Table.Td>
                 ))}
-                <Table.Td style={{ textAlign: "center", fontWeight: 700, color: "black" }}>{totalHours.toFixed(1)}s</Table.Td>
+                <Table.Td style={{ textAlign: "center", fontWeight: 700, color: "black" }}>{totalHours.toFixed(1)} saat</Table.Td>
               </Table.Tr>
             );
           })}

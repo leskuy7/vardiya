@@ -22,6 +22,7 @@ import {
   Text,
   TextInput,
   Title,
+  useMantineColorScheme,
 } from "@mantine/core";
 import {
   IconUsers,
@@ -71,6 +72,8 @@ export default function EmployeesPage() {
   const createEmployee = useCreateEmployee();
   const updateEmployee = useUpdateEmployee();
   const deleteEmployee = useDeleteEmployee();
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   const [modal, setModal] = useState<{ open: boolean; employee?: Employee }>({ open: false });
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; employee?: Employee }>({ open: false });
@@ -170,8 +173,12 @@ export default function EmployeesPage() {
         p="md"
         radius="lg"
         style={{
-          background: "linear-gradient(135deg, rgba(14, 116, 144, 0.2), rgba(30, 64, 175, 0.2))",
-          borderColor: "var(--mantine-color-dark-4)",
+          background: isDark
+            ? "linear-gradient(135deg, rgba(14, 116, 144, 0.2), rgba(30, 64, 175, 0.2))"
+            : "linear-gradient(135deg, rgba(224, 231, 255, 0.9), rgba(219, 234, 254, 0.9))",
+          borderColor: isDark
+            ? "var(--mantine-color-dark-4)"
+            : "var(--mantine-color-gray-3)",
         }}
       >
         <Group justify="space-between" wrap="wrap">

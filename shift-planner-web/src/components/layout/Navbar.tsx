@@ -47,8 +47,6 @@ export function Navbar() {
       px="md"
       py={10}
       style={{
-        background: "rgba(10, 15, 24, 0.7)",
-        borderColor: "var(--mantine-color-dark-4)",
         backdropFilter: "blur(14px)",
       }}
     >

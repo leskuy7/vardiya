@@ -74,8 +74,10 @@ model Shift {
   createdAt  DateTime    @default(now()) @map("created_at")
   updatedAt  DateTime    @updatedAt @map("updated_at")
 
-  employee Employee @relation(fields: [employeeId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
+  @@index([employeeId])
+  @@index([startTime, endTime])
   @@map("shifts")
 }
 
@@ -84,15 +86,16 @@ model AvailabilityBlock {
   employeeId String           @map("employee_id")
   type       AvailabilityType @default(UNAVAILABLE)
   dayOfWeek  Int              @map("day_of_week") // 0=Sun, 1=Mon, ..., 6=Sat
-  startTime  String?          @map("start_time")  // HH:mm
-  endTime    String?          @map("end_time")    // HH:mm
-  startDate  String?          @map("start_date")  // YYYY-MM-DD (optional date range)
-  endDate    String?          @map("end_date")    // YYYY-MM-DD
+  startTime  DateTime?        @map("start_time") @db.Time()  // HH:mm
+  endTime    DateTime?        @map("end_time") @db.Time()    // HH:mm
+  startDate  DateTime?        @map("start_date") @db.Date     // YYYY-MM-DD (optional date range)
+  endDate    DateTime?        @map("end_date") @db.Date       // YYYY-MM-DD
   note       String?
   createdAt  DateTime         @default(now()) @map("created_at")
 
-  employee Employee @relation(fields: [employeeId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
+  @@index([employeeId])
   @@map("availability_blocks")
 }
 

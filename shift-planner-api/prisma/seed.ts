@@ -1,5 +1,5 @@
 import { PrismaClient, Role, ShiftStatus, AvailabilityType } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 const SALT_ROUNDS = 12;
@@ -160,8 +160,8 @@ async function main() {
         employeeId: zeynepEmployee.id,
         type: AvailabilityType.PREFER_NOT,
         dayOfWeek: 5, // Friday
-        startTime: '06:00',
-        endTime: '12:00',
+        startTime: new Date(Date.UTC(1970, 0, 1, 6, 0, 0)),
+        endTime: new Date(Date.UTC(1970, 0, 1, 12, 0, 0)),
         note: 'Sabah erken müsait değilim',
       },
     });

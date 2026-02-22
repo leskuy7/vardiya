@@ -21,6 +21,7 @@ import {
   Table,
   Text,
   TextInput,
+  useMantineColorScheme,
 } from "@mantine/core";
 import { IconCalendarEvent, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useToast } from "@/components/ui/toast";
@@ -28,6 +29,7 @@ import { useAvailability, useCreateAvailability, useDeleteAvailability } from "@
 import { useEmployees } from "@/hooks/useEmployees";
 import { useAuth } from "@/hooks/useAuth";
 import type { AvailabilityBlock } from "@/types";
+import { formatInTimeZone } from "date-fns-tz";
 
 const DAY_LABELS = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 
@@ -58,6 +60,8 @@ const TYPE_OPTIONS = [
 export default function AvailabilityPage() {
   const { user, isAdmin, isManager, isEmployee } = useAuth();
   const { toast } = useToast();
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   const canManageAll = isAdmin || isManager;
   const { data: employees } = useEmployees(true);
@@ -110,7 +114,10 @@ export default function AvailabilityPage() {
           toast("error", "Lutfen baslangic tarihi secin");
           return;
         }
-        finalDayOfWeek = new Date(values.startDate).getDay();
+        const isoDay = Number(
+          formatInTimeZone(`${values.startDate}T00:00:00`, "Europe/Istanbul", "i")
+        );
+        finalDayOfWeek = isoDay % 7;
       }
 
       const payload = {
@@ -150,8 +157,12 @@ export default function AvailabilityPage() {
         p="md"
         radius="lg"
         style={{
-          background: "linear-gradient(135deg, rgba(20, 83, 45, 0.2), rgba(15, 23, 42, 0.2))",
-          borderColor: "var(--mantine-color-dark-4)",
+          background: isDark
+            ? "linear-gradient(135deg, rgba(20, 83, 45, 0.2), rgba(15, 23, 42, 0.2))"
+            : "linear-gradient(135deg, rgba(236, 253, 245, 0.9), rgba(219, 234, 254, 0.9))",
+          borderColor: isDark
+            ? "var(--mantine-color-dark-4)"
+            : "var(--mantine-color-gray-3)",
         }}
       >
         <Group justify="space-between" wrap="wrap">

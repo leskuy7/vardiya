@@ -32,17 +32,14 @@ export default function DashboardLayout({
         display: "flex",
         overflow: "hidden",
         position: "relative",
-        background: "radial-gradient(circle at 10% 10%, rgba(59,130,246,0.12), transparent 40%), radial-gradient(circle at 90% 0%, rgba(236,72,153,0.12), transparent 45%), #0a0f18",
+        background: "var(--mantine-color-body)",
       }}
     >
-      <Box style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "linear-gradient(120deg, rgba(255,255,255,0.02), transparent)" }} />
-      <Box style={{ position: "relative", zIndex: 1, display: "flex", width: "100%" }}>
-        <Sidebar />
-        <Box style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          <Navbar />
-          <Box component="main" style={{ flex: 1, overflow: "auto", padding: "24px" }}>
-            {children}
-          </Box>
+      <Sidebar />
+      <Box style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <Navbar />
+        <Box component="main" style={{ flex: 1, overflow: "auto", padding: "24px" }}>
+          {children}
         </Box>
       </Box>
     </Box>

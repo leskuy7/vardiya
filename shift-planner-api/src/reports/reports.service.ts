@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { DateTime } from 'luxon';
+import { parseISO, startOfWeek, addDays, format } from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
+
+const TZ = 'Europe/Istanbul';
 
 @Injectable()
 export class ReportsService {
@@ -10,13 +13,12 @@ export class ReportsService {
   constructor(private prisma: PrismaService) {}
 
   async getWeeklyHoursReport(weekStartStr: string) {
-    const weekStart = DateTime.fromISO(weekStartStr, {
-      zone: 'Europe/Istanbul',
-    }).startOf('week');
-    const weekEnd = weekStart.plus({ days: 7 });
+    const parsed = parseISO(weekStartStr);
+    const weekStartLocal = startOfWeek(parsed, { weekStartsOn: 1 });
+    const weekEndLocal = addDays(weekStartLocal, 7);
 
-    const weekStartUtc = weekStart.toUTC().toJSDate();
-    const weekEndUtc = weekEnd.toUTC().toJSDate();
+    const weekStartUtc = fromZonedTime(weekStartLocal, TZ);
+    const weekEndUtc = fromZonedTime(weekEndLocal, TZ);
 
     const employees = await this.prisma.employee.findMany({
       where: { isActive: true, deletedAt: null },
@@ -79,8 +81,8 @@ export class ReportsService {
     });
 
     return {
-      weekStart: weekStart.toFormat('yyyy-MM-dd'),
-      weekEnd: weekEnd.minus({ days: 1 }).toFormat('yyyy-MM-dd'),
+      weekStart: format(weekStartLocal, 'yyyy-MM-dd'),
+      weekEnd: format(addDays(weekStartLocal, 6), 'yyyy-MM-dd'),
       employees: report,
       totalCost: Math.round(totalCost * 100) / 100,
       totalShifts: shifts.length,

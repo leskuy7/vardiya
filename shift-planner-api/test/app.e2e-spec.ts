@@ -5,6 +5,7 @@ import request from 'supertest';
 import cookieParser from 'cookie-parser';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
+import { HttpExceptionFilter } from '../src/common/filters';
 
 describe('Shift Planner API (e2e)', () => {
   let app: INestApplication;
@@ -30,6 +31,7 @@ describe('Shift Planner API (e2e)', () => {
         transformOptions: { enableImplicitConversion: true },
       }),
     );
+    app.useGlobalFilters(new HttpExceptionFilter());
 
     await app.init();
 
@@ -91,6 +93,21 @@ describe('Shift Planner API (e2e)', () => {
           password: 'WrongPassword!',
         })
         .expect(401);
+    });
+
+    it('POST /api/auth/login - should return standard error shape', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/api/auth/login')
+        .send({
+          email: 'admin@shiftplanner.com',
+          password: 'WrongPassword!',
+        })
+        .expect(401);
+
+      expect(res.body).toHaveProperty('code', 'INVALID_CREDENTIALS');
+      expect(res.body).toHaveProperty('message');
+      expect(res.body).toHaveProperty('timestamp');
+      expect(res.body).toHaveProperty('path', '/api/auth/login');
     });
 
     it('GET /api/auth/me - should return current user', async () => {
@@ -294,11 +311,14 @@ describe('Shift Planner API (e2e)', () => {
 
       // Check employee structure
       const firstEmp = res.body.employees[0];
-      expect(firstEmp).toHaveProperty('id');
-      expect(firstEmp).toHaveProperty('name');
+      expect(firstEmp).toHaveProperty('employee');
+      expect(firstEmp.employee).toHaveProperty('id');
+      expect(firstEmp.employee).toHaveProperty('user');
+      expect(firstEmp.employee.user).toHaveProperty('name');
       expect(firstEmp).toHaveProperty('totalHours');
       expect(firstEmp).toHaveProperty('days');
-      expect(Object.keys(firstEmp.days)).toHaveLength(7);
+      expect(Array.isArray(firstEmp.days)).toBe(true);
+      expect(firstEmp.days).toHaveLength(7);
     });
   });
 

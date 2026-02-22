@@ -6,7 +6,10 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { DateTime } from 'luxon';
+import { startOfWeek, endOfWeek } from 'date-fns';
+import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
+
+const TZ = 'Europe/Istanbul';
 
 export interface ShiftValidationResult {
   valid: boolean;
@@ -91,22 +94,57 @@ export class ShiftsValidator {
     }
 
     // 4. Check availability conflicts (dayOfWeek-based)
-    const shiftDayOfWeek = startTime.getDay(); // 0=Sun, 6=Sat
-    const shiftStartHHmm = startTime.toTimeString().slice(0, 5); // "HH:MM"
-    const shiftEndHHmm = endTime.toTimeString().slice(0, 5);
+    const shiftDayOfWeek =
+      Number(formatInTimeZone(startTime, TZ, 'i')) % 7; // 0=Sun, 6=Sat
+    const shiftEndDayOfWeek =
+      Number(formatInTimeZone(endTime, TZ, 'i')) % 7;
+    const shiftStartMinutes =
+      Number(formatInTimeZone(startTime, TZ, 'HH')) * 60 +
+      Number(formatInTimeZone(startTime, TZ, 'mm'));
+    const shiftEndMinutes =
+      Number(formatInTimeZone(endTime, TZ, 'HH')) * 60 +
+      Number(formatInTimeZone(endTime, TZ, 'mm'));
+    const crossesMidnight = shiftDayOfWeek !== shiftEndDayOfWeek;
 
     const availabilityBlocks = await this.prisma.availabilityBlock.findMany({
       where: {
         employeeId,
         type: 'UNAVAILABLE',
-        dayOfWeek: shiftDayOfWeek,
+        dayOfWeek: crossesMidnight
+          ? { in: [shiftDayOfWeek, shiftEndDayOfWeek] }
+          : shiftDayOfWeek,
       },
     });
 
+    // Helper: get minutes from a Time-typed Date (1970-01-01T...)
+    const getMinutes = (d: Date) => d.getUTCHours() * 60 + d.getUTCMinutes();
+
     // Filter: block time range must overlap with shift time
+    const overlaps = (
+      aStart: number,
+      aEnd: number,
+      bStart: number,
+      bEnd: number,
+    ) => aStart < bEnd && aEnd > bStart;
+
     const conflictingBlocks = availabilityBlocks.filter((b) => {
       if (!b.startTime || !b.endTime) return true; // full-day block
-      return b.startTime < shiftEndHHmm && b.endTime > shiftStartHHmm;
+      const blockStart = getMinutes(b.startTime);
+      const blockEnd = getMinutes(b.endTime);
+
+      if (!crossesMidnight) {
+        return overlaps(shiftStartMinutes, shiftEndMinutes, blockStart, blockEnd);
+      }
+
+      if (b.dayOfWeek === shiftDayOfWeek) {
+        return overlaps(shiftStartMinutes, 24 * 60, blockStart, blockEnd);
+      }
+
+      if (b.dayOfWeek === shiftEndDayOfWeek) {
+        return overlaps(0, shiftEndMinutes, blockStart, blockEnd);
+      }
+
+      return false;
     });
 
     if (conflictingBlocks.length > 0) {
@@ -139,16 +177,12 @@ export class ShiftsValidator {
     });
 
     if (employee) {
-      const weekStart = DateTime.fromJSDate(startTime)
-        .setZone('Europe/Istanbul')
-        .startOf('week')
-        .toUTC()
-        .toJSDate();
-      const weekEnd = DateTime.fromJSDate(startTime)
-        .setZone('Europe/Istanbul')
-        .endOf('week')
-        .toUTC()
-        .toJSDate();
+      const weekStart = fromZonedTime(
+        startOfWeek(startTime, { weekStartsOn: 1 }), TZ,
+      );
+      const weekEnd = fromZonedTime(
+        endOfWeek(startTime, { weekStartsOn: 1 }), TZ,
+      );
 
       const weekShifts = await this.prisma.shift.findMany({
         where: {

@@ -6,6 +6,7 @@ import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/filters';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -21,16 +22,25 @@ async function bootstrap() {
 
   // CORS
   const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const allowedOrigins = [
-    frontendUrl,
-    'https://shift-planner-web.vercel.app' // Hardcode the new Vercel frontend to bypass CORS blockers
-  ];
+  const allowedOrigins = frontendUrl
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('CORS origin not allowed'), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['X-Warnings'],
   });
 
   // Global validation pipe
@@ -42,6 +52,8 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: true },
     }),
   );
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   // API prefix
   app.setGlobalPrefix('api', {

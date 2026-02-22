@@ -40,7 +40,7 @@ export default function GlobalError({
               <Text size="sm" c="dimmed" ta="center">
                 Uygulama beklenmedik bir sorunla karsilasti. Lutfen sayfayi yenileyin.
               </Text>
-              {error.message && (
+              {process.env.NODE_ENV !== "production" && error.message && (
                 <Text
                   size="xs"
                   style={{
