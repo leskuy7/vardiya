@@ -17,6 +17,7 @@ import {
   Divider,
   Tooltip,
   rem,
+  useMantineColorScheme,
 } from "@mantine/core";
 import {
   IconChevronLeft,
@@ -74,6 +75,8 @@ export default function MyShiftsPage() {
   const user = auth?.user ?? null;
   const { toast } = useToast();
   const [currentMonday, setCurrentMonday] = useState(() => getMonday(new Date()));
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   const { data: schedule, isLoading } = useWeeklySchedule(currentMonday);
   const acknowledgeShift = useAcknowledgeShift();
@@ -170,11 +173,10 @@ export default function MyShiftsPage() {
                   }}
                   p={0}
                 >
-                  {/* Day header */}
                   <Box
                     px="xs"
                     py={6}
-                    bg={today ? "blue.9" : "dark.6"}
+                    bg={today ? "blue.9" : isDark ? "dark.6" : "gray.1"}
                     style={{ borderRadius: "var(--mantine-radius-md) var(--mantine-radius-md) 0 0" }}
                   >
                     <Group justify="space-between">
@@ -184,7 +186,7 @@ export default function MyShiftsPage() {
                       <ThemeIcon
                         size={22}
                         radius="xl"
-                        color={today ? "blue" : "dark"}
+                        color={today ? "blue" : isDark ? "dark" : "gray"}
                         variant={today ? "filled" : "subtle"}
                       >
                         <Text size="10px" fw={800}>{dayNum}</Text>
@@ -222,7 +224,7 @@ export default function MyShiftsPage() {
       {!isLoading && allShifts.length === 0 && (
         <Center h={200}>
           <Stack align="center" gap="xs">
-            <ThemeIcon size={56} radius="xl" color="dark" variant="light" style={{ opacity: 0.3 }}>
+            <ThemeIcon size={56} radius="xl" color={isDark ? "dark" : "gray"} variant="light" style={{ opacity: 0.3 }}>
               <IconCalendar size={28} />
             </ThemeIcon>
             <Text size="sm" c="dimmed">Bu hafta için henüz vardiya yok.</Text>

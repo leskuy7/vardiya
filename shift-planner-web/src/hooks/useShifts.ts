@@ -48,7 +48,7 @@ export function useCreateShift() {
     mutationFn: async (data: CreateShiftData) => {
       const res = await api.post<Shift>("/shifts", data);
       const warnings = decodeWarnings(res.headers?.["x-warnings"]);
-      return warnings?.length ? { ...res.data, _warnings: warnings } : res.data;
+      return warnings?.length ? { ...res.data, warnings } : res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedule"] });
@@ -64,7 +64,7 @@ export function useUpdateShift() {
     mutationFn: async ({ id, data }: { id: string; data: UpdateShiftData }) => {
       const res = await api.patch<Shift>(`/shifts/${id}`, data);
       const warnings = decodeWarnings(res.headers?.["x-warnings"]);
-      return warnings?.length ? { ...res.data, _warnings: warnings } : res.data;
+      return warnings?.length ? { ...res.data, warnings } : res.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["schedule"] });

@@ -61,10 +61,10 @@ export default function ReportsPage() {
         style={{
           background: isDark
             ? "linear-gradient(140deg, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.9))"
-            : "linear-gradient(140deg, rgba(239, 246, 255, 0.95), rgba(219, 234, 254, 0.95))",
+            : "#fff",
           borderColor: isDark
             ? "var(--mantine-color-dark-4)"
-            : "var(--mantine-color-gray-3)",
+            : "#e2e8f0",
         }}
       >
         <Group justify="space-between" wrap="wrap">
@@ -168,7 +168,7 @@ export default function ReportsPage() {
                           border: "1px solid rgba(59,130,246,0.25)",
                         }}
                       >
-                        <Text size="xs" fw={700} c="blue.2">
+                        <Text size="xs" fw={700} c={isDark ? "blue.2" : "blue.7"}>
                           {emp.name?.charAt(0)?.toUpperCase() ?? "?"}
                         </Text>
                       </Paper>
@@ -183,7 +183,7 @@ export default function ReportsPage() {
                   </Table.Td>
                   <Table.Td style={{ textAlign: "right" }}>
                     {emp.overtimeHours > 0 ? (
-                      <Text size="sm" fw={700} c="yellow.4">{emp.overtimeHours.toFixed(1)} saat</Text>
+                      <Text size="sm" fw={700} c={isDark ? "yellow.4" : "yellow.7"}>{emp.overtimeHours.toFixed(1)} saat</Text>
                     ) : (
                       <Text size="sm" c="dimmed">—</Text>
                     )}

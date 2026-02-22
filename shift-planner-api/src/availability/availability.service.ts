@@ -32,6 +32,13 @@ export class AvailabilityService {
   }
 
   async create(dto: CreateAvailabilityDto, employeeId: string) {
+    if (!employeeId) {
+      throw new BadRequestException({
+        code: 'EMPLOYEE_REQUIRED',
+        message: 'Müsaitlik için çalışan seçimi zorunludur',
+      });
+    }
+
     if (dto.startTime && dto.endTime && dto.startTime >= dto.endTime) {
       throw new BadRequestException({
         code: 'INVALID_TIME_RANGE',

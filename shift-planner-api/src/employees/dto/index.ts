@@ -27,20 +27,35 @@ export class CreateEmployeeDto {
   })
   password: string;
 
-  @ApiProperty({ example: 'Ali' })
+  @ApiPropertyOptional({ example: 'Ali Vardiya' })
   @IsString()
-  @IsNotEmpty()
-  firstName: string;
+  @IsOptional()
+  name?: string;
 
-  @ApiProperty({ example: 'Yılmaz' })
+  @ApiPropertyOptional({ example: 'Ali' })
   @IsString()
-  @IsNotEmpty()
-  lastName: string;
+  @IsOptional()
+  firstName?: string;
+
+  @ApiPropertyOptional({ example: 'Yılmaz' })
+  @IsString()
+  @IsOptional()
+  lastName?: string;
 
   @ApiPropertyOptional({ example: 'barista' })
   @IsString()
   @IsOptional()
   position?: string;
+
+  @ApiPropertyOptional({ example: 'Servis' })
+  @IsString()
+  @IsOptional()
+  department?: string;
+
+  @ApiPropertyOptional({ example: '+90 555 000 0000' })
+  @IsString()
+  @IsOptional()
+  phone?: string;
 
   @ApiPropertyOptional({ example: 250.0 })
   @IsNumber()
@@ -62,6 +77,11 @@ export class CreateEmployeeDto {
 }
 
 export class UpdateEmployeeDto {
+  @ApiPropertyOptional({ example: 'Ali Vardiya' })
+  @IsString()
+  @IsOptional()
+  name?: string;
+
   @ApiPropertyOptional({ example: 'Ali' })
   @IsString()
   @IsOptional()
@@ -76,6 +96,16 @@ export class UpdateEmployeeDto {
   @IsString()
   @IsOptional()
   position?: string;
+
+  @ApiPropertyOptional({ example: 'Servis' })
+  @IsString()
+  @IsOptional()
+  department?: string;
+
+  @ApiPropertyOptional({ example: '+90 555 000 0000' })
+  @IsString()
+  @IsOptional()
+  phone?: string;
 
   @ApiPropertyOptional({ example: 300.0 })
   @IsNumber()

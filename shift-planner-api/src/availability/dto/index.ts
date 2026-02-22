@@ -17,6 +17,11 @@ export enum AvailabilityType {
 }
 
 export class CreateAvailabilityDto {
+  @ApiPropertyOptional({ example: 'employee-uuid' })
+  @IsString()
+  @IsOptional()
+  employeeId?: string;
+
   @ApiProperty({ enum: AvailabilityType, example: AvailabilityType.UNAVAILABLE })
   @IsEnum(AvailabilityType)
   type: AvailabilityType;

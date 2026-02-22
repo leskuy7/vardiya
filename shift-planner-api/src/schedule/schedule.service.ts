@@ -5,6 +5,31 @@ import { fromZonedTime, formatInTimeZone } from 'date-fns-tz';
 
 const TZ = 'Europe/Istanbul';
 
+function toMinutes(time: string) {
+  const [hour, minute] = time.split(':').map(Number);
+  return hour * 60 + minute;
+}
+
+function overlapsTimeRange(startA: number, endA: number, startB: number, endB: number) {
+  const normalize = (start: number, end: number) =>
+    end <= start ? { start, end: end + 1440 } : { start, end };
+
+  const first = normalize(startA, endA);
+  const second = normalize(startB, endB);
+
+  if (Math.max(first.start, second.start) < Math.min(first.end, second.end)) {
+    return true;
+  }
+
+  const shiftedSecond = { start: second.start + 1440, end: second.end + 1440 };
+  if (Math.max(first.start, shiftedSecond.start) < Math.min(first.end, shiftedSecond.end)) {
+    return true;
+  }
+
+  const shiftedFirst = { start: first.start + 1440, end: first.end + 1440 };
+  return Math.max(shiftedFirst.start, second.start) < Math.min(shiftedFirst.end, second.end);
+}
+
 @Injectable()
 export class ScheduleService {
   private readonly logger = new Logger(ScheduleService.name);
@@ -109,11 +134,30 @@ export class ScheduleService {
             };
           });
 
+        const hasConflict = dayShifts.some((shift) => {
+          const shiftStart = formatInTimeZone(shift.startTime, TZ, 'HH:mm');
+          const shiftEnd = formatInTimeZone(shift.endTime, TZ, 'HH:mm');
+          const shiftStartMin = toMinutes(shiftStart);
+          const shiftEndMin = toMinutes(shiftEnd);
+
+          return dayUnavailable.some((block) => {
+            if (!block.startTime || !block.endTime) {
+              return true;
+            }
+            return overlapsTimeRange(
+              shiftStartMin,
+              shiftEndMin,
+              toMinutes(block.startTime),
+              toMinutes(block.endTime),
+            );
+          });
+        });
+
         days.push({
           date: dayStr,
           shifts: dayShifts,
           unavailable: dayUnavailable,
-          hasConflict: dayShifts.length > 0 && dayUnavailable.length > 0,
+          hasConflict,
         });
       }
 

@@ -91,11 +91,11 @@ export function Sidebar({ className }: { className?: string }) {
               p={8}
               style={{
                 background: isDark
-                  ? "var(--mantine-color-body)"
-                  : "#f8fafc", // light tema için daha beyaz
-                borderRight: isDark
-                  ? "1px solid var(--mantine-color-default-border)"
-                  : "1px solid #e2e8f0", // light tema için daha açık border
+                  ? "linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(99, 102, 241, 0.85))"
+                  : "linear-gradient(135deg, #3b82f6, #6366f1)",
+                boxShadow: isDark
+                  ? "0 10px 30px rgba(59, 130, 246, 0.25)"
+                  : "0 4px 12px rgba(59, 130, 246, 0.2)",
               }}
             >
               <IconLayoutDashboard size={18} color="white" />
@@ -174,7 +174,7 @@ export function Sidebar({ className }: { className?: string }) {
                       : "1px solid #bae6fd",
                   }}
                 >
-                  <Text size="xs" fw={700} c="blue.2">
+                  <Text size="xs" fw={700} c={isDark ? "blue.2" : "blue.7"}>
                     {user?.name?.charAt(0)?.toUpperCase() ?? "U"}
                   </Text>
                 </Paper>

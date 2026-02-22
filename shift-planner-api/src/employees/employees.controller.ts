@@ -40,21 +40,21 @@ export class EmployeesController {
   }
 
   @Post()
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Yeni çalışan oluştur' })
   create(@Body() dto: CreateEmployeeDto) {
     return this.employeesService.create(dto);
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Çalışan güncelle' })
   update(@Param('id') id: string, @Body() dto: UpdateEmployeeDto) {
     return this.employeesService.update(id, dto);
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Çalışan sil (soft delete)' })
   remove(@Param('id') id: string) {
     return this.employeesService.softDelete(id);

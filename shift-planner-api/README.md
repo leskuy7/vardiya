@@ -9,13 +9,13 @@ Portfolio project — demonstrating clean architecture, JWT auth, role-based acc
 
 | Layer | Technology |
 |---|---|
-| Framework | NestJS 10 |
+| Framework | NestJS 11 |
 | ORM | Prisma 6 + PostgreSQL 16 |
 | Auth | JWT (access 15 min) + Refresh Token (7 days, httpOnly cookie) |
 | Validation | class-validator / class-transformer |
 | Logging | pino / nestjs-pino |
 | Rate Limiting | @nestjs/throttler |
-| Date/Time | Luxon (DB = UTC, UI = Europe/Istanbul) |
+| Date/Time | date-fns + date-fns-tz (DB = UTC, UI = Europe/Istanbul) |
 | Testing | Jest (unit) + Supertest (e2e) |
 
 ---
@@ -103,9 +103,9 @@ API is available at **http://localhost:3001/api**
 |---|---|---|
 | GET | `/api/employees` | MANAGER+ |
 | GET | `/api/employees/:id` | MANAGER+ |
-| POST | `/api/employees` | ADMIN |
-| PATCH | `/api/employees/:id` | ADMIN |
-| DELETE | `/api/employees/:id` | ADMIN |
+| POST | `/api/employees` | ADMIN / MANAGER |
+| PATCH | `/api/employees/:id` | ADMIN / MANAGER |
+| DELETE | `/api/employees/:id` | ADMIN / MANAGER |
 
 ### Shifts
 | Method | Path | Description |
@@ -114,29 +114,26 @@ API is available at **http://localhost:3001/api**
 | POST | `/api/shifts` | Create shift (MANAGER+) |
 | PATCH | `/api/shifts/:id` | Update shift (MANAGER+) |
 | DELETE | `/api/shifts/:id` | Delete shift (MANAGER+) |
-| PATCH | `/api/shifts/:id/acknowledge` | Employee acknowledges shift |
+| POST | `/api/shifts/:id/acknowledge` | Employee acknowledges shift |
 | PATCH | `/api/shifts/:id/publish` | Publish draft shift (MANAGER+) |
 | POST | `/api/shifts/copy-week` | Copy one week's shifts to another (MANAGER+) |
 
 ### Schedule
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/schedule?weekStart=YYYY-MM-DD` | Weekly schedule grid |
-| POST | `/api/schedule/auto-assign` | Auto-generate schedule for week (MANAGER+) |
+| GET | `/api/schedule/week?start=YYYY-MM-DD` | Weekly schedule grid |
 
 ### Availability
 | Method | Path | Description |
 |---|---|---|
 | GET | `/api/availability` | List availability blocks |
 | POST | `/api/availability` | Create availability block |
-| PATCH | `/api/availability/:id` | Update availability block |
 | DELETE | `/api/availability/:id` | Delete availability block |
 
 ### Reports
 | Method | Path | Description |
 |---|---|---|
-| GET | `/api/reports?weekStart=YYYY-MM-DD` | Weekly hours report |
-| GET | `/api/reports/summary` | Monthly summary |
+| GET | `/api/reports/weekly-hours?weekStart=YYYY-MM-DD` | Weekly hours report |
 
 ### Health
 | Method | Path | Description |

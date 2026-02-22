@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { ReportsService } from './reports.service';
@@ -17,7 +17,18 @@ export class ReportsController {
   @Roles(Role.ADMIN, Role.MANAGER)
   @ApiOperation({ summary: 'Haftalık saat ve maliyet raporu' })
   @ApiQuery({ name: 'weekStart', required: true, example: '2026-02-16' })
-  getWeeklyHoursReport(@Query('weekStart') start: string) {
-    return this.reportsService.getWeeklyHoursReport(start);
+  @ApiQuery({ name: 'start', required: false, example: '2026-02-16' })
+  getWeeklyHoursReport(
+    @Query('weekStart') weekStart?: string,
+    @Query('start') start?: string,
+  ) {
+    const startDate = weekStart || start;
+    if (!startDate) {
+      throw new BadRequestException({
+        code: 'WEEK_START_REQUIRED',
+        message: 'weekStart (veya start) query parametresi zorunludur',
+      });
+    }
+    return this.reportsService.getWeeklyHoursReport(startDate);
   }
 }

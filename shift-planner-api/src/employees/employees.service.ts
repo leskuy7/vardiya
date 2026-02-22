@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
   Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -14,6 +15,18 @@ export class EmployeesService {
   private readonly SALT_ROUNDS = 12;
 
   constructor(private prisma: PrismaService) {}
+
+  private resolveDisplayName(dto: {
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+  }) {
+    if (dto.name?.trim()) {
+      return dto.name.trim();
+    }
+    const combined = `${dto.firstName ?? ''} ${dto.lastName ?? ''}`.trim();
+    return combined;
+  }
 
   async findAll(active?: boolean) {
     const where: any = {
@@ -68,17 +81,27 @@ export class EmployeesService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, this.SALT_ROUNDS);
+    const resolvedName = this.resolveDisplayName(dto);
+
+    if (!resolvedName) {
+      throw new BadRequestException({
+        code: 'NAME_REQUIRED',
+        message: 'Çalışan adı zorunludur',
+      });
+    }
 
     const employee = await this.prisma.employee.create({
       data: {
         position: dto.position,
+        department: dto.department,
+        phone: dto.phone,
         hourlyRate: dto.hourlyRate,
         maxWeeklyHours: dto.maxWeeklyHours || 45,
         user: {
           create: {
             email: dto.email,
             passwordHash,
-            name: `${dto.firstName} ${dto.lastName}`,
+            name: resolvedName,
             role: dto.role || 'EMPLOYEE',
           },
         },
@@ -99,9 +122,19 @@ export class EmployeesService {
 
     const updateData: any = {};
     if (dto.position !== undefined) updateData.position = dto.position;
+    if (dto.department !== undefined) updateData.department = dto.department;
+    if (dto.phone !== undefined) updateData.phone = dto.phone;
     if (dto.hourlyRate !== undefined) updateData.hourlyRate = dto.hourlyRate;
     if (dto.maxWeeklyHours !== undefined) updateData.maxWeeklyHours = dto.maxWeeklyHours;
     if (dto.isActive !== undefined) updateData.isActive = dto.isActive;
+
+    const resolvedName = this.resolveDisplayName(dto);
+    if (resolvedName) {
+      await this.prisma.user.update({
+        where: { id: employee.userId },
+        data: { name: resolvedName },
+      });
+    }
 
     const updated = await this.prisma.employee.update({
       where: { id },

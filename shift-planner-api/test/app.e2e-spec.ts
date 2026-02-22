@@ -347,7 +347,7 @@ describe('Shift Planner API (e2e)', () => {
 
     it('GET /api/reports/weekly-hours - employee should get 403', async () => {
       await request(app.getHttpServer())
-        .get('/api/reports/weekly-hours?start=2026-02-16')
+        .get('/api/reports/weekly-hours?weekStart=2026-02-16')
         .set('Authorization', `Bearer ${employeeToken}`)
         .expect(403);
     });

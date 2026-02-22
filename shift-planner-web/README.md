@@ -1,6 +1,6 @@
 # Shift Planner Web
 
-Production-quality **employee shift planning frontend** built with Next.js 14 (App Router), Tailwind CSS v4, and React Query.  
+Production-quality **employee shift planning frontend** built with Next.js 15 (App Router), Tailwind CSS v4, and React Query.  
 Portfolio project — demonstrating modern React patterns, drag & drop scheduling, role-based UI, and print-ready reports.
 
 ---
@@ -9,14 +9,14 @@ Portfolio project — demonstrating modern React patterns, drag & drop schedulin
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 14 (App Router) |
+| Framework | Next.js 15 (App Router) |
 | Styling | Tailwind CSS v4 (`@theme` directive) |
 | State | @tanstack/react-query v5 |
 | Forms | react-hook-form + zod |
 | Drag & Drop | @dnd-kit/core + @dnd-kit/sortable |
 | HTTP | axios |
 | Icons | lucide-react |
-| Date/Time | Luxon |
+| Date/Time | date-fns + date-fns-tz |
 | Auth | JWT (sessionStorage) + Refresh Token (httpOnly cookie) |
 
 ---

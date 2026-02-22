@@ -20,6 +20,7 @@ import {
   Text,
   TextInput,
   Title,
+  useMantineColorScheme,
 } from "@mantine/core";
 import {
   IconCalendarWeek,
@@ -84,6 +85,8 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
 
   const {
     register,
@@ -138,8 +141,9 @@ export default function LoginPage() {
         alignItems: "center",
         position: "relative",
         overflow: "hidden",
-        background:
-          "linear-gradient(135deg, #090c16 0%, #0f1424 50%, #151a2e 100%)",
+        background: isDark
+          ? "linear-gradient(135deg, #090c16 0%, #0f1424 50%, #151a2e 100%)"
+          : "linear-gradient(135deg, #f0f4ff 0%, #e8effd 50%, #f5f3ff 100%)",
       }}
     >
       {/* Ambient shapes */}
@@ -148,8 +152,9 @@ export default function LoginPage() {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          background:
-            "radial-gradient(500px 240px at 5% 10%, rgba(99,102,241,0.25), transparent 60%), radial-gradient(400px 260px at 90% 20%, rgba(14,165,233,0.2), transparent 60%), radial-gradient(420px 260px at 80% 85%, rgba(236,72,153,0.18), transparent 60%)",
+          background: isDark
+            ? "radial-gradient(500px 240px at 5% 10%, rgba(99,102,241,0.25), transparent 60%), radial-gradient(400px 260px at 90% 20%, rgba(14,165,233,0.2), transparent 60%), radial-gradient(420px 260px at 80% 85%, rgba(236,72,153,0.18), transparent 60%)"
+            : "radial-gradient(500px 240px at 5% 10%, rgba(99,102,241,0.08), transparent 60%), radial-gradient(400px 260px at 90% 20%, rgba(14,165,233,0.06), transparent 60%)",
         }}
       />
       <Box
@@ -159,7 +164,7 @@ export default function LoginPage() {
           pointerEvents: "none",
           background:
             "repeating-linear-gradient(120deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 12px)",
-          opacity: 0.4,
+          opacity: isDark ? 0.4 : 0.15,
         }}
       />
 
@@ -203,11 +208,15 @@ export default function LoginPage() {
                       radius="md"
                       p={8}
                       style={{
-                        background: "rgba(99,102,241,0.12)",
-                        border: "1px solid rgba(99,102,241,0.3)",
+                        background: isDark
+                          ? "rgba(99,102,241,0.12)"
+                          : "rgba(99,102,241,0.08)",
+                        border: isDark
+                          ? "1px solid rgba(99,102,241,0.3)"
+                          : "1px solid rgba(99,102,241,0.15)",
                       }}
                     >
-                      <Icon size={16} color="#a5b4fc" />
+                      <Icon size={16} color={isDark ? "#a5b4fc" : "#6366f1"} />
                     </Paper>
                     <Box>
                       <Text fw={600} size="sm">{label}</Text>
@@ -226,9 +235,15 @@ export default function LoginPage() {
               p="xl"
               withBorder
               style={{
-                background: "rgba(12, 18, 28, 0.85)",
-                borderColor: "var(--mantine-color-dark-4)",
-                boxShadow: "0 24px 60px rgba(0,0,0,0.45)",
+                background: isDark
+                  ? "rgba(12, 18, 28, 0.85)"
+                  : "#fff",
+                borderColor: isDark
+                  ? "var(--mantine-color-dark-4)"
+                  : "#e2e8f0",
+                boxShadow: isDark
+                  ? "0 24px 60px rgba(0,0,0,0.45)"
+                  : "0 24px 60px rgba(37,99,235,0.1)",
               }}
             >
               <Group justify="space-between" mb="md">

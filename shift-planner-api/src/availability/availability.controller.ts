@@ -41,8 +41,12 @@ export class AvailabilityController {
     @Body() dto: CreateAvailabilityDto,
     @CurrentUser() user: AuthenticatedUser,
   ) {
-    // Employees create for themselves; admins could create for others (extend DTO if needed)
-    return this.availabilityService.create(dto, user.employeeId!);
+    const targetEmployeeId =
+      (user.role === 'ADMIN' || user.role === 'MANAGER')
+        ? (dto.employeeId ?? user.employeeId)
+        : user.employeeId;
+
+    return this.availabilityService.create(dto, targetEmployeeId!);
   }
 
   @Delete(':id')

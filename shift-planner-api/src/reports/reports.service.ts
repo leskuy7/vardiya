@@ -66,7 +66,7 @@ export class ReportsService {
       totalCost += totalPay;
 
       return {
-        id: emp.id,
+        employeeId: emp.id,
         name: emp.user.name,
         position: emp.position,
         totalHours: Math.round(totalHours * 10) / 10,

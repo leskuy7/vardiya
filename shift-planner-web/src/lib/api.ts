@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosError, AxiosHeaders, InternalAxiosRequestConfig } from "axios";
 import {
   clearStoredAuth,
   getStoredAccessToken,
@@ -87,9 +87,9 @@ api.interceptors.response.use(
         failedQueue.push({ resolve, reject });
       }).then((newToken) => {
         if (!originalRequest.headers) {
-          originalRequest.headers = {};
+          originalRequest.headers = new AxiosHeaders();
         }
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        originalRequest.headers.set("Authorization", `Bearer ${newToken}`);
         return api(originalRequest);
       });
     }
@@ -111,9 +111,9 @@ api.interceptors.response.use(
       processQueue(null, accessToken);
 
       if (!originalRequest.headers) {
-        originalRequest.headers = {};
+        originalRequest.headers = new AxiosHeaders();
       }
-      originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+      originalRequest.headers.set("Authorization", `Bearer ${accessToken}`);
       return api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);

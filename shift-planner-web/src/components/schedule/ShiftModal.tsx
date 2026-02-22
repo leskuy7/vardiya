@@ -133,9 +133,7 @@ export function ShiftModal({
         toast("success", "Vardiya güncellendi.");
       } else {
         const result = await createShift.mutateAsync(payload);
-        const warnings =
-          (result as { _warnings?: string[] })?._warnings ??
-          (result as { warnings?: string[] })?.warnings;
+        const warnings = (result as { warnings?: string[] })?.warnings;
         if (warnings?.length) {
           toast("warning", warnings.join(" | "));
         } else {

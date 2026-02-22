@@ -175,10 +175,10 @@ export default function EmployeesPage() {
         style={{
           background: isDark
             ? "linear-gradient(135deg, rgba(14, 116, 144, 0.2), rgba(30, 64, 175, 0.2))"
-            : "linear-gradient(135deg, rgba(224, 231, 255, 0.9), rgba(219, 234, 254, 0.9))",
+            : "#fff",
           borderColor: isDark
             ? "var(--mantine-color-dark-4)"
-            : "var(--mantine-color-gray-3)",
+            : "#e2e8f0",
         }}
       >
         <Group justify="space-between" wrap="wrap">
@@ -228,7 +228,7 @@ export default function EmployeesPage() {
                         border: "1px solid rgba(59,130,246,0.25)",
                       }}
                     >
-                      <Text size="xs" fw={700} c="blue.2">
+                      <Text size="xs" fw={700} c={isDark ? "blue.2" : "blue.7"}>
                         {emp.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
                       </Text>
                     </Paper>
