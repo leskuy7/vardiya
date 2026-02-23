@@ -131,7 +131,7 @@ export default function ReportsPage() {
         <Paper withBorder radius="lg" p="xl">
           <Center h={160}>
             <Stack gap={6} align="center">
-              <IconChartBar size={28} color="#64748b" />
+              <IconChartBar size={28} color="var(--mantine-color-dimmed)" />
               <Text size="sm" c="dimmed">Bu hafta icin rapor verisi bulunamadi.</Text>
             </Stack>
           </Center>
@@ -164,8 +164,8 @@ export default function ReportsPage() {
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
-                          background: "rgba(59,130,246,0.15)",
-                          border: "1px solid rgba(59,130,246,0.25)",
+                          background: isDark ? "rgba(59,130,246,0.15)" : "var(--mantine-color-blue-0)",
+                          border: isDark ? "1px solid rgba(59,130,246,0.25)" : "1px solid var(--mantine-color-blue-2)",
                         }}
                       >
                         <Text size="xs" fw={700} c={isDark ? "blue.2" : "blue.7"}>

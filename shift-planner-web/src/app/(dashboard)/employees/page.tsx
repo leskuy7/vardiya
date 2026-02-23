@@ -252,12 +252,12 @@ export default function EmployeesPage() {
                 <Table.Td>
                   {emp.isActive ? (
                     <Group gap={6}>
-                      <IconUserCheck size={14} color="#22c55e" />
+                      <IconUserCheck size={14} color="var(--mantine-color-green-6)" />
                       <Text size="xs" fw={600} c="green.4">Aktif</Text>
                     </Group>
                   ) : (
                     <Group gap={6}>
-                      <IconUserX size={14} color="#94a3b8" />
+                      <IconUserX size={14} color="var(--mantine-color-dimmed)" />
                       <Text size="xs" fw={600} c="dimmed">Pasif</Text>
                     </Group>
                   )}

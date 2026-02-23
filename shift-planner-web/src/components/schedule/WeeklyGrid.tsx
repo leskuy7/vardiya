@@ -118,7 +118,7 @@ export function WeeklyGrid({
             borderRadius: "var(--mantine-radius-lg)",
             overflow: "hidden",
             boxShadow: "0 12px 40px rgba(0, 0, 0, 0.1)",
-            background: isDark ? "rgba(12, 18, 28, 0.6)" : "#fff",
+            background: isDark ? "rgba(12, 18, 28, 0.6)" : "var(--mantine-color-body)",
           }}
         >
           {/* Header row */}
@@ -127,7 +127,7 @@ export function WeeklyGrid({
               padding: "12px 16px",
               borderBottom: "1px solid var(--mantine-color-default-border)",
               borderRight: "1px solid var(--mantine-color-default-border)",
-              background: isDark ? "rgba(15, 23, 42, 0.75)" : "#f9fafb",
+              background: isDark ? "rgba(15, 23, 42, 0.75)" : "var(--mantine-color-default)",
             }}
           >
             <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.12em" }}>
@@ -147,7 +147,7 @@ export function WeeklyGrid({
                   textAlign: "center",
                   background: isToday
                     ? (isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(239, 246, 255, 0.5)")
-                    : (isDark ? "rgba(15, 23, 42, 0.6)" : "#f9fafb"),
+                    : (isDark ? "rgba(15, 23, 42, 0.6)" : "var(--mantine-color-default)"),
                 }}
               >
                 <Text size="10px" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.1em" }}>
@@ -220,7 +220,7 @@ function EmployeeRow({
           padding: "12px 16px",
           borderBottom: "1px solid var(--mantine-color-default-border)",
           borderRight: "1px solid var(--mantine-color-default-border)",
-          background: isDark ? "rgba(12, 18, 28, 0.7)" : "#f9fafb",
+          background: isDark ? "rgba(12, 18, 28, 0.7)" : "var(--mantine-color-default)",
         }}
       >
         <Group gap="sm" align="center">
@@ -238,12 +238,12 @@ function EmployeeRow({
             }}
           >
             <Text size="sm" fw={700} c="blue">
-              {empRow.employee?.user?.firstName?.charAt(0)?.toUpperCase() ?? "?"}
+              {empRow.employee?.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
             </Text>
           </Paper>
           <Box style={{ minWidth: 0 }}>
             <Text size="sm" fw={600} truncate>
-              {empRow.employee?.user?.firstName ? `${empRow.employee.user.firstName} ${empRow.employee.user.lastName}` : "Bilinmiyor"}
+              {empRow.employee?.user?.name || "Bilinmiyor"}
             </Text>
             <Text size="xs" c="dimmed" truncate>
               {empRow.employee?.position ?? empRow.employee?.department ?? ""}
@@ -277,8 +277,8 @@ function EmployeeRow({
                 padding: 8,
                 transition: "background 120ms ease",
                 background: daySchedule.hasConflict
-                  ? (isDark ? "rgba(239, 68, 68, 0.15)" : "#fef2f2")
-                  : (isDark ? "rgba(12, 18, 28, 0.55)" : "#fff"),
+                  ? (isDark ? "rgba(239, 68, 68, 0.15)" : "var(--mantine-color-red-0)")
+                  : (isDark ? "rgba(12, 18, 28, 0.55)" : "var(--mantine-color-body)"),
               }}
             >
               <Stack gap={6}>

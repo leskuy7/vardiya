@@ -207,7 +207,7 @@ export default function AvailabilityPage() {
         <Paper withBorder radius="lg" p="xl">
           <Center h={160}>
             <Stack gap={6} align="center">
-              <IconCalendarEvent size={28} color="#64748b" />
+              <IconCalendarEvent size={28} color="var(--mantine-color-dimmed)" />
               <Text size="sm" c="dimmed">Henuz musaitlik engeli yok</Text>
             </Stack>
           </Center>

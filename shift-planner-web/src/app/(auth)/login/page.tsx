@@ -192,7 +192,7 @@ export default function LoginPage() {
 
               <Title order={1} style={{ fontSize: "clamp(32px, 4vw, 52px)", lineHeight: 1.05 }}>
                 Ekibinizi <br />
-                <Text span c="blue.2" fw={800}>
+                <Text span c={isDark ? "blue.2" : "blue.7"} fw={800}>
                   Akillica
                 </Text>{" "}
                 yonetin.

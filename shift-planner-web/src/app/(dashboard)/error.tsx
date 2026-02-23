@@ -23,12 +23,12 @@ export default function DashboardError({
         p="xl"
         style={{
           width: "min(440px, 92vw)",
-          background: "rgba(239,68,68,0.08)",
-          borderColor: "rgba(239,68,68,0.25)",
+          background: "var(--mantine-color-default)",
+          borderColor: "var(--mantine-color-red-4)",
         }}
       >
         <Stack gap="sm" align="center">
-          <IconAlertTriangle size={32} color="#f87171" />
+          <IconAlertTriangle size={32} color="var(--mantine-color-red-6)" />
           <Title order={4}>Sayfa Yuklenemedi</Title>
           <Text size="sm" c="dimmed" ta="center">
             Bu bolum yuklenirken bir sorun yasandi.

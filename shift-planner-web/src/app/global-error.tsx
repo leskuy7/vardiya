@@ -21,7 +21,7 @@ export default function GlobalError({
         <Center
           style={{
             minHeight: "100vh",
-            background: "linear-gradient(135deg,#090c16,#0f1424)",
+            background: "var(--mantine-color-body)",
           }}
         >
           <Paper
@@ -30,12 +30,12 @@ export default function GlobalError({
             p="xl"
             style={{
               width: "min(520px, 92vw)",
-              background: "rgba(239,68,68,0.08)",
-              borderColor: "rgba(239,68,68,0.25)",
+              background: "var(--mantine-color-default)",
+              borderColor: "var(--mantine-color-red-4)",
             }}
           >
             <Stack gap="sm" align="center">
-              <IconAlertTriangle size={36} color="#f87171" />
+              <IconAlertTriangle size={36} color="var(--mantine-color-red-6)" />
               <Title order={3}>Beklenmeyen Bir Hata Olustu</Title>
               <Text size="sm" c="dimmed" ta="center">
                 Uygulama beklenmedik bir sorunla karsilasti. Lutfen sayfayi yenileyin.
@@ -44,7 +44,7 @@ export default function GlobalError({
                 <Text
                   size="xs"
                   style={{
-                    background: "rgba(15,23,42,0.6)",
+                    background: "var(--mantine-color-default)",
                     padding: "8px 12px",
                     borderRadius: 8,
                     fontFamily: "monospace",
