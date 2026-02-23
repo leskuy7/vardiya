@@ -10,7 +10,7 @@ import {
 } from "@dnd-kit/core";
 import { SortableContext, rectSortingStrategy } from "@dnd-kit/sortable";
 import { format, parseISO } from "date-fns";
-import { Box, Button, Center, Group, Loader, Paper, Stack, Text } from "@mantine/core";
+import { Box, Button, Center, Group, Loader, Paper, Stack, Text, useMantineColorScheme } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
 import { ShiftCard } from "./ShiftCard";
 import type { WeeklySchedule, EmployeeSchedule, Shift } from "@/types";
@@ -42,6 +42,8 @@ export function WeeklyGrid({
   onAcknowledgeShift,
   onMoveShift,
 }: WeeklyGridProps) {
+  const { colorScheme } = useMantineColorScheme();
+  const isDark = colorScheme === "dark";
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   if (isLoading) {
@@ -116,8 +118,8 @@ export function WeeklyGrid({
             borderRadius: "var(--mantine-radius-lg)",
             overflow: "hidden",
             boxShadow: "0 12px 40px rgba(0, 0, 0, 0.1)",
+            background: isDark ? "rgba(12, 18, 28, 0.6)" : "#fff",
           }}
-          className="bg-white dark:bg-[#0c121c]/60"
         >
           {/* Header row */}
           <Box
@@ -125,8 +127,8 @@ export function WeeklyGrid({
               padding: "12px 16px",
               borderBottom: "1px solid var(--mantine-color-default-border)",
               borderRight: "1px solid var(--mantine-color-default-border)",
+              background: isDark ? "rgba(15, 23, 42, 0.75)" : "#f9fafb",
             }}
-            className="bg-gray-50 dark:bg-[#0f172a]/75"
           >
             <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: "0.12em" }}>
               Çalışan
@@ -143,8 +145,10 @@ export function WeeklyGrid({
                   borderBottom: "1px solid var(--mantine-color-default-border)",
                   borderRight: "1px solid var(--mantine-color-default-border)",
                   textAlign: "center",
+                  background: isToday
+                    ? (isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(239, 246, 255, 0.5)")
+                    : (isDark ? "rgba(15, 23, 42, 0.6)" : "#f9fafb"),
                 }}
-                className={isToday ? "bg-blue-50/50 dark:bg-blue-500/10" : "bg-gray-50 dark:bg-[#0f172a]/60"}
               >
                 <Text size="10px" tt="uppercase" fw={700} c="dimmed" style={{ letterSpacing: "0.1em" }}>
                   {DAY_NAMES[i]}
@@ -164,6 +168,7 @@ export function WeeklyGrid({
               weekDays={weekDays}
               canManage={canManage}
               isEmployee={isEmployee}
+              isDark={isDark}
               onAddShift={onAddShift}
               onEditShift={onEditShift}
               onDeleteShift={onDeleteShift}
@@ -181,6 +186,7 @@ interface EmployeeRowProps {
   weekDays: string[];
   canManage: boolean;
   isEmployee: boolean;
+  isDark: boolean;
   onAddShift: (employeeId: string, date: string) => void;
   onEditShift: (shift: Shift) => void;
   onDeleteShift: (shift: Shift) => void;
@@ -192,6 +198,7 @@ function EmployeeRow({
   weekDays,
   canManage,
   isEmployee,
+  isDark,
   onAddShift,
   onEditShift,
   onDeleteShift,
@@ -213,8 +220,8 @@ function EmployeeRow({
           padding: "12px 16px",
           borderBottom: "1px solid var(--mantine-color-default-border)",
           borderRight: "1px solid var(--mantine-color-default-border)",
+          background: isDark ? "rgba(12, 18, 28, 0.7)" : "#f9fafb",
         }}
-        className="bg-gray-50 dark:bg-[#0c121c]/70"
       >
         <Group gap="sm" align="center">
           <Paper
@@ -269,8 +276,10 @@ function EmployeeRow({
                 minHeight: 110,
                 padding: 8,
                 transition: "background 120ms ease",
+                background: daySchedule.hasConflict
+                  ? (isDark ? "rgba(239, 68, 68, 0.15)" : "#fef2f2")
+                  : (isDark ? "rgba(12, 18, 28, 0.55)" : "#fff"),
               }}
-              className={daySchedule.hasConflict ? "bg-red-50 dark:bg-red-500/15" : "bg-white dark:bg-[#0c121c]/55"}
             >
               <Stack gap={6}>
                 {shifts.map((shift, i) => (
