@@ -131,8 +131,8 @@ export default function AvailabilityPage() {
         startTime: values.startTime || undefined,
         endTime: values.endTime || undefined,
         dayOfWeek: finalDayOfWeek,
-        startDate: isRecurring === "true" ? undefined : values.startDate,
-        endDate: isRecurring === "true" ? undefined : values.endDate,
+        startDate: isRecurring === "true" || !values.startDate ? undefined : values.startDate,
+        endDate: isRecurring === "true" || !values.endDate ? undefined : values.endDate,
       };
 
       await createAvail.mutateAsync(payload);
