@@ -122,6 +122,8 @@ export default function AvailabilityPage() {
 
       const payload = {
         ...values,
+        startTime: values.startTime || undefined,
+        endTime: values.endTime || undefined,
         dayOfWeek: finalDayOfWeek,
         startDate: isRecurring === "true" ? undefined : values.startDate,
         endDate: isRecurring === "true" ? undefined : values.endDate,

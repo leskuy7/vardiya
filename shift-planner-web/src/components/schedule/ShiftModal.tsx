@@ -153,7 +153,7 @@ export function ShiftModal({
     () =>
       (employees || []).map((emp) => ({
         value: emp.id,
-        label: emp.position ? `${emp.user.firstName} ${emp.user.lastName} — ${emp.position}` : `${emp.user.firstName} ${emp.user.lastName}`,
+        label: emp.position ? `${emp.user.name} — ${emp.position}` : emp.user.name,
       })),
     [employees]
   );

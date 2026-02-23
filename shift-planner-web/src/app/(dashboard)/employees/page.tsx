@@ -228,10 +228,10 @@ export default function EmployeesPage() {
                       }}
                     >
                       <Text size="xs" fw={700} c={isDark ? "blue.2" : "blue.7"}>
-                        {emp.user?.firstName?.charAt(0)?.toUpperCase() ?? "?"}
+                        {emp.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
                       </Text>
                     </Paper>
-                    <Text size="sm" fw={600}>{emp.user?.firstName} {emp.user?.lastName}</Text>
+                    <Text size="sm" fw={600}>{emp.user?.name}</Text>
                   </Group>
                 </Table.Td>
                 <Table.Td>
@@ -370,7 +370,7 @@ export default function EmployeesPage() {
       >
         <Stack gap="sm">
           <Text size="sm" c="dimmed">
-            {deleteDialog.employee?.user.firstName} {deleteDialog.employee?.user.lastName} adlı çalışan pasife alınacak. Geçmiş vardiyaları silinmeyecek.
+            {deleteDialog.employee?.user.name} adlı çalışan pasife alınacak. Geçmiş vardiyaları silinmeyecek.
           </Text>
           <Divider />
           <Group justify="flex-end">
