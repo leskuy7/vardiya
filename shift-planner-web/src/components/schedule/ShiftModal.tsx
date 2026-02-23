@@ -152,7 +152,6 @@ export function ShiftModal({
   const employeeOptions = useMemo(
     () =>
       (employees || []).map((emp) => ({
-        group: "",
         value: emp.id,
         label: emp.position ? `${emp.user.firstName} ${emp.user.lastName} — ${emp.position}` : `${emp.user.firstName} ${emp.user.lastName}`,
       })),
