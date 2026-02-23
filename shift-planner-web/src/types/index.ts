@@ -2,7 +2,8 @@
 export interface User {
   id: string;
   email: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role: "ADMIN" | "MANAGER" | "EMPLOYEE";
 }
 
@@ -26,7 +27,8 @@ export interface Employee {
   user: {
     id: string;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
   };
 }
@@ -34,20 +36,18 @@ export interface Employee {
 export interface CreateEmployeeData {
   email: string;
   password: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   role?: string;
   position?: string;
-  department?: string;
-  phone?: string;
   hourlyRate?: number;
   maxWeeklyHours?: number;
 }
 
 export interface UpdateEmployeeData {
-  name?: string;
+  firstName?: string;
+  lastName?: string;
   position?: string;
-  department?: string;
-  phone?: string;
   hourlyRate?: number;
   maxWeeklyHours?: number;
 }
@@ -63,7 +63,7 @@ export interface Shift {
   employee?: {
     id: string;
     position?: string;
-    user: { id: string; name: string; email: string };
+    user: { id: string; firstName: string; lastName: string; email: string };
   };
 }
 
@@ -97,7 +97,7 @@ export interface AvailabilityBlock {
   endDate?: string;
   employee?: {
     id: string;
-    user: { id: string; name: string };
+    user: { id: string; firstName: string; lastName: string };
   };
 }
 
@@ -138,7 +138,8 @@ export interface CopyWeekData {
 // ============ Reports ============
 export interface EmployeeReport {
   employeeId: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   position?: string;
   shiftCount: number;
   totalHours: number;

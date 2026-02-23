@@ -33,20 +33,43 @@
   --animate-fade-in: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-slide-up: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-pulse-glow: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  
+
   @keyframes fade-in {
-    0% { opacity: 0; transform: translateY(12px) scale(0.98); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
+    0% {
+      opacity: 0;
+      transform: translateY(12px) scale(0.98);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
   }
 
   @keyframes slide-up {
-    0% { opacity: 0; transform: translateY(24px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes pulse-glow {
-    0%, 100% { opacity: 1; box-shadow: 0 0 15px -3px var(--color-primary); }
-    50% { opacity: .5; box-shadow: 0 0 5px -3px var(--color-primary); }
+
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 15px -3px var(--color-primary);
+    }
+
+    50% {
+      opacity: .5;
+      box-shadow: 0 0 5px -3px var(--color-primary);
+    }
   }
 }
 
@@ -80,25 +103,25 @@
   --color-foreground: hsl(210 40% 98%);
   --color-card: hsl(222 47% 7%);
   --color-card-foreground: hsl(210 40% 98%);
-  
+
   /* Vibrant neon blue accent */
   --color-primary: hsl(217 91% 60%);
   --color-primary-foreground: hsl(222 47% 11%);
-  
+
   --color-secondary: hsl(217 32% 12%);
   --color-secondary-foreground: hsl(210 40% 98%);
   --color-muted: hsl(217 32% 12%);
   --color-muted-foreground: hsl(215 20.2% 65.1%);
   --color-accent: hsl(217 32% 15%);
   --color-accent-foreground: hsl(210 40% 98%);
-  
+
   --color-destructive: hsl(0 62.8% 40.6%);
   --color-destructive-foreground: hsl(210 40% 98%);
-  
+
   --color-border: hsl(217 32% 17%);
   --color-input: hsl(217 32% 17%);
   --color-ring: hsl(217 91% 60%);
-  
+
   /* Sidebar uses a slightly distinct tinted tone */
   --color-sidebar: hsl(224 40% 4%);
   --color-sidebar-foreground: hsl(210 40% 96%);
@@ -127,7 +150,6 @@
   --sidebar-primary: 217 91% 60%;
 }
 
-/* ── Base ── */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -135,26 +157,57 @@
   border-color: var(--color-border);
 }
 
+:root[data-mantine-color-scheme="light"] {
+  --mantine-color-body: #f1f5f9;
+  /* Softer slate-100 instead of glaring white */
+  --mantine-color-text: #1e293b;
+  /* Slate-800 for softer contrast */
+}
+
+/* Give mantine components a slight glass/soft look in light mode where appropriate */
+:root[data-mantine-color-scheme="light"] .mantine-Paper-root {
+  border-color: #e2e8f0;
+}
+
 body {
   font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-  background-color: var(--color-background);
-  color: var(--color-foreground);
+  background-color: var(--mantine-color-body, var(--color-background));
+  color: var(--mantine-color-text, var(--color-foreground));
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
 }
 
 /* ── Smooth Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--color-muted-foreground); }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted-foreground);
+}
 
 /* ── Selection ── */
-::selection { background: hsl(217 91% 50% / 0.2); }
+::selection {
+  background: hsl(217 91% 50% / 0.2);
+}
 
 /* ── Transitions ── */
-a, button, input, select, textarea {
+a,
+button,
+input,
+select,
+textarea {
   transition-property: color, background-color, border-color, box-shadow, opacity;
   transition-duration: 150ms;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -168,17 +221,39 @@ a, button, input, select, textarea {
 
 /* ── Print ── */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
   body {
     background: white !important;
     color: black !important;
     font-size: 10pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
-  .no-print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print,
+  nav,
+  header,
+  aside {
     display: none !important;
   }
 
   .print-break {
     page-break-after: always;
+  }
+
+  /* Ensure the grid doesn't break poorly across pages */
+  table,
+  .mantine-Table-root,
+  [class*="WeeklyGrid"] {
+    page-break-inside: avoid;
   }
 }

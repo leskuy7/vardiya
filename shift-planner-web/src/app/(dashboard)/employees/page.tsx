@@ -42,13 +42,16 @@ import {
 import type { Employee } from "@/types";
 
 const employeeSchema = z.object({
-  name: z.string().min(2, "Ad en az 2 karakter"),
+  firstName: z.string().min(2, "Ad en az 2 karakter"),
+  lastName: z.string().min(2, "Soyad en az 2 karakter"),
   email: z.string().email("Gecerli e-posta girin"),
-  password: z.string().min(8, "Şifre en az 8 karakter").optional().or(z.literal("")),
+  password: z.string()
+    .min(8, "Şifre en az 8 karakter")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Şifre en az bir büyük harf, bir küçük harf ve bir rakam içermelidir")
+    .optional()
+    .or(z.literal("")),
   role: z.enum(["ADMIN", "MANAGER", "EMPLOYEE"]),
   position: z.string().optional(),
-  department: z.string().optional(),
-  phone: z.string().optional(),
   hourlyRate: z.coerce.number().min(0).optional(),
 });
 
@@ -98,12 +101,11 @@ export default function EmployeesPage() {
 
   const openEdit = (emp: Employee) => {
     reset({
-      name: emp.user?.name,
+      firstName: emp.user?.firstName,
+      lastName: emp.user?.lastName,
       email: emp.user?.email,
       role: emp.user.role as EmployeeFormValues["role"],
       position: emp.position ?? "",
-      department: emp.department ?? "",
-      phone: emp.phone ?? "",
       hourlyRate: emp.hourlyRate ?? undefined,
       password: "",
     });
@@ -116,23 +118,21 @@ export default function EmployeesPage() {
         await updateEmployee.mutateAsync({
           id: modal.employee.id,
           data: {
-            name: values.name,
+            firstName: values.firstName,
+            lastName: values.lastName,
             position: values.position,
-            department: values.department,
-            phone: values.phone,
             hourlyRate: values.hourlyRate,
           },
         });
         toast("success", "Çalışan güncellendi.");
       } else {
         await createEmployee.mutateAsync({
-          name: values.name,
+          firstName: values.firstName,
+          lastName: values.lastName,
           email: values.email,
           password: values.password ?? "",
           role: values.role,
           position: values.position,
-          department: values.department,
-          phone: values.phone,
           hourlyRate: values.hourlyRate,
         });
         toast("success", "Çalışan oluşturuldu.");
@@ -201,10 +201,9 @@ export default function EmployeesPage() {
         <Table verticalSpacing="sm" highlightOnHover>
           <Table.Thead>
             <Table.Tr>
-              <Table.Th>Ad</Table.Th>
+              <Table.Th>Ad Soyad</Table.Th>
               <Table.Th>E-posta</Table.Th>
               <Table.Th>Pozisyon</Table.Th>
-              <Table.Th>Departman</Table.Th>
               <Table.Th>Rol</Table.Th>
               <Table.Th>Durum</Table.Th>
               <Table.Th style={{ textAlign: "right" }}>İşlem</Table.Th>
@@ -229,10 +228,10 @@ export default function EmployeesPage() {
                       }}
                     >
                       <Text size="xs" fw={700} c={isDark ? "blue.2" : "blue.7"}>
-                        {emp.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
+                        {emp.user?.firstName?.charAt(0)?.toUpperCase() ?? "?"}
                       </Text>
                     </Paper>
-                    <Text size="sm" fw={600}>{emp.user?.name}</Text>
+                    <Text size="sm" fw={600}>{emp.user?.firstName} {emp.user?.lastName}</Text>
                   </Group>
                 </Table.Td>
                 <Table.Td>
@@ -240,9 +239,6 @@ export default function EmployeesPage() {
                 </Table.Td>
                 <Table.Td>
                   <Text size="sm" c="dimmed">{emp.position ?? "—"}</Text>
-                </Table.Td>
-                <Table.Td>
-                  <Text size="sm" c="dimmed">{emp.department ?? "—"}</Text>
                 </Table.Td>
                 <Table.Td>
                   <Badge color={ROLE_COLOR[emp.user?.role ?? "EMPLOYEE"]} variant="light">
@@ -298,7 +294,10 @@ export default function EmployeesPage() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Stack gap="sm">
             <Group grow>
-              <TextInput label="Ad Soyad" error={errors.name?.message} {...register("name")} />
+              <TextInput label="Ad" error={errors.firstName?.message} {...register("firstName")} />
+              <TextInput label="Soyad" error={errors.lastName?.message} {...register("lastName")} />
+            </Group>
+            <Group grow>
               <TextInput
                 label="E-posta"
                 type="email"
@@ -334,11 +333,6 @@ export default function EmployeesPage() {
 
             <Group grow>
               <TextInput label="Pozisyon" placeholder="Garson, Kasiyer..." {...register("position")} />
-              <TextInput label="Departman" placeholder="Servis, Mutfak..." {...register("department")} />
-            </Group>
-
-            <Group grow>
-              <TextInput label="Telefon" placeholder="+90 555 000 0000" {...register("phone")} />
               <Controller
                 name="hourlyRate"
                 control={control}
@@ -376,7 +370,7 @@ export default function EmployeesPage() {
       >
         <Stack gap="sm">
           <Text size="sm" c="dimmed">
-            {deleteDialog.employee?.user.name} adlı çalışan pasife alınacak. Geçmiş vardiyaları silinmeyecek.
+            {deleteDialog.employee?.user.firstName} {deleteDialog.employee?.user.lastName} adlı çalışan pasife alınacak. Geçmiş vardiyaları silinmeyecek.
           </Text>
           <Divider />
           <Group justify="flex-end">

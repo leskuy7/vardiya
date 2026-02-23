@@ -231,12 +231,12 @@ function EmployeeRow({
             }}
           >
             <Text size="sm" fw={700} c="blue">
-              {empRow.employee?.user?.name?.charAt(0)?.toUpperCase() ?? "?"}
+              {empRow.employee?.user?.firstName?.charAt(0)?.toUpperCase() ?? "?"}
             </Text>
           </Paper>
           <Box style={{ minWidth: 0 }}>
             <Text size="sm" fw={600} truncate>
-              {empRow.employee?.user?.name || "Bilinmiyor"}
+              {empRow.employee?.user?.firstName ? `${empRow.employee.user.firstName} ${empRow.employee.user.lastName}` : "Bilinmiyor"}
             </Text>
             <Text size="xs" c="dimmed" truncate>
               {empRow.employee?.position ?? empRow.employee?.department ?? ""}
