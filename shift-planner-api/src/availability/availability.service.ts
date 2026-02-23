@@ -47,23 +47,27 @@ export class AvailabilityService {
     }
 
     // Convert HH:mm strings to Date objects for @db.Time()
-    const toTime = (hhmm: string): Date => {
+    const toTime = (hhmm: string | undefined): Date | null => {
+      if (!hhmm) return null;
       const [h, m] = hhmm.split(':').map(Number);
       return new Date(Date.UTC(1970, 0, 1, h, m, 0));
     };
     // Convert YYYY-MM-DD strings to Date objects for @db.Date
-    const toDate = (ymd: string): Date => new Date(ymd + 'T00:00:00.000Z');
+    const toDate = (ymd: string | undefined): Date | null => {
+      if (!ymd) return null;
+      return new Date(ymd + 'T00:00:00.000Z');
+    };
 
     const block = await this.prisma.availabilityBlock.create({
       data: {
         employeeId,
         type: dto.type,
         dayOfWeek: dto.dayOfWeek,
-        startTime: dto.startTime ? toTime(dto.startTime) : null,
-        endTime: dto.endTime ? toTime(dto.endTime) : null,
-        startDate: dto.startDate ? toDate(dto.startDate) : null,
-        endDate: dto.endDate ? toDate(dto.endDate) : null,
-        note: dto.note ?? null,
+        startTime: toTime(dto.startTime),
+        endTime: toTime(dto.endTime),
+        startDate: toDate(dto.startDate),
+        endDate: toDate(dto.endDate),
+        note: dto.note || null,
       },
       include: {
         employee: {
