@@ -165,6 +165,7 @@ export default function SchedulePage() {
     <Stack gap="lg" style={{ height: "100%" }}>
       {/* Header */}
       <Paper
+        className="no-print"
         withBorder
         p="md"
         radius="lg"

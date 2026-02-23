@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/api";
 import type { Employee, CreateEmployeeData, UpdateEmployeeData } from "@/types";
 
-export function useEmployees(active?: boolean) {
+export function useEmployees(active?: boolean, enabled: boolean = true) {
   return useQuery<Employee[]>({
     queryKey: ["employees", active],
     queryFn: async () => {
@@ -12,6 +12,7 @@ export function useEmployees(active?: boolean) {
       const { data } = await api.get(`/employees${params}`);
       return data;
     },
+    enabled,
   });
 }
 

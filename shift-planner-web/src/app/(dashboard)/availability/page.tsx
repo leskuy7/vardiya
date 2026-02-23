@@ -64,8 +64,8 @@ export default function AvailabilityPage() {
   const isDark = colorScheme === "dark";
 
   const canManageAll = isAdmin || isManager;
-  const { data: employees } = useEmployees(true);
-  const myEmployee = employees?.find((e) => e.user?.id === user?.id);
+  const { data: employees } = useEmployees(true, canManageAll);
+  const myEmployee = user?.employee;
 
   const [filterEmployeeId, setFilterEmployeeId] = useState<string | undefined>(
     isEmployee ? myEmployee?.id : undefined
@@ -93,6 +93,9 @@ export default function AvailabilityPage() {
       type: "UNAVAILABLE",
       dayOfWeek: 1,
       employeeId: isEmployee ? myEmployee?.id ?? "" : "",
+      startDate: new Date().toISOString().split("T")[0],
+      startTime: "09:00",
+      endTime: "17:00",
     },
   });
 
@@ -101,6 +104,9 @@ export default function AvailabilityPage() {
       type: "UNAVAILABLE",
       dayOfWeek: 1,
       employeeId: isEmployee ? myEmployee?.id ?? "" : "",
+      startDate: new Date().toISOString().split("T")[0],
+      startTime: "09:00",
+      endTime: "17:00",
     });
     setModal(true);
   };

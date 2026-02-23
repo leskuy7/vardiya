@@ -55,6 +55,7 @@ export default function ReportsPage() {
   return (
     <Stack gap="lg">
       <Paper
+        className="no-print"
         withBorder
         p="md"
         radius="lg"
@@ -91,7 +92,7 @@ export default function ReportsPage() {
         </Group>
       </Paper>
 
-      <Grid gutter="md">
+      <Grid gutter="md" className="no-print">
         <Grid.Col span={{ base: 12, sm: 4 }}>
           <Paper withBorder p="md" radius="lg">
             <Group justify="space-between">

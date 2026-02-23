@@ -6,6 +6,11 @@ export interface User {
   firstName?: string;
   lastName?: string;
   role: "ADMIN" | "MANAGER" | "EMPLOYEE";
+  employee?: {
+    id: string;
+    position?: string;
+    isActive?: boolean;
+  };
 }
 
 export interface LoginResponse {

@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
-import { ActionIcon, Badge, Button, Group, Paper, Text, Tooltip } from "@mantine/core";
+import { ActionIcon, Badge, Burger, Button, Group, Paper, Text } from "@mantine/core";
 import { useMantineColorScheme } from "@mantine/core";
 import {
   IconPrinter,
@@ -19,7 +19,7 @@ const pageTitles: Record<string, string> = {
   "/reports": "Raporlar",
 };
 
-export function Navbar() {
+export function Navbar({ onBurgerClick }: { onBurgerClick?: () => void }) {
   const pathname = usePathname();
   const title = Object.entries(pageTitles).find(([key]) =>
     pathname.startsWith(key)
@@ -42,6 +42,7 @@ export function Navbar() {
 
   return (
     <Paper
+      className="no-print"
       withBorder
       radius={0}
       px="md"
@@ -52,6 +53,9 @@ export function Navbar() {
     >
       <Group justify="space-between" wrap="wrap">
         <Group gap="sm">
+          {onBurgerClick && (
+            <Burger opened={false} onClick={onBurgerClick} hiddenFrom="md" size="sm" />
+          )}
           <Badge size="lg" radius="sm" variant="light" leftSection={<IconCalendarWeek size={14} />}>
             {title}
           </Badge>

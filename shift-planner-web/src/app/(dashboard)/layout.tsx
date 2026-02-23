@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -15,6 +15,7 @@ export default function DashboardLayout({
 }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -35,9 +36,12 @@ export default function DashboardLayout({
         background: "var(--mantine-color-body)",
       }}
     >
-      <Sidebar />
+      <Sidebar
+        mobileOpened={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
+      />
       <Box style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <Navbar />
+        <Navbar onBurgerClick={() => setMobileMenuOpen(true)} />
         <Box component="main" style={{ flex: 1, overflow: "auto", padding: "24px" }}>
           {children}
         </Box>

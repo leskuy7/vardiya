@@ -95,9 +95,9 @@ export function ShiftModal({
       } else {
         reset({
           employeeId: preselectedEmployeeId ?? "",
-          date: preselectedDate ?? "",
-          startTime: "",
-          endTime: "",
+          date: preselectedDate ?? new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Istanbul" }),
+          startTime: "09:00",
+          endTime: "17:00",
           status: "DRAFT",
           note: "",
           forceOverride: false,
