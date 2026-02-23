@@ -29,8 +29,11 @@ import {
   IconUsers,
   IconArrowRight,
   IconSparkles,
+  IconMoon,
+  IconSun,
 } from "@tabler/icons-react";
 import { useState } from "react";
+import { ActionIcon } from "@mantine/core";
 
 const loginSchema = z.object({
   email: z.string().email("Geçerli bir e-posta girin"),
@@ -85,7 +88,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
-  const { colorScheme } = useMantineColorScheme();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const isDark = colorScheme === "dark";
 
   const {
@@ -169,7 +172,20 @@ export default function LoginPage() {
       />
 
       <Box style={{ position: "relative", zIndex: 1, width: "100%", padding: "32px" }}>
-        <Grid gutter="xl" align="center">
+        {/* Theme Toggle */}
+        <Group justify="flex-end" mb="xl" style={{ position: "absolute", top: 32, right: 32, zIndex: 10 }}>
+          <ActionIcon
+            variant="default"
+            size="lg"
+            radius="md"
+            onClick={() => toggleColorScheme()}
+            title="Temayı Değiştir"
+          >
+            {isDark ? <IconSun size={18} /> : <IconMoon size={18} />}
+          </ActionIcon>
+        </Group>
+
+        <Grid gutter="xl" align="center" mt={40}>
           {/* Left panel */}
           <Grid.Col span={{ base: 12, md: 6 }}>
             <Stack gap="lg">
